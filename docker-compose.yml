@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  autosupport:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./:/home/node/app
+    container_name: autosupport
+    command: yarn docker:start

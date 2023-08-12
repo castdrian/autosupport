@@ -1,0 +1,4 @@
+title = "vencord autosupport"
+
+[responses]
+vc_disappeared = "Launch the installer and press Repair/Reinstall (you won't lose any of your vencord settings don't worry)\n\nThis is a normal occurrence that happens every so often (~ once a month, more frequently if using canary)"
