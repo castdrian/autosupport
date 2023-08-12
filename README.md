@@ -1,0 +1,2 @@
+# autosupport
+vencord autosupport
