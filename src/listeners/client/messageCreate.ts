@@ -11,9 +11,7 @@ export class MessageListener extends Listener {
 		if (message.author.bot) return;
 		if (!message.content.length) return;
 
-		const { content } = message;
-
-		const response = await getResponse(content);
+		const response = await getResponse(message);
 		if (!response) return;
 
 		await message.reply({ content: response, allowedMentions: { repliedUser: true } });

@@ -1,7 +1,6 @@
 import TOML from '@ltd/j-toml';
 import pkg from 'node-wit';
-import { Collection } from 'discord.js';
-import '@sapphire/plugin-logger/register';
+import { Collection, Message } from 'discord.js';
 import { readFileSync } from 'node:fs';
 
 const { Wit } = pkg;
@@ -22,10 +21,11 @@ const wit = new Wit({
 	accessToken: process.env.WIT_AI_TOKEN ?? ''
 });
 
-export async function getResponse(input: string) {
-	const res = await wit.message(input, {});
+export async function getResponse(message: Message) {
+	const res = await wit.message(message.content, {});
 
 	if (!res.intents.length) return;
+	await message.channel.sendTyping();
 	const intent = res.intents.reduce((prev, current) => (prev.confidence > current.confidence ? prev : current));
 	return responseCache.get(intent.name);
 }
