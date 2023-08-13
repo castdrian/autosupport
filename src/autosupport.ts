@@ -3,6 +3,9 @@ import pkg from 'node-wit';
 import { Collection, Message } from 'discord.js';
 import { readFileSync } from 'node:fs';
 import { request } from 'undici';
+import { config } from 'dotenv';
+
+config();
 
 const { Wit } = pkg;
 const { WIT_AI_TOKEN, UPDATE_URL } = process.env;
