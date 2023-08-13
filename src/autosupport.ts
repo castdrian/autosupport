@@ -2,8 +2,10 @@ import TOML from '@ltd/j-toml';
 import pkg from 'node-wit';
 import { Collection, Message } from 'discord.js';
 import { readFileSync } from 'node:fs';
+import { request } from 'undici';
 
 const { Wit } = pkg;
+const { WIT_AI_TOKEN, UPDATE_URL } = process.env;
 
 interface ConfigObject {
 	title: string;
@@ -17,8 +19,22 @@ for (const [key, value] of Object.entries(configStore.responses)) {
 	responseCache.set(key, value);
 }
 
+export async function updateCacheFromRemote() {
+	const res = await request(UPDATE_URL!)
+		.then((res) => res.body.text())
+		.catch(() => null);
+
+	if (!res) return;
+
+	const config = TOML.parse(res) as unknown as ConfigObject;
+
+	for (const [key, value] of Object.entries(config.responses)) {
+		responseCache.set(key, value);
+	}
+}
+
 const wit = new Wit({
-	accessToken: process.env.WIT_AI_TOKEN ?? ''
+	accessToken: WIT_AI_TOKEN!
 });
 
 export async function getResponse(message: Message) {
