@@ -1,5 +1,9 @@
 # autosupport
-vencord autosupport
+vencord autosupport proof of concept
+
+## Showcase
+
+https://github.com/castdrian/autosupport/assets/22133246/5e2b318b-e588-483f-8690-47fd62c17f69
 
 ## Usage
 
