@@ -2,7 +2,6 @@ import TOML from '@ltd/j-toml';
 import pkg from 'node-wit';
 import { Collection, Message } from 'discord.js';
 import { readFileSync } from 'node:fs';
-// @ts-ignore no types
 import recognize from 'tesseractocr';
 import { request } from 'undici';
 import { config } from 'dotenv';
