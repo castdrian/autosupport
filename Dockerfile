@@ -2,7 +2,11 @@
 FROM node:18 as base
 WORKDIR /home/node/app
 
-# Build layer (everything besides build output & node_modules can be disgarded from this)
+# Install Tesseract
+RUN apt-get update \
+  && apt-get -y install tesseract-ocr
+
+# Build layer (everything besides build output & node_modules can be discarded from this)
 FROM base as build
 
 COPY yarn.lock package.json ./
