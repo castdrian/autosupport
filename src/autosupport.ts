@@ -4,10 +4,6 @@ import { Collection, type Message } from "discord.js";
 import { Wit, type WitIntent } from "node-wit";
 import { createWorker } from 'tesseract.js';
 
-interface ConfigObject {
-	responses: Record<string, string>;
-}
-
 const responseCache = new Collection<string, string>();
 
 for (const [key, value] of Object.entries(responses)) {
@@ -34,7 +30,7 @@ function getHighestConfidenceIntent(
 
 export async function getResponse(message: Message) {
 	try {
-		let imageText: string | undefined;
+		let imageText = "";
 
 		if (message.attachments.size) {
 			const attachment = message.attachments.first();
@@ -48,7 +44,7 @@ export async function getResponse(message: Message) {
 		}
 
 		const res = await wit.message(
-			message.content + (imageText ? `\n${imageText}` : ""),
+			`${message.content}\n${imageText}`,
 			{},
 		);
 
