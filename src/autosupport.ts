@@ -1,11 +1,9 @@
-import pkg, { WitIntent } from 'node-wit';
-import { Collection, Message } from 'discord.js';
-import recognize from 'tesseractocr';
-import { request } from 'undici';
-import responses from '@src/data.toml';
-import { config } from '@src/config';
-
-const { Wit } = pkg;
+import { config } from "@src/config";
+import responses from "@src/data.toml";
+import { Collection, type Message } from "discord.js";
+import { Wit, type WitIntent } from "node-wit";
+import recognize from "tesseractocr";
+import { request } from "undici";
 
 interface ConfigObject {
 	responses: Record<string, string>;
@@ -19,15 +17,21 @@ for (const [key, value] of Object.entries(configStore.responses)) {
 }
 
 const wit = new Wit({
-	accessToken: config.witAiToken
+	accessToken: config.witAiToken,
 });
 
-function getHighestConfidenceIntent(intents: WitIntent[]): WitIntent | undefined {
+function getHighestConfidenceIntent(
+	intents: WitIntent[],
+): WitIntent | undefined {
 	if (!intents.length) return undefined;
 
-	const highestConfidenceIntent = intents.reduce((prev, current) => (prev.confidence > current.confidence ? prev : current));
+	const highestConfidenceIntent = intents.reduce((prev, current) =>
+		prev.confidence > current.confidence ? prev : current,
+	);
 
-	return highestConfidenceIntent.confidence >= 0.9 ? highestConfidenceIntent : undefined;
+	return highestConfidenceIntent.confidence >= 0.9
+		? highestConfidenceIntent
+		: undefined;
 }
 
 export async function getResponse(message: Message) {
@@ -35,15 +39,21 @@ export async function getResponse(message: Message) {
 		let imageText: string | undefined;
 
 		if (message.attachments.size) {
+			// biome-ignore lint/style/noNonNullAssertion: this is safe because we check if there are attachments
 			const attachment = message.attachments.first()!;
-			if (!attachment.contentType?.startsWith('image')) return;
+			if (!attachment.contentType?.startsWith("image")) return;
 
-			const buffer = Buffer.from(await request(attachment.url).then((res) => res.body.arrayBuffer()));
+			const buffer = Buffer.from(
+				await request(attachment.url).then((res) => res.body.arrayBuffer()),
+			);
 			const text = await recognize(buffer);
 			if (text) imageText = text;
 		}
 
-		const res = await wit.message(message.content + (imageText ? `\n${imageText}` : ''), {});
+		const res = await wit.message(
+			message.content + (imageText ? `\n${imageText}` : ""),
+			{},
+		);
 
 		if (!res.intents.length) return;
 		const selectedIntent = getHighestConfidenceIntent(res.intents);

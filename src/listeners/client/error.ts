@@ -1,4 +1,4 @@
-import { Listener } from '@sapphire/framework';
+import { Listener } from "@sapphire/framework";
 
 export class ErrorListener extends Listener {
 	public run(err: Error) {

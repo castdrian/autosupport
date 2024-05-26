@@ -1,2 +1,2 @@
-declare module 'tesseractocr';
-declare module '@src/data.toml';
+declare module "tesseractocr";
+declare module "@src/data.toml";
