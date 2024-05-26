@@ -1,4 +1,4 @@
-import pkg from 'node-wit';
+import pkg, { WitIntent } from 'node-wit';
 import { Collection, Message } from 'discord.js';
 import recognize from 'tesseractocr';
 import { request } from 'undici';
@@ -19,8 +19,16 @@ for (const [key, value] of Object.entries(configStore.responses)) {
 }
 
 const wit = new Wit({
-	accessToken: config.witAiToken,
+	accessToken: config.witAiToken
 });
+
+function getHighestConfidenceIntent(intents: WitIntent[]): WitIntent | undefined {
+	if (!intents.length) return undefined;
+
+	const highestConfidenceIntent = intents.reduce((prev, current) => (prev.confidence > current.confidence ? prev : current));
+
+	return highestConfidenceIntent.confidence >= 0.9 ? highestConfidenceIntent : undefined;
+}
 
 export async function getResponse(message: Message) {
 	try {
@@ -38,9 +46,12 @@ export async function getResponse(message: Message) {
 		const res = await wit.message(message.content + (imageText ? `\n${imageText}` : ''), {});
 
 		if (!res.intents.length) return;
-		await message.channel.sendTyping();
-		const intent = res.intents.reduce((prev, current) => (prev.confidence > current.confidence ? prev : current));
-		return responseCache.get(intent.name);
+		const selectedIntent = getHighestConfidenceIntent(res.intents);
+
+		if (selectedIntent) {
+			await message.channel.sendTyping();
+			return responseCache.get(selectedIntent.name);
+		}
 	} catch (error) {
 		message.client.logger.error(error);
 		return undefined;

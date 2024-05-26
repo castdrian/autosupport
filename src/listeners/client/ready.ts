@@ -13,6 +13,9 @@ export class ReadyListener extends Listener {
 		if (this.container.client.application?.owner instanceof User) {
 			await this.container.client.application.owner.send(`Successfully logged in as ${username} (${id}) v${version}`).catch(() => null);
 		}
-		setInterval(() => this.container.client.user?.setActivity({ type: ActivityType.Custom, state: 'automating support', name: 'autosupport' }), 30e3);
+		setInterval(
+			() => this.container.client.user?.setActivity({ type: ActivityType.Custom, state: 'automating support', name: 'autosupport' }),
+			30e3
+		);
 	}
 }
