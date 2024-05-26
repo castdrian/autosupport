@@ -8,7 +8,6 @@ import { config } from '@src/config';
 const { Wit } = pkg;
 
 interface ConfigObject {
-	title: string;
 	responses: Record<string, string>;
 }
 
