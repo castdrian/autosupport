@@ -8,4 +8,6 @@ services:
       dockerfile: Dockerfile
       target: release
     container_name: autosupport
+    env_file:
+      - .env
     command: bun start
