@@ -9,12 +9,8 @@ import {
 	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 } from "discord.js";
+import type { WitIntent } from "node-wit";
 import { request } from "undici";
-
-interface Intent {
-	id: string;
-	name: string;
-}
 
 export class UtteranceCommand extends Command {
 	public override async contextMenuRun(
@@ -28,7 +24,7 @@ export class UtteranceCommand extends Command {
 				return;
 			const intents = (await request("https://api.wit.ai/intents", {
 				headers: { Authorization: `Bearer ${config.witAiToken}` },
-			}).then((res) => res.body.json())) as Intent[];
+			}).then((res) => res.body.json())) as WitIntent[];
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
@@ -57,22 +53,21 @@ export class UtteranceCommand extends Command {
 						(intent) => intent.name === confirmation.values[0],
 					);
 					if (!intent) return await res.delete();
-					const resp = await request("https://api.wit.ai/utterances", {
-						method: "POST",
-						headers: {
-							IncomingHttpHeaders: "application/json",
-							Authorization: `Bearer ${config.witAiToken}`,
-						},
-						body: JSON.stringify([
-							{
-								text: interaction.targetMessage.content,
-								intent: intent.name,
-								entities: [],
-								traits: [],
-							},
-						]),
-					}).then((res) => res.body.json());
-					console.log(resp);
+					// const resp = await request("https://api.wit.ai/utterances", {
+					// 	method: "POST",
+					// 	headers: {
+					// 		Authorization: `Bearer ${config.witAiToken}`,
+					// 	},
+					// 	body: JSON.stringify([
+					// 		{
+					// 			text: interaction.targetMessage.content,
+					// 			intent: intent.name,
+					// 			entities: [],
+					// 			traits: [],
+					// 		},
+					// 	]),
+					// }).then((res) => res.body.json());
+					// console.log(resp);
 					await confirmation.update({
 						content:
 							"This currently does not work because the wit api is under maintenance or whatever the fuck is going on there.",
