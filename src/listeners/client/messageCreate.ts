@@ -1,13 +1,12 @@
-import { getResponse } from '#src/autosupport';
+import { getResponse } from '@src/autosupport';
 import { Listener } from '@sapphire/framework';
 import { Message } from 'discord.js';
-
-const { GUILD_ID, CHANNEL_ID } = process.env;
+import { config } from '@src/config';
 
 export class MessageListener extends Listener {
 	public async run(message: Message) {
-		if (message.guildId !== GUILD_ID) return;
-		if (message.channelId !== CHANNEL_ID) return;
+		if (message.guildId !== config.guildId) return;
+		if (message.channelId !== config.channelId) return;
 		if (message.author.bot) return;
 		if (!message.content.length) return;
 

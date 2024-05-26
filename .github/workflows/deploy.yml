@@ -1,0 +1,38 @@
+name: deploy autosupport
+
+on:
+  push:
+    branches:
+        - main
+    paths-ignore:
+      - '**/*.md'
+      - '**.github/workflows/*'
+
+jobs:
+  deploy:
+    permissions:
+        contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Automated Version Bump
+        uses: phips28/gh-action-bump-version@v10.1.1
+        with:
+          skip-tag:  'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy melon
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd autosupport
+            git pull
+            sudo docker compose up --build -d

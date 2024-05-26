@@ -1,27 +1,27 @@
 # Base layer
-FROM node:18 as base
-WORKDIR /home/node/app
+FROM oven/bun:latest as base
+WORKDIR /usr/src/app
 
 # Install Tesseract
 RUN apt-get update \
   && apt-get -y install tesseract-ocr
 
-# Build layer (everything besides build output & node_modules can be discarded from this)
-FROM base as build
+# Install dependencies into temp directory
+# This will cache them and speed up future builds
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lockb /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-COPY yarn.lock package.json ./
-COPY .git ./.git
-RUN yarn
+# Install with --production (exclude devDependencies)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
+
+# Copy node_modules from temp directory
+# Then copy all (non-ignored) project files into the image
+FROM base AS release
+COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
-RUN yarn run build
 
-# Production layer, only copy required files to run.
-FROM base as production
-
-ENV NODE_ENV=production
-COPY --from=build /home/node/app/package.json ./
-COPY --from=build /home/node/app/node_modules ./node_modules
-COPY --from=build /home/node/app/.git ./.git
-COPY --from=build /home/node/app/dist ./dist
-
-CMD ["node", "."]
+ENTRYPOINT [ "bun", "start" ]

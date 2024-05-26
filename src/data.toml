@@ -1,5 +1,3 @@
-title = "vencord autosupport"
-
 [responses]
 vc_disappeared = "Launch the installer and press Repair/Reinstall (you won't lose any of your vencord settings don't worry)\n\nThis is a normal occurrence that happens every so often (~ once a month, more frequently if using canary)"
 vc_lag = "The most common cause of lag is poorly written css and themes\n\ntry temporarily disabling all your themes and your quick css and see if the lag is gone\n\nto then figure out which parts of your css are laggy, I recommend just removing small bits of it step by step until you figure out the culprit"

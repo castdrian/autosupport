@@ -2,11 +2,10 @@ version: '3.8'
 
 services:
   autosupport:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
-      target: base
-    volumes:
-      - ./:/home/node/app
+      target: release
     container_name: autosupport
-    command: yarn docker:start
+    command: bun start
