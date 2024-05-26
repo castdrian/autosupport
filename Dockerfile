@@ -2,10 +2,6 @@
 FROM oven/bun:latest as base
 WORKDIR /usr/src/app
 
-# Install Tesseract
-RUN apt-get update \
-  && apt-get -y install tesseract-ocr
-
 # Install dependencies into temp directory
 # This will cache them and speed up future builds
 FROM base AS install

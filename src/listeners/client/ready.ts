@@ -6,9 +6,10 @@ import { ActivityType, User } from "discord.js";
 @ApplyOptions<ListenerOptions>({ once: true })
 export class ReadyListener extends Listener {
 	public async run() {
+		if (!this.container.client.isReady()) return;
 		await this.container.client.application?.fetch();
-		// biome-ignore lint/style/noNonNullAssertion: this is safe because we fetch the application
-		const { username, id } = this.container.client.user!;
+
+		const { username, id } = this.container.client.user;
 		this.container.logger.info(
 			`Successfully logged in as ${username} (${id}) v${version}`,
 		);

@@ -1,2 +1,3 @@
-declare module "tesseractocr";
-declare module "@src/data.toml";
+declare module "@src/data.toml" {
+	export const responses: Record<string, string>;
+}

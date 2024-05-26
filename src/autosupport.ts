@@ -1,18 +1,16 @@
 import { config } from "@src/config";
-import responses from "@src/data.toml";
+import { responses } from "@src/data.toml";
 import { Collection, type Message } from "discord.js";
 import { Wit, type WitIntent } from "node-wit";
-import recognize from "tesseractocr";
-import { request } from "undici";
+import { createWorker } from 'tesseract.js';
 
 interface ConfigObject {
 	responses: Record<string, string>;
 }
 
-const configStore = responses as ConfigObject;
 const responseCache = new Collection<string, string>();
 
-for (const [key, value] of Object.entries(configStore.responses)) {
+for (const [key, value] of Object.entries(responses)) {
 	responseCache.set(key, value);
 }
 
@@ -39,15 +37,14 @@ export async function getResponse(message: Message) {
 		let imageText: string | undefined;
 
 		if (message.attachments.size) {
-			// biome-ignore lint/style/noNonNullAssertion: this is safe because we check if there are attachments
-			const attachment = message.attachments.first()!;
+			const attachment = message.attachments.first();
+			if (!attachment) return;
 			if (!attachment.contentType?.startsWith("image")) return;
 
-			const buffer = Buffer.from(
-				await request(attachment.url).then((res) => res.body.arrayBuffer()),
-			);
-			const text = await recognize(buffer);
-			if (text) imageText = text;
+			const worker = await createWorker('eng');
+			const ret = await worker.recognize(attachment.url);
+			await worker.terminate();
+			imageText = ret.data.text;
 		}
 
 		const res = await wit.message(
