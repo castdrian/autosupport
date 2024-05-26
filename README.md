@@ -1,6 +1,6 @@
 # autosupport
 
-autosupport proof of concept
+autosupport using intent classification and ocr
 
 ## Showcase
 
@@ -10,7 +10,7 @@ autosupport proof of concept
 
 ## Usage
 
-Wit.ai project: <https://wit.ai/apps/748238623724119>
+wit.ai project: <https://wit.ai/apps/748238623724119>
 
 ### Production
 
@@ -19,6 +19,14 @@ sudo docker run --name=autosupport --restart=unless-stopped ghcr.io/castdrian/au
 ```
 
 ### Development
+
+#### Local
+
+```bash
+bun start
+```
+
+#### Docker
 
 ```bash
 sudo docker-compose up --build
