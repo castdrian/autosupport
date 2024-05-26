@@ -30,18 +30,16 @@ function getHighestConfidenceIntent(
 
 export async function getResponse(message: Message) {
 	try {
+		if (!message.content.length && !message.attachments.size) return;
 		let imageText = "";
 
-		if (message.attachments.size) {
-			const attachment = message.attachments.first();
-			if (!attachment) return;
-			if (!attachment.contentType?.startsWith("image")) return;
+		const attachment = message.attachments.first();
+		if (!attachment?.contentType?.startsWith("image")) return;
 
-			const worker = await createWorker('eng');
-			const ret = await worker.recognize(attachment.url);
-			await worker.terminate();
-			imageText = ret.data.text;
-		}
+		const worker = await createWorker('eng');
+		const ret = await worker.recognize(attachment.url);
+		await worker.terminate();
+		imageText = ret.data.text;
 
 		const res = await wit.message(
 			`${message.content}\n${imageText}`,
