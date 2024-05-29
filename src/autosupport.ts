@@ -55,7 +55,7 @@ export async function getResponse(message: Message) {
 		if (selectedIntent) {
 			await message.channel.sendTyping();
 			await message.reply({
-				content: `${responseCache.get(selectedIntent.name)}\n\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence`,
+				content: `${responseCache.get(selectedIntent.name)}\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence`,
 				allowedMentions: { repliedUser: true },
 			});
 		}
