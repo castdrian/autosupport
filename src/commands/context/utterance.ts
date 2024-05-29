@@ -23,7 +23,7 @@ export class UtteranceCommand extends Command {
 			)
 				return;
 			const intents = (await request("https://api.wit.ai/intents", {
-				headers: { Authorization: `Bearer ${config.witAiToken}` },
+				headers: { Authorization: `Bearer ${config.witAiServerToken}` },
 			}).then((res) => res.body.json())) as WitIntent[];
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -56,7 +56,7 @@ export class UtteranceCommand extends Command {
 					const resp = await request("https://api.wit.ai/utterances", {
 						method: "POST",
 						headers: {
-							Authorization: `Bearer ${config.witAiToken}`,
+							Authorization: `Bearer ${config.witAiServerToken}`,
 						},
 						body: JSON.stringify([
 							{

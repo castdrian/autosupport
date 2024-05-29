@@ -11,7 +11,7 @@ for (const [key, value] of Object.entries(responses)) {
 }
 
 const wit = new Wit({
-	accessToken: config.witAiToken,
+	accessToken: config.witAiServerToken,
 });
 
 function getHighestConfidenceIntent(
@@ -34,12 +34,15 @@ export async function getResponse(message: Message) {
 		let imageText = "";
 
 		const attachment = message.attachments.first();
-		if (!attachment?.contentType?.startsWith("image")) return;
 
-		const worker = await createWorker('eng');
-		const ret = await worker.recognize(attachment.url);
-		await worker.terminate();
-		imageText = ret.data.text;
+		if (attachment) {
+			if (!attachment.contentType?.startsWith("image")) return;
+
+			const worker = await createWorker('eng');
+			const ret = await worker.recognize(attachment.url);
+			await worker.terminate();
+			imageText = ret.data.text;
+		}
 
 		const res = await wit.message(
 			`${message.content}\n${imageText}`,
@@ -52,7 +55,7 @@ export async function getResponse(message: Message) {
 		if (selectedIntent) {
 			await message.channel.sendTyping();
 			await message.reply({
-				content: `${responseCache.get(selectedIntent.name)}\n\n-# triggered intent ${selectedIntent.name} with confidence ${selectedIntent.confidence.toFixed(3)}`,
+				content: `${responseCache.get(selectedIntent.name)}\n\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence`,
 				allowedMentions: { repliedUser: true },
 			});
 		}
