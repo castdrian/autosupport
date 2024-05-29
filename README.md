@@ -4,9 +4,7 @@ autosupport using intent classification and ocr
 
 ## Showcase
 
-<https://github.com/castdrian/autosupport/assets/22133246/5e2b318b-e588-483f-8690-47fd62c17f69>
-
-<https://github.com/castdrian/autosupport/assets/22133246/ce73df8e-d9bc-4caa-9235-1568d21f1c0c>
+<https://github.com/castdrian/autosupport/assets/22133246/2a603a5a-8e94-430e-a1f6-988e187c6e5b>
 
 ## Usage
 
