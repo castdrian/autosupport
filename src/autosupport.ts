@@ -35,9 +35,7 @@ export async function getResponse(message: Message) {
 
 		const attachment = message.attachments.first();
 
-		if (attachment) {
-			if (!attachment.contentType?.startsWith("image")) return;
-
+		if (attachment?.contentType?.startsWith("image")) {
 			const worker = await createWorker('eng');
 			const ret = await worker.recognize(attachment.url);
 			await worker.terminate();
