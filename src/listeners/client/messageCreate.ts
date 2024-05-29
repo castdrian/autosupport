@@ -8,13 +8,6 @@ export class MessageListener extends Listener {
 		if (message.guildId !== config.guildId) return;
 		if (message.channelId !== config.channelId) return;
 		if (message.author.bot) return;
-
-		const response = await getResponse(message);
-		if (!response) return;
-
-		await message.reply({
-			content: response,
-			allowedMentions: { repliedUser: true },
-		});
+		await getResponse(message);
 	}
 }

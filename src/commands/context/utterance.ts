@@ -53,27 +53,22 @@ export class UtteranceCommand extends Command {
 						(intent) => intent.name === confirmation.values[0],
 					);
 					if (!intent) return await res.delete();
-					// const resp = await request("https://api.wit.ai/utterances", {
-					// 	method: "POST",
-					// 	headers: {
-					// 		Authorization: `Bearer ${config.witAiToken}`,
-					// 	},
-					// 	body: JSON.stringify([
-					// 		{
-					// 			text: interaction.targetMessage.content,
-					// 			intent: intent.name,
-					// 			entities: [],
-					// 			traits: [],
-					// 		},
-					// 	]),
-					// }).then((res) => res.body.json());
-					// console.log(resp);
-					await confirmation.update({
-						content:
-							"This currently does not work because the wit api is under maintenance or whatever the fuck is going on there.",
-						components: [],
-					});
-					// await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
+					const resp = await request("https://api.wit.ai/utterances", {
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${config.witAiToken}`,
+						},
+						body: JSON.stringify([
+							{
+								text: interaction.targetMessage.content,
+								intent: intent.name,
+								entities: [],
+								traits: [],
+							},
+						]),
+					}).then((res) => res.body.json());
+
+					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
 				}
 			} catch (ex) {
 				await res.delete();

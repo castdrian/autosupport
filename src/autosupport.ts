@@ -23,7 +23,7 @@ function getHighestConfidenceIntent(
 		prev.confidence > current.confidence ? prev : current,
 	);
 
-	return highestConfidenceIntent.confidence >= 0.9
+	return highestConfidenceIntent.confidence >= 0.8
 		? highestConfidenceIntent
 		: undefined;
 }
@@ -51,7 +51,10 @@ export async function getResponse(message: Message) {
 
 		if (selectedIntent) {
 			await message.channel.sendTyping();
-			return responseCache.get(selectedIntent.name);
+			await message.reply({
+				content: `${responseCache.get(selectedIntent.name)}\n\n-# triggered intent ${selectedIntent.name} with confidence ${selectedIntent.confidence.toFixed(3)}`,
+				allowedMentions: { repliedUser: true },
+			});
 		}
 	} catch (error) {
 		message.client.logger.error(error);
