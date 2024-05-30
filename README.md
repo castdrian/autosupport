@@ -27,5 +27,5 @@ bun start
 #### Docker
 
 ```bash
-sudo docker-compose up --build
+sudo docker compose up --build
 ```
