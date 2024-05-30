@@ -10,7 +10,6 @@ import {
 	StringSelectMenuBuilder,
 } from "discord.js";
 import type { WitIntent } from "node-wit";
-import { request } from "undici";
 
 export class UtteranceCommand extends Command {
 	public override async contextMenuRun(
@@ -22,9 +21,9 @@ export class UtteranceCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
-			const intents = (await request("https://api.wit.ai/intents", {
+			const intents = (await fetch("https://api.wit.ai/intents", {
 				headers: { Authorization: `Bearer ${config.witAiServerToken}` },
-			}).then((res) => res.body.json())) as WitIntent[];
+			}).then((res) => res.json())) as WitIntent[];
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
@@ -34,6 +33,7 @@ export class UtteranceCommand extends Command {
 					})),
 				),
 			);
+			
 			const res = await interaction.reply({
 				components: [row],
 				ephemeral: true,
@@ -53,7 +53,8 @@ export class UtteranceCommand extends Command {
 						(intent) => intent.name === confirmation.values[0],
 					);
 					if (!intent) return await res.delete();
-					const resp = await request("https://api.wit.ai/utterances", {
+
+					await fetch("https://api.wit.ai/utterances", {
 						method: "POST",
 						headers: {
 							Authorization: `Bearer ${config.witAiServerToken}`,
@@ -66,7 +67,7 @@ export class UtteranceCommand extends Command {
 								traits: [],
 							},
 						]),
-					}).then((res) => res.body.json());
+					});
 
 					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
 				}
