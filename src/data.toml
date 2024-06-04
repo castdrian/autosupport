@@ -1,4 +1,4 @@
-[responses."709061970078335027"]
-channel_ids = ["1035545374913470575"]
+[responses."1196075698301968455"] # pyoncord
+channel_ids = ["1210652540757090315"]
 undetailed_question = "The information you provided is not detailed enough to answer your question.\nPlease provide more information or rephrase your question."
 get_addons = "Bunny offers compatibility with Vendetta's plugins and themes, since it is what Bunny is based on:\n\n- For plugins, you can retrieve plugin links from: https://bn-plugins.github.io/vd-web/\n- For themes, you may install any Vendetta themes you like. Revenge themes are also supported, excluding custom fonts support.\n\nYou may find a curated list of broken plugins in https://discord.com/channels/1196075698301968455/1210652540757090315/1229376326528663596"
