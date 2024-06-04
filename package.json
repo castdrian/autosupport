@@ -16,24 +16,24 @@
     "start": "bun run src/main.ts"
   },
   "dependencies": {
-    "@sapphire/decorators": "^6.0.1",
+    "@sapphire/decorators": "^6.1.0",
     "@sapphire/framework": "^5.2.1",
     "@sapphire/pieces": "^4.2.2",
-    "discord.js": "^14.12.1",
+    "discord.js": "^14.15.3",
     "neat-config": "^3.0.0",
     "node-wit": "^6.6.0",
     "systeminformation": "^5.22.10",
     "tesseract.js": "^5.1.0",
-    "tslib": "^2.6.1",
+    "tslib": "^2.6.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.7.3",
-    "@types/node-wit": "^6.0.1",
-    "bun-types": "^1.0.1",
+    "@biomejs/biome": "^1.8.0",
+    "@types/node-wit": "^6.1.0",
+    "bun-types": "^1.1.12",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.5",
-    "typescript": "^5.0.4"
+    "typescript": "^5.4.5"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
