@@ -1,4 +1,4 @@
-import { responses, type Response } from "@src/data.toml";
+import { responses } from "@src/data.toml";
 import { Collection } from "discord.js";
 import { createConfigLoader } from "neat-config";
 import { z } from "zod";
