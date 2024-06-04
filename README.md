@@ -8,7 +8,7 @@ autosupport using intent classification and ocr
 
 ## Usage
 
-wit.ai project: <https://wit.ai/apps/748238623724119>
+wit.ai project: <https://wit.ai/apps/768983281890362>
 
 ### Production
 
