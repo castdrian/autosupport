@@ -21,8 +21,14 @@ export class UtteranceCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
+			if (!interaction.targetMessage.inGuild()) return;
+
 			const intents = (await fetch("https://api.wit.ai/intents", {
-				headers: { Authorization: `Bearer ${config.witAiServerToken}` },
+				headers: {
+					Authorization: `Bearer ${config.witAiServerToken[
+						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+					]}`
+				},
 			}).then((res) => res.json())) as WitIntent[];
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -33,7 +39,7 @@ export class UtteranceCommand extends Command {
 					})),
 				),
 			);
-			
+
 			const res = await interaction.reply({
 				components: [row],
 				ephemeral: true,
@@ -57,7 +63,9 @@ export class UtteranceCommand extends Command {
 					await fetch("https://api.wit.ai/utterances", {
 						method: "POST",
 						headers: {
-							Authorization: `Bearer ${config.witAiServerToken}`,
+							Authorization: `Bearer ${config.witAiServerToken[
+								config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+							]}`
 						},
 						body: JSON.stringify([
 							{
