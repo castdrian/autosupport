@@ -1,18 +1,7 @@
-import { config } from "@src/config";
-import { responses } from "@src/data.toml";
+import { config, responseCache } from "@src/config";
 import { Collection, type Message } from "discord.js";
 import { Wit, type WitIntent } from "node-wit";
 import { createWorker } from 'tesseract.js';
-
-const responseCache = new Collection<string, string>();
-
-for (const [key, value] of Object.entries(responses)) {
-	responseCache.set(key, value);
-}
-
-const wit = new Wit({
-	accessToken: config.witAiServerToken,
-});
 
 function getHighestConfidenceIntent(
 	intents: WitIntent[],
@@ -31,6 +20,7 @@ function getHighestConfidenceIntent(
 export async function getResponse(message: Message) {
 	try {
 		if (!message.content.length && !message.attachments.size) return;
+		if (!message.inGuild()) return;
 		let imageText = "";
 
 		const attachment = message.attachments.first();
@@ -42,6 +32,12 @@ export async function getResponse(message: Message) {
 			imageText = ret.data.text;
 		}
 
+		const wit = new Wit({
+			accessToken: config.witAiServerToken[
+				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : message.guildId
+			],
+		});
+
 		const res = await wit.message(
 			`${message.content}\n${imageText}`,
 			{},
@@ -52,11 +48,33 @@ export async function getResponse(message: Message) {
 
 		if (selectedIntent) {
 			await message.channel.sendTyping();
+
+			let responseContent = '';
+			const aggregatedResponses = new Collection<string, string>();
+
+			if (config.devGuildId) {
+				for (const [, guildResponses] of responseCache) {
+					if (guildResponses) {
+						for (const [key, value] of guildResponses.values) {
+							aggregatedResponses.set(key, value);
+						}
+					}
+				}
+
+				responseContent = aggregatedResponses.get(selectedIntent.name) ?? '';
+			} else {
+				const guildResponses = responseCache.get(message.guildId);
+				if (guildResponses) {
+					responseContent = guildResponses.values.get(selectedIntent.name) ?? '';
+				}
+			}
+
 			await message.reply({
-				content: `${responseCache.get(selectedIntent.name)}\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence`,
+				content: `${responseContent.trim()}\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence`,
 				allowedMentions: { repliedUser: true },
 			});
 		}
+
 	} catch (error) {
 		message.client.logger.error(error);
 		return undefined;

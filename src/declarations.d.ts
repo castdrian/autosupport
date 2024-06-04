@@ -1,3 +1,8 @@
 declare module "@src/data.toml" {
-	export const responses: Record<string, string>;
+	interface Response {
+		channel_ids: string[];
+		[key: string]: string;
+	}
+
+	export const responses: Record<string, Response>;
 }
