@@ -19,7 +19,8 @@
 		],
 		"paths": {
 			"@root/*": ["./*"],
-			"@src/*": ["./src/*"]
+			"@src/*": ["./src/*"],
+			"@utils/*": ["./src/utils/*"]
 		}
 	},
 	"include": ["./**/*.ts", "./package.json"]

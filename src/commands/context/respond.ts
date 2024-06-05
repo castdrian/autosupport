@@ -1,5 +1,6 @@
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
+import { trainWitUtterance, witIntents } from "@utils/wit";
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -10,7 +11,6 @@ import {
 	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 } from "discord.js";
-import type { WitIntent } from "node-wit";
 
 export class ResponseCommand extends Command {
 	public override async contextMenuRun(
@@ -24,13 +24,9 @@ export class ResponseCommand extends Command {
 				return;
 			if (!interaction.targetMessage.inGuild()) return;
 
-			const intents = (await fetch("https://api.wit.ai/intents", {
-				headers: {
-					Authorization: `Bearer ${config.witAiServerToken[
-						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-					]}`
-				},
-			}).then((res) => res.json())) as WitIntent[];
+			const intents = await witIntents(config.witAiServerToken[
+				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+			]);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_response").addOptions(
@@ -88,22 +84,9 @@ export class ResponseCommand extends Command {
 						allowedMentions: { repliedUser: true },
 					});
 
-					await fetch("https://api.wit.ai/utterances", {
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${config.witAiServerToken[
-								config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-							]}`
-						},
-						body: JSON.stringify([
-							{
-								text: interaction.targetMessage.content,
-								intent: intent.name,
-								entities: [],
-								traits: [],
-							},
-						]),
-					});
+					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[
+						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+					]);
 				}
 			} catch (ex) {
 				await res.delete();

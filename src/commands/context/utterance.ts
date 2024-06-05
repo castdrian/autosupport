@@ -1,5 +1,6 @@
 import { Command } from "@sapphire/framework";
 import { config } from "@src/config";
+import { trainWitUtterance, witIntents } from "@utils/wit";
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -9,7 +10,6 @@ import {
 	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 } from "discord.js";
-import type { WitIntent } from "node-wit";
 
 export class UtteranceCommand extends Command {
 	public override async contextMenuRun(
@@ -23,13 +23,9 @@ export class UtteranceCommand extends Command {
 				return;
 			if (!interaction.targetMessage.inGuild()) return;
 
-			const intents = (await fetch("https://api.wit.ai/intents", {
-				headers: {
-					Authorization: `Bearer ${config.witAiServerToken[
-						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-					]}`
-				},
-			}).then((res) => res.json())) as WitIntent[];
+			const intents = await witIntents(config.witAiServerToken[
+				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+			]);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
@@ -60,22 +56,9 @@ export class UtteranceCommand extends Command {
 					);
 					if (!intent) return await res.delete();
 
-					await fetch("https://api.wit.ai/utterances", {
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${config.witAiServerToken[
-								config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-							]}`
-						},
-						body: JSON.stringify([
-							{
-								text: interaction.targetMessage.content,
-								intent: intent.name,
-								entities: [],
-								traits: [],
-							},
-						]),
-					});
+					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[
+						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
+					]);
 
 					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
 				}

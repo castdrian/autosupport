@@ -1,11 +1,11 @@
 import { config, responseCache } from "@src/config";
+import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
-import { Wit, type WitIntent } from "node-wit";
 import { createWorker } from 'tesseract.js';
 
 function getHighestConfidenceIntent(
-	intents: WitIntent[],
-): WitIntent | undefined {
+	intents: Intent[],
+): Intent | undefined {
 	if (!intents.length) return undefined;
 
 	const highestConfidenceIntent = intents.reduce((prev, current) =>
@@ -32,15 +32,11 @@ export async function getResponse(message: Message) {
 			imageText = ret.data.text;
 		}
 
-		const wit = new Wit({
-			accessToken: config.witAiServerToken[
-				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : message.guildId
-			],
-		});
-
-		const res = await wit.message(
+		const res = await witMessage(
 			`${message.content}\n${imageText}`,
-			{},
+			config.witAiServerToken[
+			config.devGuildId ? Object.keys(config.witAiServerToken)[0] : message.guildId
+			],
 		);
 
 		if (!res.intents.length) return;
