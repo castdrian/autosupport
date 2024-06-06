@@ -1,6 +1,6 @@
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
-import { trainWitUtterance, witIntents } from "@utils/wit";
+import { witIntents } from "@utils/wit";
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -8,7 +8,6 @@ import {
 	Message,
 	type MessageComponentInteraction,
 	type MessageContextMenuCommandInteraction,
-	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 } from "discord.js";
 
@@ -83,10 +82,6 @@ export class ResponseCommand extends Command {
 						content: `${responseContent?.trim()}\n-# sent manually by ${interaction.user}`,
 						allowedMentions: { repliedUser: true },
 					});
-
-					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[
-						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-					]);
 				}
 			} catch (ex) {
 				await res.delete();
@@ -100,8 +95,7 @@ export class ResponseCommand extends Command {
 		registry.registerContextMenuCommand((builder) =>
 			builder //
 				.setName("Send Response")
-				.setType(ApplicationCommandType.Message)
-				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+				.setType(ApplicationCommandType.Message),
 		);
 	}
 }
