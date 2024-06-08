@@ -23,7 +23,7 @@
     "neat-config": "^3.0.0",
     "systeminformation": "^5.22.10",
     "tesseract.js": "^5.1.0",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
