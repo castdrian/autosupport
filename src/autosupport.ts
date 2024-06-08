@@ -1,4 +1,5 @@
 import { config, responseCache } from "@src/config";
+import { minimum_confidence } from "@src/data.toml";
 import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
 import { createWorker } from 'tesseract.js';
@@ -12,7 +13,7 @@ function getHighestConfidenceIntent(
 		prev.confidence > current.confidence ? prev : current,
 	);
 
-	return highestConfidenceIntent.confidence >= 0.80
+	return highestConfidenceIntent.confidence >= minimum_confidence
 		? highestConfidenceIntent
 		: undefined;
 }

@@ -3,6 +3,7 @@
 autosupport using intent classification and ocr
 
 ## Showcase
+
 <details markdown="block">
   <summary><strong>pyoncord</strong></summary>
   
@@ -12,9 +13,9 @@ autosupport using intent classification and ocr
 ## Usage
 
 wit.ai project: <https://wit.ai/apps/768983281890362>\
-To copy the wit project please refer to https://wit.ai/docs/recipes#export-your-app
+To copy the wit project please refer to <https://wit.ai/docs/recipes#export-your-app>
 
-To fine tune the response sensitivity you can adjust the minimum confidence [here](https://github.com/castdrian/autosupport/blob/1eea6694f32d71b8c58a0cef7e349c165c4c05cc/src/autosupport.ts#L15C47-L15C50)
+To fine tune the response sensitivity you can adjust the minimum confidence [here](https://github.com/castdrian/autosupport/blob/dev/src/data.toml)
 
 ### Production
 

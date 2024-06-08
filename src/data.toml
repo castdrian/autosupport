@@ -1,3 +1,5 @@
+minimum_confidence = 0.80 # minimum confidence for response
+
 [responses."1196075698301968455"] # pyoncord
 channel_ids = ["1210652540757090315"]
 undetailed_question = "The information you provided is not detailed enough to answer your question.\nPlease provide more information or rephrase your question."

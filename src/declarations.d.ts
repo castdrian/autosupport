@@ -5,4 +5,5 @@ declare module "@src/data.toml" {
 	}
 
 	export const responses: Record<string, Response>;
+	export const minimum_confidence: number;
 }
