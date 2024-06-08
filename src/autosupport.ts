@@ -12,7 +12,7 @@ function getHighestConfidenceIntent(
 		prev.confidence > current.confidence ? prev : current,
 	);
 
-	return highestConfidenceIntent.confidence >= 0.95
+	return highestConfidenceIntent.confidence >= 0.80
 		? highestConfidenceIntent
 		: undefined;
 }
