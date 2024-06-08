@@ -8,7 +8,7 @@ export class MessageListener extends Listener {
 		if (!message.inGuild()) return;
 		if (message.author.bot) return;
 		if (!config.devGuildId && !responseCache.has(message.guildId)) return;
-		if (!config.devGuildId && !responseCache.get(message.guildId)?.channel_ids?.includes(message.channelId)) return;
+		if (!config.devGuildId && !responseCache.get(message.guildId)?.channelIds?.includes(message.channelId)) return;
 		await getResponse(message);
 	}
 }

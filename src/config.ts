@@ -18,19 +18,19 @@ export const config = createConfigLoader()
 	.load();
 
 interface GuildResponse {
-	channel_ids: string[];
+	channelIds: string[];
 	values: Collection<string, string>;
 }
 
 export const responseCache = new Collection<string, GuildResponse>();
 
 for (const [key, value] of Object.entries(responses)) {
-	const { channel_ids, ...props } = value;
+	const { channel_ids: channelIds, ...props } = value;
 	const values = new Collection<string, string>();
 
 	for (const [responseKey, responseValue] of Object.entries(props)) {
 		values.set(responseKey, responseValue);
 	}
 
-	responseCache.set(key, { channel_ids, values });
+	responseCache.set(key, { channelIds, values });
 }
