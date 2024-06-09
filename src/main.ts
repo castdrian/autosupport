@@ -14,6 +14,6 @@ const client = new SapphireClient({
 	],
 });
 
-ApplicationCommandRegistries.setDefaultGuildIds(config.devGuildId ? [config.devGuildId] : Array.from(responseCache.keys()));
+ApplicationCommandRegistries.setDefaultGuildIds(config.devGuildId ? [config.devGuildId] : null);
 
 await client.login();
