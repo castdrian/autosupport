@@ -1,13 +1,14 @@
 import { config, responseCache } from "@src/config";
-import { minimum_confidence as minimumConfidence } from "@src/data.toml";
 import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
 import { createWorker } from 'tesseract.js';
 
 function getHighestConfidenceIntent(
 	intents: Intent[],
+	minimumConfidence: number | undefined,
 ): Intent | undefined {
 	if (!intents.length) return undefined;
+	if (minimumConfidence === undefined) return undefined;
 
 	const highestConfidenceIntent = intents.reduce((prev, current) =>
 		prev.confidence > current.confidence ? prev : current,
@@ -41,7 +42,7 @@ export async function getResponse(message: Message) {
 		);
 
 		if (!res.intents.length) return;
-		const selectedIntent = getHighestConfidenceIntent(res.intents);
+		const selectedIntent = getHighestConfidenceIntent(res.intents, config.devGuildId ? 0 : responseCache.get(message.guildId)?.minimumConfidence);
 
 		if (selectedIntent) {
 			await message.channel.sendTyping();

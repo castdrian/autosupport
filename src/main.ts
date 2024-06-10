@@ -2,7 +2,7 @@ import {
 	ApplicationCommandRegistries,
 	SapphireClient,
 } from "@sapphire/framework";
-import { config, responseCache } from "@src/config";
+import { config } from "@src/config";
 import { GatewayIntentBits } from "discord.js";
 
 const client = new SapphireClient({
@@ -15,5 +15,4 @@ const client = new SapphireClient({
 });
 
 ApplicationCommandRegistries.setDefaultGuildIds(config.devGuildId ? [config.devGuildId] : null);
-
 await client.login();

@@ -1,14 +1,17 @@
-minimum_confidence = 0.80 # minimum confidence for response
-
 [responses."1196075698301968455"] # pyoncord
-channel_ids = ["1210652540757090315"]
+minimum_confidence = 0.80 # minimum confidence for response
+ignore_replies = true # ignore messages that are replies
+channel_ids = ["1210652540757090315"] # channels to respond in
+ignored_roles = [] # ignores messages from members with these roles
+
+[responses."1196075698301968455".values] # responses for triggered intents
 undetailed_question = "The information you provided is not detailed enough to answer your question.\nPlease provide more information or rephrase your question."
 get_addons = "Bunny offers compatibility with Vendetta's plugins and themes, since it is what Bunny is based on:\n\n- For plugins, you can retrieve plugin links from: https://bn-plugins.github.io/vd-web/\n- For themes, you may install any Vendetta themes you like. Revenge themes are also supported, excluding custom fonts support.\n\nYou may find a curated list of broken plugins in https://discord.com/channels/1196075698301968455/1210652540757090315/1229376326528663596"
-installation_instructions = "### Android\n\n- **Root** with LSPosed - [BunnyXposed](<https://github.com/pyoncord/BunnyXposed/releases/latest>)\n- **Non-root** - [BunnyManager](<https://github.com/pyoncord/BunnyManager/releases/latest>)\n### iOS\n\n- **Jailed**\n - Pre-patched `.ipa` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n - AltSource Repo - [Pyoncord App Repo](<https://raw.githubusercontent.com/pyoncord/BunnyTweak/main/app-repo.json>)\n-# Note: TrollStore will display an encryption warning which you can ignore\n- **Jailbroken**\n - Rootful and rootless `.deb` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n\nPlease keep in mind that this channel is not sideload-, jailbreak nor root support. Please keep questions pertaining to those topics elsewhere."
+installation_instructions = "### Android\n\n- **Root** with LSPosed - [BunnyXposed](<https://github.com/pyoncord/BunnyXposed/releases/latest>)\n- **Non-root** - [BunnyManager](<https://github.com/pyoncord/BunnyManager/releases/latest>)\n### iOS\n\n- **Jailed**\n - Pre-patched `.ipa` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n - AltSource Repo - [Pyoncord App Repo](<https://raw.githubusercontent.com/pyoncord/BunnyTweak/main/app-repo.json>)\n-# Note: TrollStore will display an encryption warning which you can ignore\n- **Jailbroken**\n - Rootful and rootless `.deb` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n\nPlease keep in mind that this channel is not sideload-, jailbreak nor root support.\nPlease keep questions pertaining to those topics elsewhere."
 enable_experiments = "Head to Settings > Bunny > Activate Discord Experiments"
 account_switcher = "Enable Discord Experiments and look for the 'Mobile Account Switcher' experiment and set it to Treatment 1. Hold your profile in the navigation tab to manage your accounts."
 disable_nmu = "The only way to disable NMU is to use Discord version <= 224 and change the experiment's treatment. Keep in mind that support is only provided for the latest stable release and your version may stop working at some point."
 fix_voice_activity = "The cause of this is unclear. To fix it, please disable 'Advanced Voice Activity' in voice settings."
 no_mod_settings = "Try visiting [this link](<https://raw.githubusercontent.com/pyoncord/detta-builds/main/bunny.js>) and see if it loads bunch of texts. If it doesn't, try using a VPN and/or disable any sort of ad blocker and try again."
 custom_fonts = "Fonts are experimental and some packs may break the application. You can get font packs listed here: https://discord.com/channels/1196075698301968455/1225584192012947506/1241453802184380418"
-ios_notifications = "For notifications to work on a Jailed device you need to sign the ipa with a certificate that has the notification entitlement enabled.\n\nPlease keep in mind that this channel is not sideloading support. Please keep questions pertaining to this topic elsewhere."
+ios_notifications = "For notifications to work on a Jailed device you need to sign the ipa with a certificate that has the notification entitlement enabled.\n\nPlease keep in mind that this channel is not sideloading support.\nPlease keep questions pertaining to this topic elsewhere."

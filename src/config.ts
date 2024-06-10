@@ -18,19 +18,22 @@ export const config = createConfigLoader()
 	.load();
 
 interface GuildResponse {
+	minimumConfidence: number;
+	ignoreReplies: boolean;
 	channelIds: string[];
+	ignoredRoles: string[];
 	values: Collection<string, string>;
 }
 
 export const responseCache = new Collection<string, GuildResponse>();
 
 for (const [key, value] of Object.entries(responses)) {
-	const { channel_ids: channelIds, ...props } = value;
-	const values = new Collection<string, string>();
+	const { minimum_confidence: minimumConfidence, ignore_replies: ignoreReplies, channel_ids: channelIds, ignored_roles: ignoredRoles, values } = value;
+	const valueCollection = new Collection<string, string>();
 
-	for (const [responseKey, responseValue] of Object.entries(props)) {
-		values.set(responseKey, responseValue);
+	for (const [responseKey, responseValue] of Object.entries(values)) {
+		valueCollection.set(responseKey, responseValue);
 	}
 
-	responseCache.set(key, { channelIds, values });
+	responseCache.set(key, { minimumConfidence, ignoreReplies, channelIds, ignoredRoles, values: valueCollection });
 }

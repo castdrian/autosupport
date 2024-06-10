@@ -1,9 +1,12 @@
 declare module "@src/data.toml" {
+
 	interface Response {
+		minimum_confidence: number;
+		ignore_replies: boolean;
 		channel_ids: string[];
-		[key: string]: string;
+		ignored_roles: string[];
+		values: Record<string, string>;
 	}
 
 	export const responses: Record<string, Response>;
-	export const minimum_confidence: number;
 }
