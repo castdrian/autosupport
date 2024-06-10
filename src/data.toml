@@ -11,3 +11,4 @@ disable_nmu = "The only way to disable NMU is to use Discord version <= 224 and 
 fix_voice_activity = "The cause of this is unclear. To fix it, please disable 'Advanced Voice Activity' in voice settings."
 no_mod_settings = "Try visiting [this link](<https://raw.githubusercontent.com/pyoncord/detta-builds/main/bunny.js>) and see if it loads bunch of texts. If it doesn't, try using a VPN and/or disable any sort of ad blocker and try again."
 custom_fonts = "Fonts are experimental and some packs may break the application. You can get font packs listed here: https://discord.com/channels/1196075698301968455/1225584192012947506/1241453802184380418"
+ios_notifications = "For notifications to work on a Jailed device you need to sign the ipa with a certificate that has the notification entitlement enabled.\n\nPlease keep in mind that this channel is not sideloading support. Please keep questions pertaining to this topic elsewhere."
