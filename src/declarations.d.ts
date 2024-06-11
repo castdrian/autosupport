@@ -5,6 +5,7 @@ declare module "@src/data.toml" {
 		ignore_replies: boolean;
 		channel_ids: string[];
 		ignored_roles: string[];
+		confinement_role: string;
 		values: Record<string, string>;
 	}
 

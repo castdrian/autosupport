@@ -1,4 +1,5 @@
 import { version } from "@root/package.json";
+import { confinementCache } from "@root/src/config";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
 import { ActivityType, User } from "discord.js";
@@ -27,6 +28,16 @@ export class ReadyListener extends Listener {
 					name: "autosupport",
 				}),
 			30e3,
+		);
+		setInterval(
+			async () => {
+				for (const inmate of confinementCache.values()) {
+					if (inmate.releaseDate < new Date()) {
+						await this.container.client.guilds.cache.get(inmate.guildId)?.members.cache.get(inmate.id)?.roles.remove(inmate.confinementRole);
+					}
+				}
+			},
+			10e3,
 		);
 	}
 }
