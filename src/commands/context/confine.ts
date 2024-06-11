@@ -24,7 +24,7 @@ export class ConfineCommand extends Command {
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("confinement_time").addOptions(
-					new StringSelectMenuOptionBuilder().setLabel('1 hour').setValue('10e3'),
+					new StringSelectMenuOptionBuilder().setLabel('1 hour').setValue('3.6e6'),
 					new StringSelectMenuOptionBuilder().setLabel('1 day').setValue('8.64e7'),
 					new StringSelectMenuOptionBuilder().setLabel('1 week').setValue('6.048e8'),
 				),
@@ -46,6 +46,7 @@ export class ConfineCommand extends Command {
 				if (!confirmation.isStringSelectMenu()) return await res.delete();
 
 				if (confirmation.customId === "confinement_time") {
+					if (!interaction.inCachedGuild()) return;
 					await interaction.targetMember.roles.add(responseCache.get(interaction.guildId)?.confinementRole!);
 
 					confinementCache.set(interaction.targetMember.id, {
@@ -59,7 +60,7 @@ export class ConfineCommand extends Command {
 				}
 			} catch (ex) {
 				await res.edit({ content: `Failed to confine member.\n${(ex as Error).message}`, components: [] });
-				this.container.logger.error(ex);
+				console.error(ex);
 			}
 		} catch (ex) {
 			this.container.logger.error(ex);
