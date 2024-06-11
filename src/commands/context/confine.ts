@@ -21,6 +21,7 @@ export class ConfineCommand extends Command {
 				return;
 			if (!interaction.inGuild() || !(interaction.targetMember instanceof GuildMember)) return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
+			if (!responseCache.get(interaction.guildId)?.confinementRole) return;
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("confinement_time").addOptions(

@@ -22,7 +22,7 @@ const guildResponseSchema = z.object({
 	ignore_replies: z.boolean(),
 	channel_ids: z.array(z.string().regex(/^(?<id>\d{17,20})$/)),
 	ignored_roles: z.array(z.string().regex(/^(?<id>\d{17,20})$/)),
-	confinement_role: z.string().regex(/^(?<id>\d{17,20})$/),
+	confinement_role: z.string().optional().or(z.string().regex(/^(?<id>\d{17,20})$/)),
 	values: z.record(z.string(), z.string()),
 });
 
@@ -34,7 +34,7 @@ interface GuildResponse {
 	ignoreReplies: boolean;
 	channelIds: string[];
 	ignoredRoles: string[];
-	confinementRole: string;
+	confinementRole?: string;
 	values: Collection<string, string>;
 }
 

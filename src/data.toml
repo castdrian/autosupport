@@ -3,7 +3,7 @@ minimum_confidence = 0.80 # minimum confidence for response
 ignore_replies = true # ignore messages that are replies
 channel_ids = ["1210652540757090315"] # channels to respond in
 ignored_roles = [] # ignores messages from members with these roles
-confinement_role = "0123456789012345678" # role to apply using confinement command
+confinement_role = "" # role to apply using confinement command
 
 [responses."1196075698301968455".values] # responses for triggered intents
 undetailed_question = "The information you provided is not detailed enough to answer your question.\nPlease provide more information or rephrase your question."
