@@ -17,7 +17,6 @@ export const config = createConfigLoader()
 	.addZodSchema(configSchema)
 	.load();
 
-
 const guildResponseSchema = z.object({
 	minimum_confidence: z.number(),
 	ignore_replies: z.boolean(),
