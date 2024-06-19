@@ -5,6 +5,7 @@ import {
 	ApplicationCommandType,
 	GuildMember,
 	type MessageComponentInteraction,
+	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 	type UserContextMenuCommandInteraction,
@@ -72,7 +73,8 @@ export class ConfineCommand extends Command {
 		registry.registerContextMenuCommand((builder) =>
 			builder //
 				.setName("Confine to Channel")
-				.setType(ApplicationCommandType.User),
+				.setType(ApplicationCommandType.User)
+				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 		);
 	}
 }
