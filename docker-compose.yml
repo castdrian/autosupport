@@ -23,7 +23,8 @@ services:
       - autosupport-db:/var/lib/sqlite
     entrypoint: sh -c "ln -sf /var/lib/sqlite/autosupport.db /usr/src/app/autosupport.db && bun start"
     depends_on:
-      - db-init
+      db-init:
+        condition: service_completed_successfully
 
 volumes:
   autosupport-db:
