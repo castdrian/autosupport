@@ -18,10 +18,7 @@ To copy the wit project please refer to <https://wit.ai/docs/recipes#export-your
 ### Production
 
 ```bash
-sudo docker run --name=autosupport --restart=unless-stopped \
-  --env-file .env \
-  -v ./autosupport.db:/usr/src/app/autosupport.db \
-  ghcr.io/castdrian/autosupport:main
+sudo docker compose up --build
 ```
 
 ### Development
