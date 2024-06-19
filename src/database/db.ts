@@ -44,29 +44,49 @@ export async function getMinimumConfidence(guildId: string) {
 	return settings.minimumConfidence;
 }
 
-export async function getConfinementRoleId(guildId: string) {
-	const settings = await getOrCreateGuildSettings(guildId);
-	return settings.confinementRoleId;
-}
-
-export async function setChannelIds(guildId: string, channelIds: string[]) {
-	return updateGuildSettings(guildId, { channelIds });
-}
-
-export async function setIgnoredRoles(guildId: string, ignoredRoles: string[]) {
-	return updateGuildSettings(guildId, { ignoredRoles });
+export async function setMinimumConfidence(guildId: string, minimumConfidence: number) {
+	return updateGuildSettings(guildId, { minimumConfidence });
 }
 
 export async function setIgnoreReplies(guildId: string, ignoreReplies: boolean) {
 	return updateGuildSettings(guildId, { ignoreReplies });
 }
 
-export async function setMinimumConfidence(guildId: string, minimumConfidence: number) {
-	return updateGuildSettings(guildId, { minimumConfidence });
+export async function addSupportChannelId(guildId: string, channelId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	const channelIds = [...settings.channelIds, channelId];
+	return updateGuildSettings(guildId, { channelIds });
+}
+
+export async function removeSupportChannelId(guildId: string, channelId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	const channelIds = settings.channelIds.filter((id) => id !== channelId);
+	return updateGuildSettings(guildId, { channelIds });
+}
+
+export async function addIgnoredRoleId(guildId: string, roleId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	const ignoredRoles = [...settings.ignoredRoles, roleId];
+	return updateGuildSettings(guildId, { ignoredRoles });
+}
+
+export async function removeIgnoredRoleId(guildId: string, roleId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	const ignoredRoles = settings.ignoredRoles.filter((id) => id !== roleId);
+	return updateGuildSettings(guildId, { ignoredRoles });
+}
+
+export async function getConfinementRoleId(guildId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	return settings.confinementRoleId;
 }
 
 export async function setConfinementRoleId(guildId: string, confinementRoleId: string) {
 	return updateGuildSettings(guildId, { confinementRoleId });
+}
+
+export async function clearConfinementRoleId(guildId: string) {
+	return updateGuildSettings(guildId, { confinementRoleId: null });
 }
 
 export async function getInmates() {
