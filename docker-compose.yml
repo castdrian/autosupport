@@ -1,4 +1,15 @@
 services:
+  db-init:
+    image: alpine:latest
+    volumes:
+      - autosupport-db:/var/lib/sqlite
+    entrypoint: >
+      sh -c "apk add --no-cache sqlite && 
+      if [ ! -f /var/lib/sqlite/autosupport.db ]; then 
+        echo 'Creating SQLite database at /var/lib/sqlite/autosupport.db'; 
+        sqlite3 /var/lib/sqlite/autosupport.db 'VACUUM;'; 
+      fi"
+
   autosupport:
     restart: unless-stopped
     build:
@@ -8,4 +19,12 @@ services:
     container_name: autosupport
     env_file:
       - .env
-    command: bun start
+    volumes:
+      - autosupport-db:/var/lib/sqlite
+    entrypoint: sh -c "ln -sf /var/lib/sqlite/autosupport.db /usr/src/app/autosupport.db && bun start"
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+
+volumes:
+  autosupport-db:

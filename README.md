@@ -15,12 +15,10 @@ autosupport using intent classification and ocr
 wit.ai project: <https://wit.ai/apps/768983281890362>\
 To copy the wit project please refer to <https://wit.ai/docs/recipes#export-your-app>
 
-To fine tune the response sensitivity you can adjust the minimum confidence [here](https://github.com/castdrian/autosupport/blob/dev/src/data.toml)
-
 ### Production
 
 ```bash
-sudo docker run --name=autosupport --restart=unless-stopped ghcr.io/castdrian/autosupport:main --env-file .env
+sudo docker compose up --build
 ```
 
 ### Development

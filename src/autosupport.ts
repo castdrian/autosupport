@@ -2,13 +2,13 @@ import { config, responseCache } from "@src/config";
 import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
 import { createWorker } from 'tesseract.js';
+import { getMinimumConfidence } from "./database/db";
 
 function getHighestConfidenceIntent(
 	intents: Intent[],
-	minimumConfidence: number | undefined,
+	minimumConfidence: number,
 ): Intent | undefined {
 	if (!intents.length) return undefined;
-	if (minimumConfidence === undefined) return undefined;
 
 	const highestConfidenceIntent = intents.reduce((prev, current) =>
 		prev.confidence > current.confidence ? prev : current,
@@ -42,7 +42,7 @@ export async function getResponse(message: Message) {
 		);
 
 		if (!res.intents.length) return;
-		const selectedIntent = getHighestConfidenceIntent(res.intents, config.devGuildId ? 0 : responseCache.get(message.guildId)?.minimumConfidence);
+		const selectedIntent = getHighestConfidenceIntent(res.intents, config.devGuildId ? 0 : await getMinimumConfidence(message.guildId));
 
 		if (selectedIntent) {
 			await message.channel.sendTyping();
@@ -53,7 +53,7 @@ export async function getResponse(message: Message) {
 			if (config.devGuildId) {
 				for (const [, guildResponses] of responseCache) {
 					if (guildResponses) {
-						for (const [key, value] of guildResponses.values) {
+						for (const [key, value] of guildResponses) {
 							aggregatedResponses.set(key, value);
 						}
 					}
@@ -63,7 +63,7 @@ export async function getResponse(message: Message) {
 			} else {
 				const guildResponses = responseCache.get(message.guildId);
 				if (guildResponses) {
-					responseContent = guildResponses.values.get(selectedIntent.name) ?? '';
+					responseContent = guildResponses.get(selectedIntent.name) ?? '';
 				}
 			}
 

@@ -1,5 +1,6 @@
+import { type Inmate, addInmate, getConfinementRoleId } from "@root/src/database/db";
 import { Command } from "@sapphire/framework";
-import { config, confinementCache, responseCache } from "@src/config";
+import { config, responseCache } from "@src/config";
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -22,7 +23,8 @@ export class ConfineCommand extends Command {
 				return;
 			if (!interaction.inGuild() || !(interaction.targetMember instanceof GuildMember)) return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
-			if (!responseCache.get(interaction.guildId)?.confinementRole) return;
+			const confinementRoleId = await getConfinementRoleId(interaction.guildId);
+			if (!confinementRoleId) return;
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("confinement_time").addOptions(
@@ -49,15 +51,16 @@ export class ConfineCommand extends Command {
 
 				if (confirmation.customId === "confinement_time") {
 					if (!interaction.inCachedGuild()) return;
-					await interaction.targetMember.roles.add(responseCache.get(interaction.guildId)?.confinementRole!);
+					await interaction.targetMember.roles.add(confinementRoleId);
 
-					confinementCache.set(interaction.targetMember.id, {
+					const inmate: Inmate = {
 						id: interaction.targetMember.id,
 						guildId: interaction.guildId,
-						confinementRole: responseCache.get(interaction.guildId)?.confinementRole!,
+						confinementRoleId: confinementRoleId,
 						releaseDate: new Date(Date.now() + Number(confirmation.values[0])),
-					});
+					};
 
+					await addInmate(inmate);
 					await res.edit({ content: 'Confined member to configured channel.', components: [] });
 				}
 			} catch (ex) {

@@ -1,11 +1,4 @@
-[responses."1196075698301968455"] # pyoncord
-minimum_confidence = 0.80 # minimum confidence for response
-ignore_replies = true # ignore messages that are replies
-channel_ids = ["1210652540757090315"] # channels to respond in
-ignored_roles = [] # ignores messages from members with these roles
-confinement_role = "" # role to apply using confinement command
-
-[responses."1196075698301968455".values] # responses for triggered intents
+["1196075698301968455"] # pyoncord, responses for triggered intents
 undetailed_question = "The information you provided is not detailed enough to answer your question.\nPlease provide more information or rephrase your question."
 get_addons = "Bunny offers compatibility with Vendetta's plugins and themes, since it is what Bunny is based on:\n\n- For plugins, you can retrieve plugin links from: https://bn-plugins.github.io/vd-web/\n- For themes, you may install any Vendetta themes you like. Revenge themes are also supported, excluding custom fonts support.\n\nYou may find a curated list of broken plugins in https://discord.com/channels/1196075698301968455/1210652540757090315/1229376326528663596"
 installation_instructions = "### Android\n\n- **Root** with LSPosed - [BunnyXposed](<https://github.com/pyoncord/BunnyXposed/releases/latest>)\n- **Non-root** - [BunnyManager](<https://github.com/pyoncord/BunnyManager/releases/latest>)\n### iOS\n\n- **Jailed**\n - Pre-patched `.ipa` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n - AltSource Repo - [Pyoncord App Repo](<https://raw.githubusercontent.com/pyoncord/BunnyTweak/main/app-repo.json>)\n-# Note: TrollStore will display an encryption warning which you can ignore\n- **Jailbroken**\n - Rootful and rootless `.deb` - [BunnyTweak](<https://github.com/pyoncord/BunnyTweak/releases/latest>)\n\nPlease keep in mind that this channel is not sideload-, jailbreak nor root support.\nPlease keep questions pertaining to those topics elsewhere."
