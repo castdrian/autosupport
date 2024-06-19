@@ -20,4 +20,14 @@ FROM base AS release
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-ENTRYPOINT [ "bun", "start" ]
+# Copy the entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Specify the command to run the app
+CMD ["bun", "start"]

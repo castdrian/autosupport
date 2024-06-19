@@ -5,5 +5,10 @@
 	"editor.codeActionsOnSave": {
 		"quickfix.biome": "explicit",
 		"source.organizeImports.biome": "explicit"
+	},
+	"markdownlint.config": {
+		"MD033": {
+			"allowed_elements": ["details", "summary", "strong"]
+		}
 	}
 }

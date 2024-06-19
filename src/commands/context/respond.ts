@@ -65,7 +65,7 @@ export class ResponseCommand extends Command {
 					if (config.devGuildId) {
 						for (const [, guildResponses] of responseCache) {
 							if (guildResponses) {
-								for (const [key, value] of guildResponses.values) {
+								for (const [key, value] of guildResponses) {
 									aggregatedResponses.set(key, value);
 								}
 							}
@@ -75,7 +75,7 @@ export class ResponseCommand extends Command {
 					} else {
 						const guildResponses = responseCache.get(interaction.guildId);
 						if (guildResponses) {
-							responseContent = guildResponses.values.get(intent.name) ?? '';
+							responseContent = guildResponses.get(intent.name) ?? '';
 						}
 					}
 
