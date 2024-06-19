@@ -44,7 +44,7 @@ export class SettingsCommand extends Subcommand {
 	public async chatInputInfo(interaction: Subcommand.ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const settings = await getOrCreateGuildSettings(interaction.guildId);
-		const formattedSettings = `Minimum Confidence: ${`${inlineCodeBlock((settings.minimumConfidence * 100).toString())}%`}\nIgnore Replies: ${settings.ignoreReplies ? inlineCodeBlock('Yes') : inlineCodeBlock('No')}\nSupport Channels: ${settings.channelIds.length > 0 ? settings.channelIds.map(channelMention).join(' ') : inlineCodeBlock('None')}\nIgnored Roles: ${settings.ignoredRoles.length > 0 ? settings.ignoredRoles.map(roleMention).join(' ') : inlineCodeBlock('None')}\nConfinement Role: ${settings.confinementRoleId ? roleMention(settings.confinementRoleId) : inlineCodeBlock('None')}`;
+		const formattedSettings = `Minimum Confidence: ${inlineCodeBlock(`${(settings.minimumConfidence * 100).toString()}%`)}\nIgnore Replies: ${settings.ignoreReplies ? inlineCodeBlock('Yes') : inlineCodeBlock('No')}\nSupport Channels: ${settings.channelIds.length > 0 ? settings.channelIds.map(channelMention).join(' ') : inlineCodeBlock('None')}\nIgnored Roles: ${settings.ignoredRoles.length > 0 ? settings.ignoredRoles.map(roleMention).join(' ') : inlineCodeBlock('None')}\nConfinement Role: ${settings.confinementRoleId ? roleMention(settings.confinementRoleId) : inlineCodeBlock('None')}`;
 		await interaction.reply({ content: formattedSettings, ephemeral: true });
 	}
 
