@@ -11,3 +11,4 @@ custom_fonts = "Fonts are experimental and some packs may break the application.
 ios_notifications = "For notifications to work on a Jailed device you need to sign the ipa with a certificate that has the notification entitlement enabled.\n\nPlease keep in mind that this channel is not sideloading support.\nPlease keep questions pertaining to this topic elsewhere."
 thirty_two_bit_android_os = "32-bit versions of Android OS are not supported. Please use a 64-bit operating system."
 broken_addons = "You can find a curated list of broken add-ons in https://discord.com/channels/1196075698301968455/1210652540757090315/1229376326528663596"
+altstore_pal = "AltStore PAL is an alternate app marketplace for notarized applications. You cannot use it to sideload.\n\nPlease keep in mind that this channel is not sideloading support.\nPlease keep questions pertaining to this topic elsewhere."
