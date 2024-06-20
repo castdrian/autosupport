@@ -1,8 +1,8 @@
 import { config, responseCache } from "@src/config";
+import { getMinimumConfidence } from "@src/database/db";
 import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
 import { createWorker } from 'tesseract.js';
-import { getMinimumConfidence } from "@src/database/db";
 
 function getHighestConfidenceIntent(
 	intents: Intent[],
@@ -36,9 +36,7 @@ export async function getResponse(message: Message) {
 
 		const res = await witMessage(
 			`${message.content}\n${imageText}`,
-			config.witAiServerToken[
-			config.devGuildId ? Object.keys(config.witAiServerToken)[0] : message.guildId
-			],
+			config.devWitAiServerToken ?? config.witAiServerToken[message.guildId],
 		);
 
 		if (!res.intents.length) return;
