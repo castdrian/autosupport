@@ -17,6 +17,21 @@ export const config = createConfigLoader()
 	.addZodSchema(configSchema)
 	.load();
 
+function validateConfig(data: unknown) {
+	const parsed = configSchema.parse(data);
+	if (parsed.devGuildId && !Object.keys(parsed.witAiServerToken).includes(parsed.devGuildId)) {
+		throw new z.ZodError([
+			{
+				path: ['witAiServerToken'],
+				message: 'if devGuildId is set, it must be a key in witAiServerToken',
+				code: z.ZodIssueCode.custom,
+			},
+		]);
+	}
+	return parsed;
+}
+
+validateConfig(config);
 const tomlSchema = z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.record(z.string(), z.string()))
 tomlSchema.parse(data);
 
