@@ -36,9 +36,7 @@ export async function getResponse(message: Message) {
 
 		const res = await witMessage(
 			`${message.content}\n${imageText}`,
-			config.witAiServerToken[
-			config.devGuildId ? Object.keys(config.witAiServerToken)[0] : message.guildId
-			],
+			config.witAiServerToken[message.guildId],
 		);
 
 		if (!res.intents.length) return;

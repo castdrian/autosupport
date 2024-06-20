@@ -23,10 +23,8 @@ export class UtteranceCommand extends Command {
 				return;
 			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
-			
-			const intents = await witIntents(config.witAiServerToken[
-				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-			]);
+
+			const intents = await witIntents(config.witAiServerToken[interaction.targetMessage.guildId]);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
@@ -57,10 +55,7 @@ export class UtteranceCommand extends Command {
 					);
 					if (!intent) return await res.delete();
 
-					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[
-						config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-					]);
-
+					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[interaction.targetMessage.guildId]);
 					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
 				}
 			} catch (ex) {

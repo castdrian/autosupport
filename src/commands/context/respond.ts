@@ -24,9 +24,7 @@ export class ResponseCommand extends Command {
 			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 
-			const intents = await witIntents(config.witAiServerToken[
-				config.devGuildId ? Object.keys(config.witAiServerToken)[0] : interaction.targetMessage.guildId
-			]);
+			const intents = await witIntents(config.witAiServerToken[interaction.targetMessage.guildId]);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_response").addOptions(
