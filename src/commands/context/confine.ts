@@ -65,7 +65,7 @@ export class ConfineCommand extends Command {
 				}
 			} catch (ex) {
 				await res.edit({ content: `Failed to confine member.\n${(ex as Error).message}`, components: [] });
-				console.error(ex);
+				this.container.logger.error(ex);
 			}
 		} catch (ex) {
 			this.container.logger.error(ex);
