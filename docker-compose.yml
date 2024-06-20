@@ -1,6 +1,7 @@
 services:
   db-init:
     image: alpine:latest
+    container_name: db-init
     volumes:
       - autosupport-db:/var/lib/sqlite
     entrypoint: >

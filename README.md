@@ -23,14 +23,6 @@ sudo docker compose up --build
 
 ### Development
 
-#### Local
-
 ```bash
 bun start
-```
-
-#### Docker
-
-```bash
-sudo docker compose up --build
 ```
