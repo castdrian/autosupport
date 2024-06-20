@@ -8,7 +8,6 @@ const configSchema = z.object({
 		.string()
 		.regex(/^([MN][\w-]{23,25})\.([\w-]{6})\.([\w-]{27,39})$/),
 	devGuildId: z.string().regex(/^(?<id>\d{17,20})$/).optional(),
-	devWitAiServerToken: z.string().regex(/^[A-Z0-9]{32}$/).optional(),
 	witAiServerToken: z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.string().regex(/^[A-Z0-9]{32}$/)),
 });
 
