@@ -28,7 +28,6 @@ function validateConfig(data: unknown) {
 			},
 		]);
 	}
-	return parsed;
 }
 
 validateConfig(config);
