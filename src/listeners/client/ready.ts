@@ -1,5 +1,5 @@
 import { version } from "@root/package.json";
-import { getInmates, removeInmate } from "@root/src/database/db";
+import { getInmates, removeInmate } from "@src/database/db";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
 import { ActivityType, User } from "discord.js";

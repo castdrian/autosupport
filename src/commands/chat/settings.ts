@@ -1,7 +1,7 @@
-import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setIgnoreReplies, setMinimumConfidence } from '@root/src/database/db';
+import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setIgnoreReplies, setMinimumConfidence } from '@src/database/db';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { inlineCodeBlock } from '@sapphire/utilities';
-import { PermissionFlagsBits } from 'discord.js';
+import { type ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
 import { ChannelType, channelMention, roleMention } from 'discord.js';
 
 export class SettingsCommand extends Subcommand {
@@ -41,63 +41,63 @@ export class SettingsCommand extends Subcommand {
 		});
 	}
 
-	public async chatInputInfo(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputInfo(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const settings = await getOrCreateGuildSettings(interaction.guildId);
 		const formattedSettings = `Minimum Confidence: ${inlineCodeBlock(`${(settings.minimumConfidence * 100).toString()}%`)}\nIgnore Replies: ${settings.ignoreReplies ? inlineCodeBlock('Yes') : inlineCodeBlock('No')}\nSupport Channels: ${settings.channelIds.length > 0 ? settings.channelIds.map(channelMention).join(' ') : inlineCodeBlock('None')}\nIgnored Roles: ${settings.ignoredRoles.length > 0 ? settings.ignoredRoles.map(roleMention).join(' ') : inlineCodeBlock('None')}\nConfinement Role: ${settings.confinementRoleId ? roleMention(settings.confinementRoleId) : inlineCodeBlock('None')}`;
 		await interaction.reply({ content: formattedSettings, ephemeral: true });
 	}
 
-	public async chatInputConfidence(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputConfidence(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const confidence = interaction.options.getInteger('value', true);
 		await setMinimumConfidence(interaction.guildId, confidence / 100);
 		await interaction.reply({ content: `minimum confidence set to ${confidence}%`, ephemeral: true });
 	}
 
-	public async chatInputIgnoreReplies(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputIgnoreReplies(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const ignoreReplies = interaction.options.getBoolean('value', true);
 		await setIgnoreReplies(interaction.guildId, ignoreReplies);
 		await interaction.reply({ content: `ignore replies set to ${ignoreReplies}`, ephemeral: true });
 	}
 
-	public async chatInputAddSupportChannel(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputAddSupportChannel(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const channel = interaction.options.getChannel('channel', true);
 		await addSupportChannelId(interaction.guildId, channel.id);
 		await interaction.reply({ content: `channel ${channelMention(channel.id)} added as support channel`, ephemeral: true });
 	}
 
-	public async chatInputRemoveSupportChannel(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputRemoveSupportChannel(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const channel = interaction.options.getChannel('channel', true);
 		await removeSupportChannelId(interaction.guildId, channel.id);
 		await interaction.reply({ content: `channel ${channelMention(channel.id)} removed as support channel`, ephemeral: true });
 	}
 
-	public async chatInputAddIgnoredRole(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputAddIgnoredRole(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const role = interaction.options.getRole('role', true);
 		await addIgnoredRoleId(interaction.guildId, role.id);
 		await interaction.reply({ content: `${roleMention(role.id)} added as ignored role`, ephemeral: true });
 	}
 
-	public async chatInputRemoveIgnoredRole(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputRemoveIgnoredRole(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const role = interaction.options.getRole('role', true);
 		await removeIgnoredRoleId(interaction.guildId, role.id);
 		await interaction.reply({ content: `${roleMention(role.id)} removed as ignored role`, ephemeral: true });
 	}
 
-	public async chatInputSetConfinementRole(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputSetConfinementRole(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const role = interaction.options.getRole('role', true);
 		await setConfinementRoleId(interaction.guildId, role.id);
 		await interaction.reply({ content: `confinement role set to ${roleMention(role.id)}`, ephemeral: true });
 	}
 
-	public async chatInputClearConfinementRole(interaction: Subcommand.ChatInputCommandInteraction) {
+	public async chatInputClearConfinementRole(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		await clearConfinementRoleId(interaction.guildId);
 		await interaction.reply({ content: 'confinement role cleared', ephemeral: true });

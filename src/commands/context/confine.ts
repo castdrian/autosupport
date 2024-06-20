@@ -1,4 +1,4 @@
-import { type Inmate, addInmate, getConfinementRoleId } from "@root/src/database/db";
+import { type Inmate, addInmate, getConfinementRoleId } from "@src/database/db";
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
 import {

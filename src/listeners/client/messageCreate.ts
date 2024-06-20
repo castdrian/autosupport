@@ -1,4 +1,4 @@
-import { getOrCreateGuildSettings } from "@root/src/database/db";
+import { getOrCreateGuildSettings } from "@src/database/db";
 import { Listener } from "@sapphire/framework";
 import { getResponse } from "@src/autosupport";
 import { config, responseCache } from "@src/config";

@@ -1,13 +1,13 @@
 import { Command, version as sapphver } from '@sapphire/framework';
 import { version as bunver } from 'bun';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type CommandInteraction, version as djsver, time } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type ChatInputCommandInteraction, version as djsver, time } from 'discord.js';
 import { cpu, mem, osInfo } from 'systeminformation';
 import { version as tsver } from 'typescript';
 
 import pkg from '@root/package.json';
 
 export class InfoCommand extends Command {
-	public override async chatInputRun(interaction: CommandInteraction) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		try {
 			const { readyAt } = this.container.client;
 			const uptimeString = time(readyAt ?? new Date(), 'R');

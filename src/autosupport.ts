@@ -2,7 +2,7 @@ import { config, responseCache } from "@src/config";
 import { type Intent, witMessage } from "@utils/wit";
 import { Collection, type Message } from "discord.js";
 import { createWorker } from 'tesseract.js';
-import { getMinimumConfidence } from "./database/db";
+import { getMinimumConfidence } from "@src/database/db";
 
 function getHighestConfidenceIntent(
 	intents: Intent[],
@@ -59,11 +59,11 @@ export async function getResponse(message: Message) {
 					}
 				}
 
-				responseContent = aggregatedResponses.get(selectedIntent.name) ?? '';
+				responseContent = aggregatedResponses.get(selectedIntent.name)!;
 			} else {
 				const guildResponses = responseCache.get(message.guildId);
 				if (guildResponses) {
-					responseContent = guildResponses.get(selectedIntent.name) ?? '';
+					responseContent = guildResponses.get(selectedIntent.name)!;
 				}
 			}
 
