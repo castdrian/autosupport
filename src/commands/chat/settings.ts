@@ -1,4 +1,4 @@
-import { addIntent } from '@root/src/utils/wit';
+import { addIntent, deleteIntent } from '@root/src/utils/wit';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { inlineCodeBlock } from '@sapphire/utilities';
 import { config } from '@src/config';
@@ -132,6 +132,7 @@ export class SettingsCommand extends Subcommand {
 	public async chatInputDeleteIntent(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 		const intent = interaction.options.getString('intent', true);
+		await deleteIntent(intent, config.witAiServerToken[interaction.guildId]);
 		await interaction.reply({ content: `intent ${inlineCodeBlock(intent)} deleted`, ephemeral: true });
 	}
 
