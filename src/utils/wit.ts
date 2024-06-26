@@ -23,7 +23,7 @@ interface WitMessageResult {
 
 interface Utterance {
 	text: string;
-	intent: string;
+	intent?: string;
 	entities: unknown[];
 	traits: unknown[];
 }
@@ -69,7 +69,7 @@ export async function witIntents(token: string): Promise<Intent[]> {
 	});
 }
 
-export async function trainWitUtterance(text: string, intent: string, token: string): Promise<void> {
+export async function trainWitUtterance(text: string, token: string, intent?: string): Promise<void> {
 	const utterance: Utterance = {
 		text,
 		intent,

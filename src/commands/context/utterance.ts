@@ -55,7 +55,7 @@ export class UtteranceCommand extends Command {
 					);
 					if (!intent) return await res.delete();
 
-					await trainWitUtterance(interaction.targetMessage.content, intent.name, config.witAiServerToken[interaction.targetMessage.guildId]);
+					await trainWitUtterance(interaction.targetMessage.content, config.witAiServerToken[interaction.targetMessage.guildId], intent.name);
 					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
 				}
 			} catch (ex) {
