@@ -3,7 +3,7 @@ import { witIntents } from '@root/src/utils/wit';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { AutocompleteInteraction } from 'discord.js';
 
-export class AutocompleteHandler extends InteractionHandler {
+export class DeleteIntentAutocompleteHandler extends InteractionHandler {
 	public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
 		super(ctx, {
 			...options,
