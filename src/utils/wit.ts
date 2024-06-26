@@ -6,6 +6,7 @@ enum WitRoute {
 
 enum HttpMethod {
 	POST = 'POST',
+	DELETE = 'DELETE',
 }
 
 export interface Intent {
@@ -29,7 +30,7 @@ interface Utterance {
 }
 
 interface FetchOptions {
-	route: WitRoute;
+	route: WitRoute | string;
 	token: string;
 	params?: URLSearchParams;
 	method?: HttpMethod;
@@ -46,7 +47,7 @@ async function witFetch<T>({ route, token, params = new URLSearchParams(), metho
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify(body),
+		body: body ? JSON.stringify(body) : undefined,
 	});
 
 	if (!response.ok) throw new Error(`Failed to fetch from Wit.ai: ${response.statusText}`);
@@ -66,6 +67,23 @@ export async function witIntents(token: string): Promise<Intent[]> {
 	return witFetch<Intent[]>({
 		route: WitRoute.INTENTS,
 		token,
+	});
+}
+
+export async function addIntent(intent: string, token: string): Promise<void> {
+	await witFetch<void>({
+		route: WitRoute.INTENTS,
+		token,
+		method: HttpMethod.POST,
+		body: { name: intent },
+	});
+}
+
+export async function deleteIntent(intent: string, token: string): Promise<void> {
+	await witFetch<void>({
+		route: `${WitRoute.INTENTS}/${intent}`,
+		token,
+		method: HttpMethod.DELETE,
 	});
 }
 

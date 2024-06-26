@@ -1,6 +1,8 @@
-import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setIgnoreReplies, setMinimumConfidence } from '@src/database/db';
+import { addIntent } from '@root/src/utils/wit';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { inlineCodeBlock } from '@sapphire/utilities';
+import { config } from '@src/config';
+import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setIgnoreReplies, setMinimumConfidence } from '@src/database/db';
 import { type ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
 import { ChannelType, channelMention, roleMention } from 'discord.js';
 
@@ -35,6 +37,14 @@ export class SettingsCommand extends Subcommand {
 					entries: [
 						{ name: 'set', chatInputRun: 'chatInputSetConfinementRole' },
 						{ name: 'clear', chatInputRun: 'chatInputClearConfinementRole' }
+					]
+				},
+				{
+					name: 'intents',
+					type: 'group',
+					entries: [
+						{ name: 'add', chatInputRun: 'chatInputAddIntent' },
+						{ name: 'delete', chatInputRun: 'chatInputDeleteIntent' },
 					]
 				},
 			]
@@ -101,6 +111,28 @@ export class SettingsCommand extends Subcommand {
 		if (!interaction.guildId) return;
 		await clearConfinementRoleId(interaction.guildId);
 		await interaction.reply({ content: 'confinement role cleared', ephemeral: true });
+	}
+
+	public async chatInputAddIntent(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+
+		const intent = interaction.options.getString('intent', true);
+
+		const isValidIntent = /^[a-z_]+$/.test(intent);
+
+		if (!isValidIntent) {
+			await interaction.reply({ content: "Invalid intent format. Intent must be in lowercase snake_case with no numbers or special characters.", ephemeral: true });
+			return;
+		}
+
+		await addIntent(intent, config.witAiServerToken[interaction.guildId]);
+		await interaction.reply({ content: `intent ${inlineCodeBlock(intent)} added`, ephemeral: true });
+	}
+
+	public async chatInputDeleteIntent(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+		const intent = interaction.options.getString('intent', true);
+		await interaction.reply({ content: `intent ${inlineCodeBlock(intent)} deleted`, ephemeral: true });
 	}
 
 	registerApplicationCommands(registry: Subcommand.Registry) {
@@ -212,6 +244,34 @@ export class SettingsCommand extends Subcommand {
 							command
 								.setName('clear')
 								.setDescription('clear confinement role')
+						)
+				)
+				.addSubcommandGroup((group) =>
+					group
+						.setName('intents')
+						.setDescription('configure intents')
+						.addSubcommand((command) =>
+							command
+								.setName('add')
+								.setDescription('add intent')
+								.addStringOption((option) =>
+									option
+										.setName('intent')
+										.setDescription('intent to add')
+										.setRequired(true),
+								)
+						)
+						.addSubcommand((command) =>
+							command
+								.setName('delete')
+								.setDescription('delete intent')
+								.addStringOption((option) =>
+									option
+										.setName('intent')
+										.setDescription('intent to delete')
+										.setAutocomplete(true)
+										.setRequired(true),
+								)
 						)
 				)
 				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
