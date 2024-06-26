@@ -40,7 +40,7 @@ export async function getResponse(message: Message) {
 		);
 
 		if (!res.intents.length) return;
-		const selectedIntent = getHighestConfidenceIntent(res.intents, config.devGuildId ? 0 : await getMinimumConfidence(message.guildId));
+		const selectedIntent = getHighestConfidenceIntent(res.intents, await getMinimumConfidence(message.guildId));
 
 		if (selectedIntent) {
 			await message.channel.sendTyping();

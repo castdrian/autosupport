@@ -2,7 +2,7 @@ import { integer, real, sqliteTable, text} from 'drizzle-orm/sqlite-core';
 
 export const guildPreferences = sqliteTable('guild_preferences', {
 	id: text('id').primaryKey(),
-	minimumConfidence: real('minimum_confidence').notNull().default(0.80),
+	minimumConfidence: real('minimum_confidence').notNull().default(0.95),
 	ignoreReplies: integer('ignore_replies', { mode: 'boolean' }).notNull().default(true),
 	channelIds: text('channel_ids', { mode: 'json' }).notNull().default('[]').$type<string[]>(),
 	ignoredRoles: text('ignored_roles', { mode: 'json' }).notNull().default('[]').$type<string[]>(),
