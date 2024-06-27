@@ -1,6 +1,6 @@
 {
   "name": "autosupport",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "discord autosupport",
   "main": "src/main.ts",
   "repository": "git@github.com:castdrian/autosupport.git",
