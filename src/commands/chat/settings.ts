@@ -118,10 +118,10 @@ export class SettingsCommand extends Subcommand {
 
 		const intent = interaction.options.getString('intent', true);
 
-		const isValidIntent = /^[a-z_]+$/.test(intent);
+		const isValidIntent = /^(?!\d)[a-zA-Z0-9_]+$/.test(intent);
 
 		if (!isValidIntent) {
-			await interaction.reply({ content: "Invalid intent format. Intent must be in lowercase snake_case with no numbers or special characters.", ephemeral: true });
+			await interaction.reply({ content: "Invalid intent format. Intent must match the regex `/^(?!\\d)[a-zA-Z0-9_]+$/`.", ephemeral: true });
 			return;
 		}
 

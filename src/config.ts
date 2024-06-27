@@ -31,7 +31,7 @@ function validateConfig(data: unknown) {
 }
 
 validateConfig(config);
-const tomlSchema = z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.record(z.string(), z.string()))
+const tomlSchema = z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.record(z.string().regex(/^(?!\d)[a-zA-Z0-9_]+$/), z.string()))
 tomlSchema.parse(data);
 
 export const responseCache = new Collection<string, Collection<string, string>>();
