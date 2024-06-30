@@ -1,5 +1,5 @@
-import { config } from '@root/src/config';
-import { witIntents } from '@root/src/utils/wit';
+import { config } from '@src/config';
+import { witIntents } from '@utils/wit';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { AutocompleteInteraction } from 'discord.js';
 

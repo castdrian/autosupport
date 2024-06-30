@@ -1,4 +1,4 @@
-import { addIntent, deleteIntent } from '@root/src/utils/wit';
+import { addIntent, deleteIntent } from '@utils/wit';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { inlineCodeBlock } from '@sapphire/utilities';
 import { config } from '@src/config';
