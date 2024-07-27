@@ -47,5 +47,9 @@
       "biome format --write --no-errors-on-unmatched",
       "biome lint --apply --no-errors-on-unmatched"
     ]
-  }
+  },
+  "trustedDependencies": [
+    "@biomejs/biome",
+    "tesseract.js"
+  ]
 }
