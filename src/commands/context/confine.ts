@@ -44,7 +44,7 @@ export class ConfineCommand extends Command {
 			try {
 				const confirmation = await res.awaitMessageComponent({
 					filter: collectorFilter,
-					time: 10_000,
+					time: 20_000,
 				});
 
 				if (!confirmation.isStringSelectMenu()) return await res.delete();
