@@ -64,7 +64,7 @@ export async function getResponse(message: Message) {
 	}
 }
 
-export function getResponseContent(intentName: string, guild: string) {
+export function getResponseContent(intentName: string, guildId: string) {
 	if (config.devGuildId) {
 		const aggregatedResponses = new Collection<string, string>();
 
@@ -79,7 +79,7 @@ export function getResponseContent(intentName: string, guild: string) {
 		return aggregatedResponses.get(intentName)!;
 	}
 
-	const guildResponses = responseCache.get(guild);
+	const guildResponses = responseCache.get(guildId);
 	if (guildResponses) {
 		return guildResponses.get(intentName)!;
 	}
