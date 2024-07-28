@@ -1,3 +1,4 @@
+import { getResponseContent } from "@root/src/utils/autosupport";
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
 import { witIntents } from "@utils/wit";
@@ -21,15 +22,19 @@ export class ResponseCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
-			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
+			if (!interaction.inGuild() || !interaction.targetMessage.inGuild())
+				return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 
-			const intents = await witIntents(config.witAiServerToken[interaction.targetMessage.guildId]);
+			const intents = await witIntents(
+				config.witAiServerToken[interaction.targetMessage.guildId],
+			);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_response").addOptions(
 					intents.map((intent) => ({
 						label: intent.name,
+						description: getResponseContent(intent.name, interaction.guildId)?.slice(0, 100),
 						value: intent.name,
 					})),
 				),
@@ -45,7 +50,7 @@ export class ResponseCommand extends Command {
 			try {
 				const confirmation = await res.awaitMessageComponent({
 					filter: collectorFilter,
-					time: 10_000,
+					time: 20_000,
 				});
 				if (!confirmation.isStringSelectMenu()) return await res.delete();
 
@@ -57,7 +62,7 @@ export class ResponseCommand extends Command {
 					await res.delete();
 					if (!interaction.inCachedGuild()) return;
 
-					let responseContent = '';
+					let responseContent = "";
 					const aggregatedResponses = new Collection<string, string>();
 
 					if (config.devGuildId) {
@@ -69,11 +74,11 @@ export class ResponseCommand extends Command {
 							}
 						}
 
-						responseContent = aggregatedResponses.get(intent.name) ?? '';
+						responseContent = aggregatedResponses.get(intent.name) ?? "";
 					} else {
 						const guildResponses = responseCache.get(interaction.guildId);
 						if (guildResponses) {
-							responseContent = guildResponses.get(intent.name) ?? '';
+							responseContent = guildResponses.get(intent.name) ?? "";
 						}
 					}
 

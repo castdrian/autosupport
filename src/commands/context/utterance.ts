@@ -1,3 +1,4 @@
+import { getResponseContent } from "@root/src/utils/autosupport";
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
 import { trainWitUtterance, witIntents } from "@utils/wit";
@@ -21,15 +22,19 @@ export class UtteranceCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
-			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
+			if (!interaction.inGuild() || !interaction.targetMessage.inGuild())
+				return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 
-			const intents = await witIntents(config.witAiServerToken[interaction.targetMessage.guildId]);
+			const intents = await witIntents(
+				config.witAiServerToken[interaction.targetMessage.guildId],
+			);
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
 					intents.map((intent) => ({
 						label: intent.name,
+						description: getResponseContent(intent.name, interaction.guildId),
 						value: intent.name,
 					})),
 				),
@@ -45,7 +50,7 @@ export class UtteranceCommand extends Command {
 			try {
 				const confirmation = await res.awaitMessageComponent({
 					filter: collectorFilter,
-					time: 10_000,
+					time: 20_000,
 				});
 				if (!confirmation.isStringSelectMenu()) return await res.delete();
 
@@ -55,8 +60,15 @@ export class UtteranceCommand extends Command {
 					);
 					if (!intent) return await res.delete();
 
-					await trainWitUtterance(interaction.targetMessage.content, config.witAiServerToken[interaction.targetMessage.guildId], intent.name);
-					await confirmation.update({ content: 'Training intent classifier with selected message.', components: [] });
+					await trainWitUtterance(
+						interaction.targetMessage.content,
+						config.witAiServerToken[interaction.targetMessage.guildId],
+						intent.name,
+					);
+					await confirmation.update({
+						content: "Training intent classifier with selected message.",
+						components: [],
+					});
 				}
 			} catch (ex) {
 				await res.delete();
