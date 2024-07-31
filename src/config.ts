@@ -2,6 +2,7 @@ import data from "@src/data.toml";
 import { Collection } from "discord.js";
 import { createConfigLoader } from "neat-config";
 import { z } from "zod";
+import { addIntent, witIntents } from "@utils/wit";
 
 const configSchema = z.object({
 	discordToken: z
@@ -44,4 +45,15 @@ for (const [key, value] of Object.entries(data)) {
 	}
 
 	responseCache.set(key, values);
+}
+
+for (const [guildId, responses] of responseCache) {
+	const intents = await witIntents(config.witAiServerToken[config.devGuildId ?? guildId]);
+
+	for (const intentName of responses.keys()) {
+		const intent = intents.find((intent) => intent.name === intentName);
+		if (!intent) {
+			await addIntent(intentName, config.witAiServerToken[config.devGuildId ?? guildId]);
+		}
+	}
 }
