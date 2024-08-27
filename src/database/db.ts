@@ -28,6 +28,7 @@ export async function getOrCreateGuildSettings(guildId: string) {
 		channelIds: [],
 		ignoredRoles: [],
 		confinementRoleId: null,
+		developerRoleId: null,
 	};
 
 	const createdSettings = await db.insert(schema.guildPreferences).values(newSettings).returning();
@@ -87,6 +88,19 @@ export async function setConfinementRoleId(guildId: string, confinementRoleId: s
 
 export async function clearConfinementRoleId(guildId: string) {
 	return updateGuildSettings(guildId, { confinementRoleId: null });
+}
+
+export async function getDeveloperRoleId(guildId: string) {
+	const settings = await getOrCreateGuildSettings(guildId);
+	return settings.developerRoleId;
+}
+
+export async function setDeveloperRoleId(guildId: string, developerRoleId: string) {
+	return updateGuildSettings(guildId, { developerRoleId });
+}
+
+export async function clearDeveloperRoleId(guildId: string) {
+	return updateGuildSettings(guildId, { developerRoleId: null });
 }
 
 export async function getInmates() {

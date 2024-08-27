@@ -4,7 +4,8 @@ CREATE TABLE `guild_preferences` (
 	`ignore_replies` integer DEFAULT true NOT NULL,
 	`channel_ids` text DEFAULT '[]' NOT NULL,
 	`ignored_roles` text DEFAULT '[]' NOT NULL,
-	`confinement_role_id` text
+	`confinement_role_id` text,
+	`developer_role_id` text
 );
 --> statement-breakpoint
 CREATE TABLE `inmates` (

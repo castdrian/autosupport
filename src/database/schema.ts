@@ -7,6 +7,7 @@ export const guildPreferences = sqliteTable('guild_preferences', {
 	channelIds: text('channel_ids', { mode: 'json' }).notNull().default('[]').$type<string[]>(),
 	ignoredRoles: text('ignored_roles', { mode: 'json' }).notNull().default('[]').$type<string[]>(),
 	confinementRoleId: text('confinement_role_id'),
+	developerRoleId: text('developer_role_id'),
 });
 
 export const inmates = sqliteTable('inmates', {

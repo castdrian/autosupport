@@ -52,6 +52,13 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "developer_role_id": {
+          "name": "developer_role_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},

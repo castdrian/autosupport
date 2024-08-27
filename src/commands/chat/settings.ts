@@ -113,6 +113,19 @@ export class SettingsCommand extends Subcommand {
 		await interaction.reply({ content: 'confinement role cleared', ephemeral: true });
 	}
 
+	public async chatInputSetDeveloperRole(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+		const role = interaction.options.getRole('role', true);
+		await setDeveloperRoleId(interaction.guildId, role.id);
+		await interaction.reply({ content: `developer role set to ${roleMention(role.id)}`, ephemeral: true });
+	}
+
+	public async chatInputClearDeveloperRole(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+		await clearDeveloperRoleId(interaction.guildId);
+		await interaction.reply({ content: 'developer role cleared', ephemeral: true });
+	}
+
 	public async chatInputAddIntent(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId) return;
 
