@@ -342,12 +342,12 @@ export class SettingsCommand extends Subcommand {
 				)
 				.addSubcommandGroup((group) =>
 					group
-						.setName("development-role")
-						.setDescription("configure development role")
+						.setName("developer-role")
+						.setDescription("configure developer role")
 						.addSubcommand((command) =>
 							command
 								.setName("set")
-								.setDescription("set development role")
+								.setDescription("set developer role")
 								.addRoleOption((option) =>
 									option
 										.setName("role")
