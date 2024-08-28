@@ -270,6 +270,27 @@ export class SettingsCommand extends Subcommand {
 				)
 				.addSubcommandGroup((group) =>
 					group
+						.setName('development-role')
+						.setDescription('configure development role')
+						.addSubcommand((command) =>
+							command
+								.setName('set')
+								.setDescription('set development role')
+								.addRoleOption((option) =>
+									option
+										.setName('role')
+										.setDescription('role to set')
+										.setRequired(true),
+								)
+						)
+						.addSubcommand((command) =>
+							command
+								.setName('clear')
+								.setDescription('clear development role')
+						)
+				)
+				.addSubcommandGroup((group) =>
+					group
 						.setName('intents')
 						.setDescription('configure intents')
 						.addSubcommand((command) =>
