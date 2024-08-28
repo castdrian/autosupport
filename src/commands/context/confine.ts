@@ -1,6 +1,6 @@
-import { type Inmate, addInmate, getConfinementRoleId } from "@src/database/db";
 import { Command } from "@sapphire/framework";
 import { config, responseCache } from "@src/config";
+import { type Inmate, addInmate, getConfinementRoleId } from "@src/database/db";
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -17,21 +17,30 @@ export class ConfineCommand extends Command {
 		interaction: UserContextMenuCommandInteraction,
 	) {
 		try {
+			if (!interaction.isUserContextMenuCommand) return;
 			if (
-				!interaction.isUserContextMenuCommand
+				!interaction.inGuild() ||
+				!(interaction.targetMember instanceof GuildMember)
 			)
 				return;
-			if (!interaction.inGuild() || !(interaction.targetMember instanceof GuildMember)) return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 			const confinementRoleId = await getConfinementRoleId(interaction.guildId);
 			if (!confinementRoleId) return;
 
 			const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-				new StringSelectMenuBuilder().setCustomId("confinement_time").addOptions(
-					new StringSelectMenuOptionBuilder().setLabel('1 hour').setValue('3.6e6'),
-					new StringSelectMenuOptionBuilder().setLabel('1 day').setValue('8.64e7'),
-					new StringSelectMenuOptionBuilder().setLabel('1 week').setValue('6.048e8'),
-				),
+				new StringSelectMenuBuilder()
+					.setCustomId("confinement_time")
+					.addOptions(
+						new StringSelectMenuOptionBuilder()
+							.setLabel("1 hour")
+							.setValue("3.6e6"),
+						new StringSelectMenuOptionBuilder()
+							.setLabel("1 day")
+							.setValue("8.64e7"),
+						new StringSelectMenuOptionBuilder()
+							.setLabel("1 week")
+							.setValue("6.048e8"),
+					),
 			);
 
 			const res = await interaction.reply({
@@ -51,7 +60,10 @@ export class ConfineCommand extends Command {
 
 				if (confirmation.customId === "confinement_time") {
 					if (!interaction.inCachedGuild()) return;
-					await interaction.targetMember.roles.add(confinementRoleId);
+					await interaction.targetMember.roles.add(
+						confinementRoleId,
+						`${interaction.user.username} confined member for ${getTimeString(confirmation.values[0])}`,
+					);
 
 					const inmate: Inmate = {
 						id: interaction.targetMember.id,
@@ -61,10 +73,16 @@ export class ConfineCommand extends Command {
 					};
 
 					await addInmate(inmate);
-					await res.edit({ content: 'Confined member to configured channel.', components: [] });
+					await res.edit({
+						content: "Confined member to configured channel.",
+						components: [],
+					});
 				}
 			} catch (ex) {
-				await res.edit({ content: `Failed to confine member.\n${(ex as Error).message}`, components: [] });
+				await res.edit({
+					content: `Failed to confine member.\n${(ex as Error).message}`,
+					components: [],
+				});
 				this.container.logger.error(ex);
 			}
 		} catch (ex) {
@@ -79,5 +97,18 @@ export class ConfineCommand extends Command {
 				.setType(ApplicationCommandType.User)
 				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 		);
+	}
+}
+
+function getTimeString(ms: string): string {
+	switch (ms) {
+		case "3.6e6":
+			return "1 hour";
+		case "8.64e7":
+			return "1 day";
+		case "6.048e8":
+			return "1 week";
+		default:
+			return `${Number(ms) / 1000} seconds`;
 	}
 }

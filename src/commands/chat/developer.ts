@@ -1,4 +1,5 @@
 import { Command, Listener } from "@sapphire/framework";
+import { config, responseCache } from "@src/config";
 import { getDeveloperRoleId } from "@src/database/db";
 import {
 	ActionRowBuilder,
@@ -13,6 +14,7 @@ export class DeveloperCategoryAccessGrantCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		try {
 			if (!interaction.inCachedGuild()) return;
+			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 
 			const developerRoleId = await getDeveloperRoleId(interaction.guildId);
 			if (!developerRoleId) {
@@ -31,7 +33,8 @@ export class DeveloperCategoryAccessGrantCommand extends Command {
 			);
 
 			const reply = await interaction.reply({
-				content: "By clicking the 'Grant Access' button, you will gain access to the development category.\nBy doing so, you agree not to misuse this category and to use the support channel when necessary.",
+				content:
+					"By clicking the 'Grant Access' button, you will gain access to the development category.\nBy doing so, you agree not to misuse this category and to use the support channel when necessary.",
 				components: [row],
 				ephemeral: true,
 			});
@@ -46,9 +49,13 @@ export class DeveloperCategoryAccessGrantCommand extends Command {
 				});
 
 				if (confirmation.customId === "grant_access") {
-					await interaction.member.roles.add(developerRoleId);
+					await interaction.member.roles.add(
+						developerRoleId,
+						"user self-requested access to development category",
+					);
 					await interaction.editReply({
-						content: "You have been granted access to the development category.",
+						content:
+							"You have been granted access to the development category.",
 						components: [],
 					});
 				}
