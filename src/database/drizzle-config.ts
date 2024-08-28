@@ -5,7 +5,7 @@ export default defineConfig({
 	out: "./src/database/drizzle",
 	dialect: "sqlite",
 	dbCredentials: {
-		url: 'file:./autosupport.db',
+		url: "file:./autosupport.db",
 	},
 	verbose: true,
 	strict: true,

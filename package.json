@@ -8,7 +8,7 @@
 	"license": "GPL-3.0",
 	"type": "module",
 	"scripts": {
-		"format": "bunx @biomejs/biome check --apply .",
+		"format": "bunx @biomejs/biome check --write .",
 		"sversion": "standard-version",
 		"commit": "git-cz",
 		"cz": "git-cz",
