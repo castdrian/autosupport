@@ -2,7 +2,7 @@ import { addIntent, deleteIntent } from '@utils/wit';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { inlineCodeBlock } from '@sapphire/utilities';
 import { config } from '@src/config';
-import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setIgnoreReplies, setMinimumConfidence } from '@src/database/db';
+import { addIgnoredRoleId, addSupportChannelId, clearConfinementRoleId, clearDeveloperRoleId, getOrCreateGuildSettings, removeIgnoredRoleId, removeSupportChannelId, setConfinementRoleId, setDeveloperRoleId, setIgnoreReplies, setMinimumConfidence } from '@src/database/db';
 import { type ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
 import { ChannelType, channelMention, roleMention } from 'discord.js';
 
@@ -37,6 +37,14 @@ export class SettingsCommand extends Subcommand {
 					entries: [
 						{ name: 'set', chatInputRun: 'chatInputSetConfinementRole' },
 						{ name: 'clear', chatInputRun: 'chatInputClearConfinementRole' }
+					]
+				},
+				{
+					name: 'developer-role',
+					type: 'group',
+					entries: [
+						{ name: 'set', chatInputRun: 'chatInputSetDeveloperRole' },
+						{ name: 'clear', chatInputRun: 'chatInputClearDevelopertRole' }
 					]
 				},
 				{
