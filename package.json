@@ -12,7 +12,8 @@
 		"sversion": "standard-version",
 		"commit": "git-cz",
 		"cz": "git-cz",
-		"sql": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
+		"sql-gen": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
+		"sql-migrate": "drizzle-kit migrate --config ./src/database/drizzle-config.ts",
 		"prepare": "husky .github/husky",
 		"start": "bun run src/main.ts"
 	},
