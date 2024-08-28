@@ -23,12 +23,6 @@ export class DeveloperCategoryAccessGrantCommand extends Command {
 				return;
 			}
 
-			const embed = {
-				title: "Grant Access to Development Category",
-				description:
-					"By clicking the 'Grant Access' button, you will gain access to the development category. By doing so, you agree not to misuse this category and to use the support channel when necessary.",
-			};
-
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setLabel("Grant Access")
@@ -37,7 +31,7 @@ export class DeveloperCategoryAccessGrantCommand extends Command {
 			);
 
 			const reply = await interaction.reply({
-				embeds: [embed],
+				content: "By clicking the 'Grant Access' button, you will gain access to the development category.\nBy doing so, you agree not to misuse this category and to use the support channel when necessary.",
 				components: [row],
 				ephemeral: true,
 			});
