@@ -1,55 +1,52 @@
 {
-  "name": "autosupport",
-  "version": "1.0.0",
-  "description": "discord autosupport",
-  "main": "src/main.ts",
-  "repository": "git@github.com:castdrian/autosupport.git",
-  "author": "castdrian",
-  "license": "GPL-3.0",
-  "type": "module",
-  "scripts": {
-    "format": "bunx @biomejs/biome check --apply .",
-    "sversion": "standard-version",
-    "commit": "git-cz",
-    "cz": "git-cz",
-    "sql": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
-    "prepare": "husky .github/husky",
-    "start": "bun run src/main.ts"
-  },
-  "dependencies": {
-    "@sapphire/decorators": "^6.1.0",
-    "@sapphire/framework": "^5.2.1",
-    "@sapphire/pieces": "^4.2.2",
-    "@sapphire/plugin-subcommands": "^6.0.3",
-    "@sapphire/utilities": "^3.16.2",
-    "discord.js": "^14.15.3",
-    "drizzle-orm": "^0.31.2",
-    "neat-config": "^3.0.0",
-    "systeminformation": "^5.22.11",
-    "tesseract.js": "^5.1.0",
-    "tslib": "^2.6.3",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.8.1",
-    "bun-types": "^1.1.15",
-    "drizzle-kit": "^0.22.7",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.7",
-    "typescript": "^5.4.5"
-  },
-  "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
-      "biome check --files-ignore-unknown=true",
-      "biome check --apply --no-errors-on-unmatched",
-      "biome check --apply --organize-imports-enabled=true --no-errors-on-unmatched",
-      "biome check --apply-unsafe --no-errors-on-unmatched",
-      "biome format --write --no-errors-on-unmatched",
-      "biome lint --apply --no-errors-on-unmatched"
-    ]
-  },
-  "trustedDependencies": [
-    "@biomejs/biome",
-    "tesseract.js"
-  ]
+	"name": "autosupport",
+	"version": "1.0.0",
+	"description": "discord autosupport",
+	"main": "src/main.ts",
+	"repository": "git@github.com:castdrian/autosupport.git",
+	"author": "castdrian",
+	"license": "GPL-3.0",
+	"type": "module",
+	"scripts": {
+		"format": "bunx @biomejs/biome check --apply .",
+		"sversion": "standard-version",
+		"commit": "git-cz",
+		"cz": "git-cz",
+		"sql": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
+		"prepare": "husky .github/husky",
+		"start": "bun run src/main.ts"
+	},
+	"dependencies": {
+		"@sapphire/decorators": "^6.1.0",
+		"@sapphire/framework": "^5.2.1",
+		"@sapphire/pieces": "^4.2.2",
+		"@sapphire/plugin-subcommands": "^6.0.3",
+		"@sapphire/utilities": "^3.16.2",
+		"discord.js": "^14.15.3",
+		"drizzle-orm": "^0.31.2",
+		"neat-config": "^3.0.0",
+		"systeminformation": "^5.22.11",
+		"tesseract.js": "^5.1.0",
+		"tslib": "^2.6.3",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.1",
+		"bun-types": "^1.1.15",
+		"drizzle-kit": "^0.22.7",
+		"husky": "^9.0.11",
+		"lint-staged": "^15.2.7",
+		"typescript": "^5.4.5"
+	},
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+			"biome check --files-ignore-unknown=true",
+			"biome check --apply --no-errors-on-unmatched",
+			"biome check --apply --organize-imports-enabled=true --no-errors-on-unmatched",
+			"biome check --apply-unsafe --no-errors-on-unmatched",
+			"biome format --write --no-errors-on-unmatched",
+			"biome lint --apply --no-errors-on-unmatched"
+		]
+	},
+	"trustedDependencies": ["@biomejs/biome", "tesseract.js"]
 }

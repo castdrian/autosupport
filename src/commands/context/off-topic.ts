@@ -21,11 +21,19 @@ export class UtteranceCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
-			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
+			if (!interaction.inGuild() || !interaction.targetMessage.inGuild())
+				return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
 
-			await trainWitUtterance(interaction.targetMessage.content, config.witAiServerToken[interaction.targetMessage.guildId]);
-			await interaction.reply({ content: 'Training intent classifier with selected message as off-topic utterance.', ephemeral: true });
+			await trainWitUtterance(
+				interaction.targetMessage.content,
+				config.witAiServerToken[interaction.targetMessage.guildId],
+			);
+			await interaction.reply({
+				content:
+					"Training intent classifier with selected message as off-topic utterance.",
+				ephemeral: true,
+			});
 		} catch (ex) {
 			this.container.logger.error(ex);
 		}

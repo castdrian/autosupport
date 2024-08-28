@@ -1,12 +1,12 @@
 enum WitRoute {
-	MESSAGE = 'message',
-	INTENTS = 'intents',
-	UTTERANCES = 'utterances',
+	MESSAGE = "message",
+	INTENTS = "intents",
+	UTTERANCES = "utterances",
 }
 
 enum HttpMethod {
-	POST = 'POST',
-	DELETE = 'DELETE',
+	POST = "POST",
+	DELETE = "DELETE",
 }
 
 export interface Intent {
@@ -37,7 +37,13 @@ interface FetchOptions {
 	body?: object;
 }
 
-async function witFetch<T>({ route, token, params = new URLSearchParams(), method, body }: FetchOptions): Promise<T> {
+async function witFetch<T>({
+	route,
+	token,
+	params = new URLSearchParams(),
+	method,
+	body,
+}: FetchOptions): Promise<T> {
 	const url = new URL(`https://api.wit.ai/${route}`);
 	url.search = params.toString();
 
@@ -45,16 +51,20 @@ async function witFetch<T>({ route, token, params = new URLSearchParams(), metho
 		method,
 		headers: {
 			Authorization: `Bearer ${token}`,
-			'Content-Type': 'application/json',
+			"Content-Type": "application/json",
 		},
 		body: body ? JSON.stringify(body) : undefined,
 	});
 
-	if (!response.ok) throw new Error(`Failed to fetch from Wit.ai: ${response.statusText}`);
+	if (!response.ok)
+		throw new Error(`Failed to fetch from Wit.ai: ${response.statusText}`);
 	return response.json() as T;
 }
 
-export async function witMessage(text: string, token: string): Promise<WitMessageResult> {
+export async function witMessage(
+	text: string,
+	token: string,
+): Promise<WitMessageResult> {
 	const params = new URLSearchParams({ q: text });
 	return witFetch<WitMessageResult>({
 		route: WitRoute.MESSAGE,
@@ -79,7 +89,10 @@ export async function addIntent(intent: string, token: string): Promise<void> {
 	});
 }
 
-export async function deleteIntent(intent: string, token: string): Promise<void> {
+export async function deleteIntent(
+	intent: string,
+	token: string,
+): Promise<void> {
 	await witFetch<void>({
 		route: `${WitRoute.INTENTS}/${intent}`,
 		token,
@@ -87,14 +100,18 @@ export async function deleteIntent(intent: string, token: string): Promise<void>
 	});
 }
 
-export async function trainWitUtterance(text: string, token: string, intent?: string): Promise<void> {
+export async function trainWitUtterance(
+	text: string,
+	token: string,
+	intent?: string,
+): Promise<void> {
 	const utterance: Utterance = {
 		text,
 		intent,
 		entities: [],
 		traits: [],
 	};
-	
+
 	await witFetch<void>({
 		route: WitRoute.UTTERANCES,
 		token,

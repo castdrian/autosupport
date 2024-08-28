@@ -16,10 +16,22 @@ export class ResponseCommand extends Command {
 				!(interaction.targetMessage instanceof Message)
 			)
 				return;
-			if (!interaction.inGuild() || !interaction.targetMessage.inGuild()) return;
+			if (!interaction.inGuild() || !interaction.targetMessage.inGuild())
+				return;
 			if (!config.devGuildId && !responseCache.has(interaction.guildId)) return;
-			if (interaction.targetMessage.author.id !== this.container.client.user?.id) return interaction.reply({ content: "You can only delete autosupport responses", ephemeral: true });
-			if (!interaction.targetMessage.deletable) return interaction.reply({ content: "autosupport does not have permission to delete messages in this channel", ephemeral: true });
+			if (
+				interaction.targetMessage.author.id !== this.container.client.user?.id
+			)
+				return interaction.reply({
+					content: "You can only delete autosupport responses",
+					ephemeral: true,
+				});
+			if (!interaction.targetMessage.deletable)
+				return interaction.reply({
+					content:
+						"autosupport does not have permission to delete messages in this channel",
+					ephemeral: true,
+				});
 
 			await interaction.targetMessage.delete();
 			await interaction.reply({ content: "Response deleted", ephemeral: true });

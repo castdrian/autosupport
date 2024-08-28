@@ -34,7 +34,10 @@ export class UtteranceCommand extends Command {
 				new StringSelectMenuBuilder().setCustomId("select_intent").addOptions(
 					intents.map((intent) => ({
 						label: intent.name,
-						description: getResponseContent(intent.name, interaction.guildId)?.slice(0, 100),
+						description: getResponseContent(
+							intent.name,
+							interaction.guildId,
+						)?.slice(0, 100),
 						value: intent.name,
 					})),
 				),

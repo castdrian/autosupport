@@ -34,7 +34,10 @@ export class ResponseCommand extends Command {
 				new StringSelectMenuBuilder().setCustomId("select_response").addOptions(
 					intents.map((intent) => ({
 						label: intent.name,
-						description: getResponseContent(intent.name, interaction.guildId)?.slice(0, 100),
+						description: getResponseContent(
+							intent.name,
+							interaction.guildId,
+						)?.slice(0, 100),
 						value: intent.name,
 					})),
 				),
