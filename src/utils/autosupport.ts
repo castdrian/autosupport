@@ -120,7 +120,7 @@ export async function getResponse(message: Message) {
 			const text = new TextDisplayBuilder().setContent(cleanedContent);
 
 			const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
-				tag.name.includes("human"),
+				tag.name.toLowerCase().includes("human"),
 			)?.id;
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

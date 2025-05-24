@@ -54,7 +54,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 					return;
 				}
 
-				const humanAssistanceTag = thread.parent.availableTags.find((tag) => tag.name.includes("human"))?.id;
+				const humanAssistanceTag = thread.parent.availableTags.find((tag) => tag.name.toLowerCase().includes("human"))?.id;
 				if (humanAssistanceTag) {
 					await thread.setAppliedTags([humanAssistanceTag]);
 				}
