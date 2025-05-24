@@ -1,7 +1,7 @@
 import { config } from "@src/config";
-import { MessageFlags, type Message } from "discord.js";
-import OpenAI from "openai";
 import { ensureKnowledgeBaseFile } from "@utils/fileManager";
+import { type Message, MessageFlags } from "discord.js";
+import OpenAI from "openai";
 
 enum Role {
 	USER = "user",
@@ -55,12 +55,18 @@ export async function getResponse(message: Message) {
 
 		await message.channel.sendTyping();
 
-		await ensureKnowledgeBaseFile(guildId, openai);
+		const vectorStoreId = await ensureKnowledgeBaseFile(guildId, openai);
 
 		let threadId = userThreads.get(threadKey);
 
 		if (!threadId) {
-			const thread = await openai.beta.threads.create();
+			const thread = await openai.beta.threads.create({
+				tool_resources: {
+					file_search: {
+						vector_store_ids: [vectorStoreId],
+					},
+				},
+			});
 			threadId = thread.id;
 			userThreads.set(threadKey, threadId);
 		}
@@ -72,8 +78,8 @@ export async function getResponse(message: Message) {
 
 		const run = await openai.beta.threads.runs.create(threadId, {
 			assistant_id: assistantId,
-			tool_choice: { type: ToolType.FILE_SEARCH },
-			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'.`,
+			tools: [{ type: ToolType.FILE_SEARCH }],
+			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'. Use the file search tool to find relevant information from the knowledge base.`,
 		});
 
 		const completedRun = await openai.beta.threads.runs.poll(threadId, run.id, {
@@ -95,7 +101,6 @@ export async function getResponse(message: Message) {
 			await message.reply({
 				content,
 				allowedMentions: { repliedUser: true },
-				// flags: MessageFlags.IsComponentsV2,
 			});
 		}
 	} catch (error) {

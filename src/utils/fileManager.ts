@@ -11,17 +11,17 @@ enum FilePurpose {
 enum ErrorMessage {
 	NO_SUPPORT_DATA = "No support data found for guild",
 	FILE_CREATION_ERROR = "Error creating knowledge base file",
-	FILE_RETRIEVAL_ERROR = "Error retrieving file content",
+	VECTOR_STORE_ERROR = "Error managing vector store",
 }
 
-const managedFiles = new Map<string, string>();
+const managedVectorStores = new Map<string, string>();
 
 export async function ensureKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
 ): Promise<string> {
-	if (managedFiles.has(guildId)) {
-		return managedFiles.get(guildId)!;
+	if (managedVectorStores.has(guildId)) {
+		return managedVectorStores.get(guildId)!;
 	}
 
 	try {
@@ -33,63 +33,41 @@ export async function ensureKnowledgeBaseFile(
 		const fileName = `${guildId}.json`;
 		const tempFilePath = path.join(process.cwd(), fileName);
 
-		const jsonContent = JSON.stringify({
-			support: {
-				[guildId]: supportData.map((item) => ({
-					problem: item.problem,
-					solution: item.solution,
-					notes: item.notes || null,
-				})),
+		const jsonContent = JSON.stringify(
+			{
+				support: {
+					[guildId]: supportData.map((item) => ({
+						problem: item.problem,
+						solution: item.solution,
+						notes: item.notes || null,
+					})),
+				},
 			},
-		});
+			null,
+			2,
+		);
 
 		await fs.writeFile(tempFilePath, jsonContent);
 
-		const files = await client.files.list();
-		const existingFile = files.data.find((file) => file.filename === fileName);
+		const file = await client.files.create({
+			file: createReadStream(tempFilePath),
+			purpose: FilePurpose.ASSISTANTS,
+		});
 
-		let fileId: string;
+		const vectorStore = await client.vectorStores.create({
+			name: guildId,
+		});
 
-		if (existingFile) {
-			let contentMatches = false;
-
-			try {
-				const fileContent = await client.files.content(existingFile.id);
-				const existingContent = await fileContent.text();
-
-				const parsedExisting = JSON.parse(existingContent);
-				const parsedNew = JSON.parse(jsonContent);
-				contentMatches =
-					JSON.stringify(parsedExisting) === JSON.stringify(parsedNew);
-			} catch (error) {
-				console.warn(`${ErrorMessage.FILE_RETRIEVAL_ERROR}: ${error}`);
-				contentMatches = false;
-			}
-
-			if (!contentMatches) {
-				await client.files.del(existingFile.id);
-				const file = await client.files.create({
-					file: createReadStream(tempFilePath),
-					purpose: FilePurpose.ASSISTANTS,
-				});
-				fileId = file.id;
-			} else {
-				fileId = existingFile.id;
-			}
-		} else {
-			const file = await client.files.create({
-				file: createReadStream(tempFilePath),
-				purpose: FilePurpose.ASSISTANTS,
-			});
-			fileId = file.id;
-		}
+		await client.vectorStores.fileBatches.create(vectorStore.id, {
+			file_ids: [file.id],
+		});
 
 		await fs.unlink(tempFilePath);
 
-		managedFiles.set(guildId, fileId);
-		return fileId;
+		managedVectorStores.set(guildId, vectorStore.id);
+		return vectorStore.id;
 	} catch (error) {
-		console.error(`${ErrorMessage.FILE_CREATION_ERROR}:`, error);
+		console.error(`${ErrorMessage.VECTOR_STORE_ERROR}:`, error);
 		throw error;
 	}
 }
