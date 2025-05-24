@@ -3,7 +3,7 @@ import {
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
 import { addHumanAssistanceThread } from "@utils/autosupport";
-import { type ButtonInteraction, PermissionFlagsBits } from "discord.js";
+import { type ButtonInteraction, MessageFlags, PermissionFlagsBits } from "discord.js";
 
 export class ThreadButtonHandler extends InteractionHandler {
 	public constructor(
@@ -41,7 +41,6 @@ export class ThreadButtonHandler extends InteractionHandler {
 				});
 
 				await thread.setArchived(true);
-				await thread.setLocked(true);
 				break;
 			}
 			case "request_human": {
@@ -57,7 +56,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 				) {
 					await interaction.reply({
 						content: "I don't have permission to request a human.",
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -74,7 +73,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 				await interaction.reply({
 					content:
 						"Human assistance has been requested. AI responses have been disabled for this thread.",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 				break;
 			}
