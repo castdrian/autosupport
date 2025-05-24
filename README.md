@@ -7,7 +7,7 @@ A Discord bot that provides automated support using OpenAI Assistants API with v
 <details markdown="block">
   <summary><strong>video</strong></summary>
   
-  https://github.com/user-attachments/assets/bb470c81-2f21-4063-b02b-772cfbf1be61
+  <https://github.com/user-attachments/assets/bb470c81-2f21-4063-b02b-772cfbf1be61>
   
 </details>
 
