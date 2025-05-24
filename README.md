@@ -5,9 +5,10 @@ A Discord bot that provides automated support using OpenAI Assistants API with v
 ## Showcase
 
 <details markdown="block">
-  <summary><strong>pyoncord</strong></summary>
+  <summary><strong>video</strong></summary>
   
-<https://github.com/castdrian/autosupport/assets/22133246/731da373-dc1b-4738-b7ff-a098170b71d2>
+  https://github.com/user-attachments/assets/bb470c81-2f21-4063-b02b-772cfbf1be61
+  
 </details>
 
 ## Features
