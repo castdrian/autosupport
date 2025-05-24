@@ -31,6 +31,19 @@ enum ErrorMessage {
 
 const userThreads = new Map<string, string>();
 const openAIClients = new Map<string, OpenAI>();
+const humanAssistanceThreads = new Set<string>();
+
+export function addHumanAssistanceThread(threadId: string): void {
+	humanAssistanceThreads.add(threadId);
+}
+
+export function hasRequestedHumanAssistance(threadId: string): boolean {
+	return humanAssistanceThreads.has(threadId);
+}
+
+export function removeHumanAssistanceThread(threadId: string): void {
+	humanAssistanceThreads.delete(threadId);
+}
 
 function getOpenAIClient(guildId: string): OpenAI {
 	if (!openAIClients.has(guildId)) {
@@ -58,6 +71,8 @@ export async function getResponse(message: Message) {
 		if (!message.inGuild()) return;
 		if (!message.channel.isThread()) return;
 		if (!message.channel.parent?.isThreadOnly()) return;
+
+		if (hasRequestedHumanAssistance(message.channelId)) return;
 
 		const guildId = message.guildId;
 		const userId = message.author.id;

@@ -1,9 +1,9 @@
-import { config } from "@src/config";
 import {
 	InteractionHandler,
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
-import { PermissionFlagsBits, type ButtonInteraction } from "discord.js";
+import { addHumanAssistanceThread } from "@utils/autosupport";
+import { type ButtonInteraction, PermissionFlagsBits } from "discord.js";
 
 export class ThreadButtonHandler extends InteractionHandler {
 	public constructor(
@@ -16,16 +16,19 @@ export class ThreadButtonHandler extends InteractionHandler {
 		});
 	}
 
-	public override async run(
-		interaction: ButtonInteraction,
-	) {
+	public override async run(interaction: ButtonInteraction) {
 		switch (interaction.customId) {
 			case "close_thread": {
 				if (!interaction.guildId) return;
 				const thread = interaction.channel;
 				if (!thread || !thread.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
-				if (!interaction.guild?.members?.me || !thread.permissionsFor(interaction.guild.members.me)?.has(PermissionFlagsBits.ManageThreads)) {
+				if (
+					!interaction.guild?.members?.me ||
+					!thread
+						.permissionsFor(interaction.guild.members.me)
+						?.has(PermissionFlagsBits.ManageThreads)
+				) {
 					await interaction.reply({
 						content: "I don't have permission to close this thread.",
 						ephemeral: true,
@@ -46,7 +49,12 @@ export class ThreadButtonHandler extends InteractionHandler {
 				const thread = interaction.channel;
 				if (!thread || !thread.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
-				if (!interaction.guild?.members?.me || !thread.permissionsFor(interaction.guild.members.me)?.has(PermissionFlagsBits.ManageThreads)) {
+				if (
+					!interaction.guild?.members?.me ||
+					!thread
+						.permissionsFor(interaction.guild.members.me)
+						?.has(PermissionFlagsBits.ManageThreads)
+				) {
 					await interaction.reply({
 						content: "I don't have permission to request a human.",
 						ephemeral: true,
@@ -54,13 +62,18 @@ export class ThreadButtonHandler extends InteractionHandler {
 					return;
 				}
 
-				const humanAssistanceTag = thread.parent.availableTags.find((tag) => tag.name.toLowerCase().includes("human"))?.id;
+				const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
+					tag.name.toLowerCase().includes("human"),
+				)?.id;
 				if (humanAssistanceTag) {
 					await thread.setAppliedTags([humanAssistanceTag]);
 				}
 
+				addHumanAssistanceThread(thread.id);
+
 				await interaction.reply({
-					content: "Human assistance has been requested.",
+					content:
+						"Human assistance has been requested. AI responses have been disabled for this thread.",
 					ephemeral: true,
 				});
 				break;
@@ -70,7 +83,11 @@ export class ThreadButtonHandler extends InteractionHandler {
 
 	public override async parse(interaction: ButtonInteraction) {
 		if (!interaction.guildId) return this.none();
-		if (interaction.customId !== "close_thread" && interaction.customId !== "request_human") return this.none();
+		if (
+			interaction.customId !== "close_thread" &&
+			interaction.customId !== "request_human"
+		)
+			return this.none();
 		return this.some({ interaction });
 	}
 }
