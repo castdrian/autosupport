@@ -37,6 +37,15 @@ function getOpenAIClient(guildId: string): OpenAI {
 	return openAIClients.get(guildId)!;
 }
 
+
+function cleanResponseText(text: string): string {
+	return text
+		.replace(/【\d+:\d+†[a-zA-Z]+】/g, "")
+		.replace(/\[\^\d+\^\]/g, "")
+		.replace(/\[\d+\]/g, "")
+		.trim();
+}
+
 export async function getResponse(message: Message) {
 	try {
 		if (!message.content.length && !message.attachments.size) return;
@@ -79,7 +88,7 @@ export async function getResponse(message: Message) {
 		const run = await openai.beta.threads.runs.create(threadId, {
 			assistant_id: assistantId,
 			tools: [{ type: ToolType.FILE_SEARCH }],
-			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'. Use the file search tool to find relevant information from the knowledge base.`,
+			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'`,
 		});
 
 		const completedRun = await openai.beta.threads.runs.poll(threadId, run.id, {
@@ -98,8 +107,10 @@ export async function getResponse(message: Message) {
 				.map((item) => (item.type === MessageType.TEXT ? item.text.value : ""))
 				.join("\n");
 
+			const cleanedContent = cleanResponseText(content);
+
 			await message.reply({
-				content,
+				content: cleanedContent,
 				allowedMentions: { repliedUser: true },
 			});
 		}

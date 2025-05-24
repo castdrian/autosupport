@@ -16,6 +16,33 @@ enum ErrorMessage {
 
 const managedVectorStores = new Map<string, string>();
 
+async function getVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
+	try {
+
+		const response = (await client.vectorStores.files.list(vectorStoreId));
+		return response;
+	} catch (error) {
+		console.warn(`Error listing vector store files: ${error}`);
+		return { data: [] };
+	}
+}
+
+async function deleteVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
+	try {
+		const files = await getVectorStoreFiles(client, vectorStoreId);
+
+		for (const file of files.data || []) {
+			try {
+				await client.vectorStores.files.del(vectorStoreId, file.id);
+			} catch (error) {
+				console.warn(`Failed to delete file ${file.id}: ${error}`);
+			}
+		}
+	} catch (error) {
+		console.warn(`Error deleting vector store files: ${error}`);
+	}
+}
+
 export async function ensureKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
@@ -49,23 +76,39 @@ export async function ensureKnowledgeBaseFile(
 
 		await fs.writeFile(tempFilePath, jsonContent);
 
+		let vectorStoreId: string;
+		let hasExistingVectorStore = false;
+
+		const vectorStores = await client.vectorStores.list();
+		const existingVectorStore = vectorStores.data.find(
+			(store) => store.name === guildId,
+		);
+
+		if (existingVectorStore) {
+			vectorStoreId = existingVectorStore.id;
+			hasExistingVectorStore = true;
+
+			await deleteVectorStoreFiles(client, vectorStoreId);
+		} else {
+			const vectorStore = await client.vectorStores.create({
+				name: guildId,
+			});
+			vectorStoreId = vectorStore.id;
+		}
+
 		const file = await client.files.create({
 			file: createReadStream(tempFilePath),
 			purpose: FilePurpose.ASSISTANTS,
 		});
 
-		const vectorStore = await client.vectorStores.create({
-			name: guildId,
-		});
-
-		await client.vectorStores.fileBatches.create(vectorStore.id, {
+		await client.vectorStores.fileBatches.create(vectorStoreId, {
 			file_ids: [file.id],
 		});
 
 		await fs.unlink(tempFilePath);
 
-		managedVectorStores.set(guildId, vectorStore.id);
-		return vectorStore.id;
+		managedVectorStores.set(guildId, vectorStoreId);
+		return vectorStoreId;
 	} catch (error) {
 		console.error(`${ErrorMessage.VECTOR_STORE_ERROR}:`, error);
 		throw error;
