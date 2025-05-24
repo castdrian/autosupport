@@ -1,6 +1,6 @@
 # autosupport
 
-A Discord bot that provides automated support using OpenAI Assistants API with vectorized knowledge bases.
+A Discord bot that provides automated support using the OpenAI Assistants API with vectorized knowledge bases.
 
 ## Showcase
 
@@ -10,13 +10,6 @@ A Discord bot that provides automated support using OpenAI Assistants API with v
   <https://github.com/user-attachments/assets/bb470c81-2f21-4063-b02b-772cfbf1be61>
   
 </details>
-
-## Features
-
-- Automated support responses using OpenAI Assistants API
-- Knowledge base management with vector search
-- Forum thread support with user threads
-- Human escalation workflow
 
 ## Configuration
 
