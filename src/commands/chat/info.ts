@@ -5,6 +5,11 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	type ChatInputCommandInteraction,
+	ContainerBuilder,
+	MessageFlags,
+	SectionBuilder,
+	TextDisplayBuilder,
+	ThumbnailBuilder,
 	version as djsver,
 	time,
 } from "discord.js";
@@ -29,13 +34,17 @@ export class InfoCommand extends Command {
 				total / 1024 / 1024,
 			)} MB`;
 
-			const embed = {
-				title: pkg.name,
-				description: `${pkg.name} [v${pkg.version}](<https://github.com/castdrian/autosupport>)\n${pkg.description}\n\n**Uptime:** Container started ${uptimeString}\n**System:** ${osString}\n**CPU:** ${cpuString}\n**Memory Usage:** ${memoryString}\n\n**Bun:** [v${bunver}](<https://bun.sh/>)\n**TypeScript:** [v${tsver}](<https://www.typescriptlang.org/>)\n**Discord.js:** [v${djsver}](<https://discord.js.org/>)\n**Sapphire:** [v${sapphver}](<https://www.sapphirejs.dev/>)`,
-				thumbnail: {
-					url: this.container.client.user?.displayAvatarURL() ?? "",
-				},
-			};
+			const content = new TextDisplayBuilder().setContent(
+				`${pkg.name} [v${pkg.version}](<https://github.com/castdrian/autosupport>)\n${pkg.description}\n\n**Uptime:** Container started ${uptimeString}\n**System:** ${osString}\n**CPU:** ${cpuString}\n**Memory Usage:** ${memoryString}\n\n**Bun:** [v${bunver}](<https://bun.sh/>)\n**TypeScript:** [v${tsver}](<https://www.typescriptlang.org/>)\n**Discord.js:** [v${djsver}](<https://discord.js.org/>)\n**Sapphire:** [v${sapphver}](<https://www.sapphirejs.dev/>)`,
+			);
+
+			const section = new SectionBuilder()
+				.addTextDisplayComponents(content)
+				.setThumbnailAccessory(
+					new ThumbnailBuilder().setURL(
+						this.container.client.user?.displayAvatarURL() ?? "",
+					),
+				);
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
@@ -48,7 +57,14 @@ export class InfoCommand extends Command {
 					.setURL("https://github.com/castdrian/autosupport"),
 			);
 
-			await interaction.reply({ embeds: [embed], components: [row] });
+			const container = new ContainerBuilder()
+				.addSectionComponents(section)
+				.addActionRowComponents(row);
+
+			await interaction.reply({
+				components: [container],
+				flags: MessageFlags.IsComponentsV2,
+			});
 		} catch (ex) {
 			this.container.logger.error(ex);
 		}

@@ -1,6 +1,13 @@
 import { config } from "@src/config";
 import { ensureKnowledgeBaseFile } from "@utils/fileManager";
-import { type Message, MessageFlags } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	type Message,
+	MessageFlags,
+	TextDisplayBuilder,
+} from "discord.js";
 import OpenAI from "openai";
 
 enum Role {
@@ -37,7 +44,6 @@ function getOpenAIClient(guildId: string): OpenAI {
 	return openAIClients.get(guildId)!;
 }
 
-
 function cleanResponseText(text: string): string {
 	return text
 		.replace(/【\d+:\d+†[a-zA-Z]+】/g, "")
@@ -50,6 +56,8 @@ export async function getResponse(message: Message) {
 	try {
 		if (!message.content.length && !message.attachments.size) return;
 		if (!message.inGuild()) return;
+		if (!message.channel.isThread()) return;
+		if (!message.channel.parent?.isThreadOnly()) return;
 
 		const guildId = message.guildId;
 		const userId = message.author.id;
@@ -109,9 +117,32 @@ export async function getResponse(message: Message) {
 
 			const cleanedContent = cleanResponseText(content);
 
+			const text = new TextDisplayBuilder().setContent(cleanedContent);
+
+			const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
+				tag.name.includes("human"),
+			)?.id;
+
+			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				new ButtonBuilder()
+					.setLabel("Close Thread")
+					.setStyle(ButtonStyle.Success)
+					.setCustomId("close_thread"),
+			);
+
+			if (hasHumanTag) {
+				row.addComponents(
+					new ButtonBuilder()
+						.setLabel("Request Human")
+						.setStyle(ButtonStyle.Danger)
+						.setCustomId("request_human"),
+				);
+			}
+
 			await message.reply({
-				content: cleanedContent,
+				components: [text, row],
 				allowedMentions: { repliedUser: true },
+				flags: MessageFlags.IsComponentsV2,
 			});
 		}
 	} catch (error) {

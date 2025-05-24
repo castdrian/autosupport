@@ -1,16 +1,13 @@
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import {
-	addIgnoredRoleId,
 	addSupportChannelId,
-	removeIgnoredRoleId,
 	removeSupportChannelId,
-	setIgnoreReplies,
 } from "@src/database/db";
 import {
 	type ChatInputCommandInteraction,
 	PermissionFlagsBits,
 } from "discord.js";
-import { ChannelType, channelMention, roleMention } from "discord.js";
+import { ChannelType, channelMention } from "discord.js";
 
 export class SettingsCommand extends Subcommand {
 	public constructor(
@@ -78,7 +75,7 @@ export class SettingsCommand extends Subcommand {
 									option
 										.setName("channel")
 										.setDescription("channel to add")
-										.addChannelTypes(ChannelType.GuildText)
+										.addChannelTypes(ChannelType.GuildForum)
 										.setRequired(true),
 								),
 						)
@@ -90,7 +87,7 @@ export class SettingsCommand extends Subcommand {
 									option
 										.setName("channel")
 										.setDescription("channel to remove")
-										.addChannelTypes(ChannelType.GuildText)
+										.addChannelTypes(ChannelType.GuildForum)
 										.setRequired(true),
 								),
 						),
