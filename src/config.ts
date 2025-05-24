@@ -1,10 +1,9 @@
+import { createConfig, loaders } from "@neato/config";
 import data from "@src/data.toml";
-import { addIntent, witIntents } from "@utils/wit";
-import { Collection } from "discord.js";
-import { createConfigLoader } from "neat-config";
+
 import { z } from "zod";
 
-const configSchema = z.object({
+const schema = z.object({
 	discordToken: z
 		.string()
 		.regex(/^([MN][\w-]{23,25})\.([\w-]{6})\.([\w-]{27,39})$/),
@@ -12,28 +11,34 @@ const configSchema = z.object({
 		.string()
 		.regex(/^(?<id>\d{17,20})$/)
 		.optional(),
-	witAiServerToken: z.record(
+	openAiApiKey: z.record(
 		z.string().regex(/^(?<id>\d{17,20})$/),
-		z.string().regex(/^[A-Z0-9]{32}$/),
+		z.string().regex(/sk-(?:proj-)?[a-zA-Z0-9]{40,}/),
+	),
+	openAiAssistantId: z.record(
+		z.string().regex(/^(?<id>\d{17,20})$/),
+		z.string().regex(/asst_[a-zA-Z0-9]{24,}/),
 	),
 });
 
-export const config = createConfigLoader()
-	.addFromFile(".env")
-	.addFromEnvironment()
-	.addZodSchema(configSchema)
-	.load();
+export const config = createConfig({
+	schema,
+	loaders: [loaders.file(".env"), loaders.environment()],
+	freeze: true,
+});
 
 function validateConfig(data: unknown) {
-	const parsed = configSchema.parse(data);
+	const parsed = schema.parse(data);
 	if (
 		parsed.devGuildId &&
-		!Object.keys(parsed.witAiServerToken).includes(parsed.devGuildId)
+		(!Object.keys(parsed.openAiApiKey).includes(parsed.devGuildId) ||
+			!Object.keys(parsed.openAiAssistantId).includes(parsed.devGuildId))
 	) {
 		throw new z.ZodError([
 			{
-				path: ["witAiServerToken"],
-				message: "if devGuildId is set, it must be a key in witAiServerToken",
+				path: ["openAiApiKey", "openAiAssistantId"],
+				message:
+					"if devGuildId is set, it must be a key in both openAiApiKey and openAiAssistantId",
 				code: z.ZodIssueCode.custom,
 			},
 		]);
@@ -41,39 +46,17 @@ function validateConfig(data: unknown) {
 }
 
 validateConfig(config);
-const tomlSchema = z.record(
-	z.string().regex(/^(?<id>\d{17,20})$/),
-	z.record(z.string().regex(/^(?!\d)[a-zA-Z0-9_]+$/), z.string()),
-);
+
+const tomlSchema = z.object({
+	support: z.record(
+		z.string().regex(/^(?<id>\d{17,20})$/),
+		z.array(
+			z.object({
+				problem: z.string(),
+				solution: z.string(),
+				notes: z.string().optional(),
+			}),
+		),
+	),
+});
 tomlSchema.parse(data);
-
-export const responseCache = new Collection<
-	string,
-	Collection<string, string>
->();
-
-for (const [key, value] of Object.entries(data)) {
-	const values = new Collection<string, string>();
-
-	for (const [responseKey, responseValue] of Object.entries(value)) {
-		values.set(responseKey, responseValue);
-	}
-
-	responseCache.set(key, values);
-}
-
-for (const [guildId, responses] of responseCache) {
-	const intents = await witIntents(
-		config.witAiServerToken[config.devGuildId ?? guildId],
-	);
-
-	for (const intentName of responses.keys()) {
-		const intent = intents.find((intent) => intent.name === intentName);
-		if (!intent) {
-			await addIntent(
-				intentName,
-				config.witAiServerToken[config.devGuildId ?? guildId],
-			);
-		}
-	}
-}

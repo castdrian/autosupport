@@ -18,26 +18,26 @@
 		"start": "bun run src/main.ts"
 	},
 	"dependencies": {
-		"@sapphire/decorators": "^6.1.0",
-		"@sapphire/framework": "^5.2.1",
-		"@sapphire/pieces": "^4.2.2",
+		"@neato/config": "^4.0.3",
+		"@sapphire/decorators": "^6.1.1",
+		"@sapphire/framework": "^5.3.5",
+		"@sapphire/pieces": "^4.4.0",
 		"@sapphire/plugin-subcommands": "^6.0.3",
-		"@sapphire/utilities": "^3.16.2",
-		"discord.js": "^14.15.3",
-		"drizzle-orm": "^0.31.2",
-		"neat-config": "^3.0.0",
-		"systeminformation": "^5.22.11",
-		"tesseract.js": "^5.1.0",
-		"tslib": "^2.6.3",
-		"zod": "^3.23.8"
+		"@sapphire/utilities": "^3.18.2",
+		"discord.js": "^14.19.3",
+		"drizzle-orm": "^0.31.4",
+		"openai": "^4.103.0",
+		"systeminformation": "^5.26.2",
+		"tslib": "^2.8.1",
+		"zod": "^3.25.23"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.1",
-		"bun-types": "^1.1.15",
-		"drizzle-kit": "^0.22.7",
-		"husky": "^9.0.11",
-		"lint-staged": "^15.2.7",
-		"typescript": "^5.4.5"
+		"@biomejs/biome": "^1.9.4",
+		"bun-types": "^1.2.14",
+		"drizzle-kit": "^0.22.8",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.5.2",
+		"typescript": "^5.8.3"
 	},
 	"lint-staged": {
 		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [

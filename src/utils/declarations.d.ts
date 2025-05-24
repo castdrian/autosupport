@@ -1,4 +1,16 @@
 declare module "@src/data.toml" {
-	const data: Record<string, Record<string, string>>;
+	interface SupportItem {
+		problem: string;
+		solution: string;
+		notes?: string;
+	}
+
+	interface TomlData {
+		support: {
+			[guildId: string]: SupportItem[];
+		};
+	}
+
+	const data: TomlData;
 	export default data;
 }

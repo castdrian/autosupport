@@ -1,7 +1,6 @@
 import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
-import { getInmates, removeInmate } from "@src/database/db";
 import { ActivityType, User } from "discord.js";
 
 @ApplyOptions<ListenerOptions>({ once: true })
@@ -27,22 +26,6 @@ export class ReadyListener extends Listener {
 				state: "automating support",
 				name: "autosupport",
 			});
-
-			const inmates = await getInmates();
-			if (inmates.length === 0) return;
-
-			const now = new Date();
-
-			for (const inmate of inmates) {
-				if (inmate.releaseDate < now) {
-					await this.container.client.guilds.cache
-						.get(inmate.guildId)
-						?.members.cache.get(inmate.id)
-						?.roles.remove(inmate.confinementRoleId);
-
-					await removeInmate(inmate.id);
-				}
-			}
 		}, 30e3);
 	}
 }

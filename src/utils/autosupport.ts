@@ -1,86 +1,109 @@
-import { config, responseCache } from "@src/config";
-import { getMinimumConfidence } from "@src/database/db";
-import { type Intent, witMessage } from "@utils/wit";
-import { Collection, type Message } from "discord.js";
-import { createWorker } from "tesseract.js";
+import { config } from "@src/config";
+import { MessageFlags, type Message } from "discord.js";
+import OpenAI from "openai";
+import { ensureKnowledgeBaseFile } from "@utils/fileManager";
 
-function getHighestConfidenceIntent(
-	intents: Intent[],
-	minimumConfidence: number,
-): Intent | undefined {
-	if (!intents.length) return undefined;
+enum Role {
+	USER = "user",
+	ASSISTANT = "assistant",
+}
 
-	const highestConfidenceIntent = intents.reduce((prev, current) =>
-		prev.confidence > current.confidence ? prev : current,
-	);
+enum ToolType {
+	FILE_SEARCH = "file_search",
+}
 
-	return highestConfidenceIntent.confidence >= minimumConfidence
-		? highestConfidenceIntent
-		: undefined;
+enum MessageType {
+	TEXT = "text",
+}
+
+enum ErrorMessage {
+	MISSING_CLIENT = "OpenAI client not available for guild",
+	MISSING_ASSISTANT = "Assistant ID not configured for guild",
+	API_ERROR = "Error in OpenAI API call",
+}
+
+const userThreads = new Map<string, string>();
+const openAIClients = new Map<string, OpenAI>();
+
+function getOpenAIClient(guildId: string): OpenAI {
+	if (!openAIClients.has(guildId)) {
+		const apiKey = config.openAiApiKey[guildId];
+		if (!apiKey) {
+			throw new Error(`${ErrorMessage.MISSING_CLIENT}: ${guildId}`);
+		}
+
+		openAIClients.set(guildId, new OpenAI({ apiKey }));
+	}
+	return openAIClients.get(guildId)!;
 }
 
 export async function getResponse(message: Message) {
 	try {
 		if (!message.content.length && !message.attachments.size) return;
 		if (!message.inGuild()) return;
-		let imageText = "";
 
-		const attachment = message.attachments.first();
+		const guildId = message.guildId;
+		const userId = message.author.id;
+		const threadKey = `${guildId}-${userId}-${message.channelId}`;
 
-		if (attachment?.contentType?.startsWith("image")) {
-			const worker = await createWorker("eng");
-			const ret = await worker.recognize(attachment.url);
-			await worker.terminate();
-			imageText = ret.data.text;
+		const openai = getOpenAIClient(guildId);
+
+		const assistantId = config.openAiAssistantId[guildId];
+		if (!assistantId) {
+			throw new Error(`${ErrorMessage.MISSING_ASSISTANT}: ${guildId}`);
 		}
 
-		const res = await witMessage(
-			`${message.content}\n${imageText}`,
-			config.witAiServerToken[message.guildId],
+		await message.channel.sendTyping();
+
+		await ensureKnowledgeBaseFile(guildId, openai);
+
+		let threadId = userThreads.get(threadKey);
+
+		if (!threadId) {
+			const thread = await openai.beta.threads.create();
+			threadId = thread.id;
+			userThreads.set(threadKey, threadId);
+		}
+
+		await openai.beta.threads.messages.create(threadId, {
+			role: Role.USER,
+			content: message.content,
+		});
+
+		const run = await openai.beta.threads.runs.create(threadId, {
+			assistant_id: assistantId,
+			tool_choice: { type: ToolType.FILE_SEARCH },
+			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'.`,
+		});
+
+		const completedRun = await openai.beta.threads.runs.poll(threadId, run.id, {
+			pollIntervalMs: 500,
+		});
+
+		const messages = await openai.beta.threads.messages.list(threadId);
+		const assistantMessages = messages.data.filter(
+			(msg) => msg.role === Role.ASSISTANT && msg.run_id === completedRun.id,
 		);
 
-		if (!res.intents.length) return;
-		const selectedIntent = getHighestConfidenceIntent(
-			res.intents,
-			await getMinimumConfidence(message.guildId),
-		);
+		if (assistantMessages.length > 0) {
+			const latestMessage = assistantMessages[0];
+			const content = latestMessage.content
+				.filter((item) => item.type === MessageType.TEXT)
+				.map((item) => (item.type === MessageType.TEXT ? item.text.value : ""))
+				.join("\n");
 
-		if (selectedIntent) {
-			await message.channel.sendTyping();
-
-			const responseContent = getResponseContent(
-				selectedIntent.name,
-				message.guildId,
-			);
-			if (responseContent)
-				await message.reply({
-					content: `${responseContent.trim()}${config.devGuildId ? `\n-# triggered intent ${selectedIntent.name} with ${(selectedIntent.confidence * 100).toFixed(2)}% confidence` : ""}`,
-					allowedMentions: { repliedUser: true },
-				});
+			await message.reply({
+				content,
+				allowedMentions: { repliedUser: true },
+				// flags: MessageFlags.IsComponentsV2,
+			});
 		}
 	} catch (error) {
-		message.client.logger.error(error);
+		message.client.logger.error(`${ErrorMessage.API_ERROR}: ${error}`);
+		await message.reply({
+			content: "Sorry, I encountered an error while processing your request.",
+			allowedMentions: { repliedUser: true },
+		});
 		return undefined;
-	}
-}
-
-export function getResponseContent(intentName: string, guildId: string) {
-	if (config.devGuildId) {
-		const aggregatedResponses = new Collection<string, string>();
-
-		for (const [, guildResponses] of responseCache) {
-			if (guildResponses) {
-				for (const [key, value] of guildResponses) {
-					aggregatedResponses.set(key, value);
-				}
-			}
-		}
-
-		return aggregatedResponses.get(intentName)!;
-	}
-
-	const guildResponses = responseCache.get(guildId);
-	if (guildResponses) {
-		return guildResponses.get(intentName)!;
 	}
 }
