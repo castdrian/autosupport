@@ -96,7 +96,7 @@ export async function getResponse(message: Message) {
 		const run = await openai.beta.threads.runs.create(threadId, {
 			assistant_id: assistantId,
 			tools: [{ type: ToolType.FILE_SEARCH }],
-			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'`,
+			additional_instructions: `The user you are talking to is '${message.author.displayName} (@${message.author.username})'. The thread you are in is called '${message.channel.name}'.`,
 		});
 
 		const completedRun = await openai.beta.threads.runs.poll(threadId, run.id, {
