@@ -6,6 +6,9 @@ declare module "@src/data.toml" {
 	}
 
 	interface TomlData {
+		instructions: {
+			[guildId: string]: string;
+		};
 		support: {
 			[guildId: string]: SupportItem[];
 		};

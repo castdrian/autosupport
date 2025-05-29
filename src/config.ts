@@ -48,6 +48,7 @@ function validateConfig(data: unknown) {
 validateConfig(config);
 
 const tomlSchema = z.object({
+	instructions: z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.string()),
 	support: z.record(
 		z.string().regex(/^(?<id>\d{17,20})$/),
 		z.array(
