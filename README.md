@@ -1,22 +1,11 @@
 # autosupport
 
-A Discord bot that provides automated support using OpenAI Assistants API with vectorized knowledge bases.
+A Discord bot that provides automated support using the OpenAI Assistants API with vectorized knowledge bases.
 
 ## Showcase
 
-<details markdown="block">
-  <summary><strong>pyoncord</strong></summary>
+<https://github.com/user-attachments/assets/bb470c81-2f21-4063-b02b-772cfbf1be61>
   
-<https://github.com/castdrian/autosupport/assets/22133246/731da373-dc1b-4738-b7ff-a098170b71d2>
-</details>
-
-## Features
-
-- Automated support responses using OpenAI Assistants API
-- Knowledge base management with vector search
-- Forum thread support with user threads
-- Human escalation workflow
-
 ## Configuration
 
 Create a `.env` file with the following:

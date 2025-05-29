@@ -1,4 +1,5 @@
 import { config } from "@src/config";
+import data from "@src/data.toml";
 import { ensureKnowledgeBaseFile } from "@utils/fileManager";
 import {
 	ActionRowBuilder,
@@ -45,14 +46,29 @@ export function removeHumanAssistanceThread(threadId: string): void {
 	humanAssistanceThreads.delete(threadId);
 }
 
-function getOpenAIClient(guildId: string): OpenAI {
+async function getOpenAIClient(guildId: string): Promise<OpenAI> {
 	if (!openAIClients.has(guildId)) {
 		const apiKey = config.openAiApiKey[guildId];
 		if (!apiKey) {
 			throw new Error(`${ErrorMessage.MISSING_CLIENT}: ${guildId}`);
 		}
 
-		openAIClients.set(guildId, new OpenAI({ apiKey }));
+		const openai = new OpenAI({ apiKey });
+		openAIClients.set(guildId, openai);
+
+		const assistantId = config.openAiAssistantId[guildId];
+		if (assistantId && data.instructions && data.instructions[guildId]) {
+			try {
+				await openai.beta.assistants.update(assistantId, {
+					instructions: data.instructions[guildId],
+				});
+				console.log(
+					`Updated assistant ${assistantId} with custom instructions for guild ${guildId}`,
+				);
+			} catch (error) {
+				console.error(`Failed to update assistant instructions: ${error}`);
+			}
+		}
 	}
 	return openAIClients.get(guildId)!;
 }
@@ -78,13 +94,12 @@ export async function getResponse(message: Message) {
 		const userId = message.author.id;
 		const threadKey = `${guildId}-${userId}-${message.channelId}`;
 
-		const openai = getOpenAIClient(guildId);
+		const openai = await getOpenAIClient(guildId);
 
 		const assistantId = config.openAiAssistantId[guildId];
 		if (!assistantId) {
 			throw new Error(`${ErrorMessage.MISSING_ASSISTANT}: ${guildId}`);
 		}
-
 		await message.channel.sendTyping();
 
 		const vectorStoreId = await ensureKnowledgeBaseFile(guildId, openai);
