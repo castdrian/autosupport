@@ -1,6 +1,6 @@
 {
 	"name": "autosupport",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "discord autosupport",
 	"main": "src/main.ts",
 	"repository": "git@github.com:castdrian/autosupport.git",
@@ -49,5 +49,8 @@
 			"biome lint --apply --no-errors-on-unmatched"
 		]
 	},
-	"trustedDependencies": ["@biomejs/biome", "tesseract.js"]
+	"trustedDependencies": [
+		"@biomejs/biome",
+		"tesseract.js"
+	]
 }
