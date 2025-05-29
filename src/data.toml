@@ -98,7 +98,7 @@ solution = "First, enable Discord Experiments. Then locate the 'Mobile Account S
 [[support."709061970078335027"]]
 problem = "Notifications aren't working on my iOS device."
 solution = "For jailed devices, make sure the `.ipa` is signed with a certificate that includes the notification (apn) entitlement. Note: this channel does not provide sideloading support."
-notes = "Additionally to the entitlement, the app must also match the bundle ID of the official app. This will increase the risk of Apple revoking the certificate and disabling the ADP account it belongs to so it is not recommended to do this."
+notes = "Additionally to the entitlement, the app must also match the bundle ID of the official app. This will increase the risk of Apple revoking the certificate and disabling the ADP account it belongs to, so it is not recommended to do this."
 
 [[support."709061970078335027"]]
 problem = "Can I use AltStore PAL to sideload apps?"
