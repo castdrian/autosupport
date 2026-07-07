@@ -1,5 +1,31 @@
 import { describe, expect, test } from "bun:test";
-import { cleanResponseText, splitContent } from "./autosupport";
+import type { Message } from "discord.js";
+import {
+	buildInputContent,
+	cleanResponseText,
+	MAX_ATTACHMENT_SIZE_BYTES,
+	MAX_ATTACHMENTS,
+	splitContent,
+} from "./autosupport";
+
+interface FakeAttachment {
+	size: number;
+	contentType: string | null;
+	url: string;
+	name: string;
+}
+
+function createMessage(
+	content: string,
+	attachments: FakeAttachment[],
+): Message {
+	return {
+		content,
+		attachments: new Map(
+			attachments.map((attachment, i) => [String(i), attachment]),
+		),
+	} as unknown as Message;
+}
 
 describe("cleanResponseText", () => {
 	test("strips file citation markers", () => {
@@ -53,5 +79,104 @@ describe("splitContent", () => {
 		expect(chunks.join(" ").replace(/\s+/g, " ")).toBe(
 			content.replace(/\s+/g, " "),
 		);
+	});
+});
+
+describe("buildInputContent", () => {
+	test("includes text content", () => {
+		const result = buildInputContent(createMessage("hello", []));
+
+		expect(result.content).toEqual([{ type: "input_text", text: "hello" }]);
+		expect(result.droppedAttachments).toBe(0);
+	});
+
+	test("includes image attachments as input_image", () => {
+		const result = buildInputContent(
+			createMessage("", [
+				{
+					size: 100,
+					contentType: "image/png",
+					url: "https://example.com/img.png",
+					name: "img.png",
+				},
+			]),
+		);
+
+		expect(result.content).toEqual([
+			{
+				type: "input_image",
+				image_url: "https://example.com/img.png",
+				detail: "auto",
+			},
+		]);
+		expect(result.droppedAttachments).toBe(0);
+	});
+
+	test("includes non-image attachments as input_file", () => {
+		const result = buildInputContent(
+			createMessage("", [
+				{
+					size: 100,
+					contentType: "application/pdf",
+					url: "https://example.com/doc.pdf",
+					name: "doc.pdf",
+				},
+			]),
+		);
+
+		expect(result.content).toEqual([
+			{
+				type: "input_file",
+				file_url: "https://example.com/doc.pdf",
+				filename: "doc.pdf",
+			},
+		]);
+		expect(result.droppedAttachments).toBe(0);
+	});
+
+	test("drops attachments over the size cap", () => {
+		const result = buildInputContent(
+			createMessage("", [
+				{
+					size: MAX_ATTACHMENT_SIZE_BYTES + 1,
+					contentType: "image/png",
+					url: "https://example.com/huge.png",
+					name: "huge.png",
+				},
+			]),
+		);
+
+		expect(result.content).toEqual([]);
+		expect(result.droppedAttachments).toBe(1);
+	});
+
+	test("drops unsupported attachment types", () => {
+		const result = buildInputContent(
+			createMessage("", [
+				{
+					size: 100,
+					contentType: "video/mp4",
+					url: "https://example.com/clip.mp4",
+					name: "clip.mp4",
+				},
+			]),
+		);
+
+		expect(result.content).toEqual([]);
+		expect(result.droppedAttachments).toBe(1);
+	});
+
+	test("caps attachments at MAX_ATTACHMENTS and drops the rest", () => {
+		const attachments = Array.from({ length: MAX_ATTACHMENTS + 2 }, (_, i) => ({
+			size: 100,
+			contentType: "image/png",
+			url: `https://example.com/img${i}.png`,
+			name: `img${i}.png`,
+		}));
+
+		const result = buildInputContent(createMessage("", attachments));
+
+		expect(result.content).toHaveLength(MAX_ATTACHMENTS);
+		expect(result.droppedAttachments).toBe(2);
 	});
 });
