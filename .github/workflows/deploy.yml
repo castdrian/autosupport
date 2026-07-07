@@ -19,17 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for version-worthy commits
-        id: check-bump
-        run: |
-          if git log ${{ github.event.before }}..${{ github.event.after }} --format=%s | grep -qE '^(feat|fix|perf)(\(.+\))?!?:'; then
-            echo "should_bump=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_bump=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Automated Version Bump
-        if: steps.check-bump.outputs.should_bump == 'true'
         uses: phips28/gh-action-bump-version@v11.1.5
         with:
           skip-tag:  'true'
