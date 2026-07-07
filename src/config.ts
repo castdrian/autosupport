@@ -12,6 +12,10 @@ const schema = z.object({
 		.regex(/^(?<id>\d{17,20})$/)
 		.optional(),
 	openAiApiKey: z.string().regex(/sk-(?:proj-)?[a-zA-Z0-9]{40,}/),
+	openAiAdminApiKey: z
+		.string()
+		.regex(/^sk-[a-zA-Z0-9_-]{20,}$/)
+		.optional(),
 });
 
 export const config = createConfig({

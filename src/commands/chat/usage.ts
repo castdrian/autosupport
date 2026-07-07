@@ -31,7 +31,7 @@ export class UsageCommand extends Command {
 			this.container.logger.error(`Failed to fetch OpenAI usage: ${error}`);
 			await interaction.editReply({
 				content:
-					"Couldn't fetch usage data. Make sure the configured OpenAI API key has organization admin access.",
+					"Couldn't fetch usage data. Make sure OPEN_AI_ADMIN_API_KEY is set to an org admin key with the api.usage.read scope.",
 			});
 		}
 	}

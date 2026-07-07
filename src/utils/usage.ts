@@ -1,25 +1,9 @@
 import type OpenAI from "openai";
 
-interface CostAmount {
-	value: number;
-	currency: string;
-}
-
-interface CostResult {
-	amount: CostAmount;
-}
-
-interface CostBucket {
-	start_time: number;
-	end_time: number;
-	results: CostResult[];
-}
-
-interface CostsPage {
-	data: CostBucket[];
-	has_more: boolean;
-	next_page: string | null;
-}
+type CostsResponse = Awaited<
+	ReturnType<OpenAI["admin"]["organization"]["usage"]["costs"]>
+>;
+type CostBucket = CostsResponse["data"][number];
 
 export interface UsageSummary {
 	todayUsd: number;
@@ -46,12 +30,11 @@ async function fetchCostBuckets(
 	let page: string | undefined;
 
 	do {
-		const response = await client.get<unknown, CostsPage>(
-			"/organization/costs",
-			{
-				query: { start_time: startTime, limit: 31, ...(page ? { page } : {}) },
-			},
-		);
+		const response = await client.admin.organization.usage.costs({
+			start_time: startTime,
+			limit: 31,
+			...(page ? { page } : {}),
+		});
 		buckets.push(...response.data);
 		page = response.has_more && response.next_page ? response.next_page : undefined;
 	} while (page);
@@ -72,10 +55,12 @@ export async function getUsageSummary(client: OpenAI): Promise<UsageSummary> {
 
 	for (const bucket of buckets) {
 		for (const result of bucket.results) {
-			monthToDateUsd += result.amount.value;
-			currency = result.amount.currency;
+			if (result.object !== "organization.costs.result") continue;
+			const value = result.amount?.value ?? 0;
+			currency = result.amount?.currency ?? currency;
+			monthToDateUsd += value;
 			if (bucket.start_time >= dayStart) {
-				todayUsd += result.amount.value;
+				todayUsd += value;
 			}
 		}
 	}
