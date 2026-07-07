@@ -23,6 +23,8 @@ jobs:
         uses: phips28/gh-action-bump-version@v11.1.5
         with:
           skip-tag:  'true'
+          major-wording: 'BREAKING CHANGE'
+          minor-wording: 'feat:'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
