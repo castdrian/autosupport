@@ -23,7 +23,7 @@
 		"@sapphire/framework": "^5.5.0",
 		"@sapphire/plugin-subcommands": "^7.0.1",
 		"@sapphire/utilities": "^3.18.2",
-		"discord.js": "^14.19.3",
+		"discord.js": "^14.26.4",
 		"drizzle-orm": "^0.45.2",
 		"openai": "^6.45.0",
 		"systeminformation": "^5.26.2",
