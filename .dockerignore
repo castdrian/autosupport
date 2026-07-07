@@ -2,4 +2,6 @@
 .gitignore
 node_modules/
 *.db
+*.db-shm
+*.db-wal
 healthcheck.tmp

@@ -1,6 +1,9 @@
 import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
+import data from "@src/data.toml";
+import { getOpenAIClient } from "@utils/autosupport";
+import { ensureKnowledgeBaseFile } from "@utils/fileManager";
 import { sweepStaleThreads } from "@utils/threadSweeper";
 import { ActivityType, Events, User } from "discord.js";
 
@@ -25,6 +28,8 @@ export class ReadyListener extends Listener {
 				.catch(() => null);
 		}
 
+		this.warmKnowledgeBases();
+
 		setInterval(async () => {
 			this.container.client.user?.setActivity({
 				type: ActivityType.Custom,
@@ -47,5 +52,34 @@ export class ReadyListener extends Listener {
 
 		await writeHeartbeat();
 		setInterval(writeHeartbeat, HEARTBEAT_INTERVAL_MS);
+	}
+
+	// Builds each guild's knowledge base vector store ahead of time so the
+	// first real user message doesn't pay the full upload/indexing latency.
+	// Runs in the background and never blocks readiness or command registration.
+	private warmKnowledgeBases(): void {
+		const guildIds = Object.keys(data.support).filter((guildId) =>
+			this.container.client.guilds.cache.has(guildId),
+		);
+		if (!guildIds.length) return;
+
+		const openai = getOpenAIClient();
+		this.container.logger.info(
+			`Warming knowledge base for ${guildIds.length} guild(s)...`,
+		);
+
+		Promise.allSettled(
+			guildIds.map((guildId) => ensureKnowledgeBaseFile(guildId, openai)),
+		).then((results) => {
+			const failed = results.filter((r) => r.status === "rejected").length;
+			this.container.logger.info(
+				`Knowledge base warmup complete: ${results.length - failed}/${results.length} succeeded.`,
+			);
+			if (failed > 0) {
+				this.container.logger.error(
+					`Knowledge base warmup failed for ${failed} guild(s).`,
+				);
+			}
+		});
 	}
 }

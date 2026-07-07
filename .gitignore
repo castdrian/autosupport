@@ -134,6 +134,8 @@ dist
 
 # sqlite
 *.db
+*.db-shm
+*.db-wal
 
 # healthcheck heartbeat
 healthcheck.tmp

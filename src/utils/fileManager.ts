@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import data from "@src/data.toml";
+import { getKnowledgeBaseState, setKnowledgeBaseState } from "@src/database/db";
 import type OpenAI from "openai";
 
 enum FilePurpose {
@@ -44,28 +46,32 @@ async function deleteVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	}
 }
 
+export function normalizeSupportData(
+	supportData: (typeof data.support)[string],
+) {
+	return supportData.map((item) => ({
+		problem: item.problem,
+		solution: item.solution,
+		notes: item.notes || null,
+	}));
+}
+
+export function hashSupportData(
+	normalized: ReturnType<typeof normalizeSupportData>,
+) {
+	return createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
+}
+
 async function buildKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
+	normalizedSupportData: ReturnType<typeof normalizeSupportData>,
 ): Promise<string> {
-	const supportData = data.support[guildId];
-	if (!supportData || !supportData.length) {
-		throw new Error(`${ErrorMessage.NO_SUPPORT_DATA}: ${guildId}`);
-	}
-
 	const fileName = `${guildId}.json`;
 	const tempFilePath = path.join(process.cwd(), fileName);
 
 	const jsonContent = JSON.stringify(
-		{
-			support: {
-				[guildId]: supportData.map((item) => ({
-					problem: item.problem,
-					solution: item.solution,
-					notes: item.notes || null,
-				})),
-			},
-		},
+		{ support: { [guildId]: normalizedSupportData } },
 		null,
 		2,
 	);
@@ -112,9 +118,40 @@ async function buildKnowledgeBaseFile(
 	return vectorStoreId;
 }
 
+async function resolveKnowledgeBaseFile(
+	guildId: string,
+	client: OpenAI,
+): Promise<string> {
+	const supportData = data.support[guildId];
+	if (!supportData || !supportData.length) {
+		throw new Error(`${ErrorMessage.NO_SUPPORT_DATA}: ${guildId}`);
+	}
+
+	const normalized = normalizeSupportData(supportData);
+	const currentHash = hashSupportData(normalized);
+
+	const persisted = await getKnowledgeBaseState(guildId);
+	if (persisted && persisted.contentHash === currentHash) {
+		return persisted.vectorStoreId;
+	}
+
+	const vectorStoreId = await buildKnowledgeBaseFile(
+		guildId,
+		client,
+		normalized,
+	);
+	await setKnowledgeBaseState(guildId, {
+		vectorStoreId,
+		contentHash: currentHash,
+	});
+	return vectorStoreId;
+}
+
 // Caches the in-flight build promise (not just the finished result) so
 // concurrent calls for the same guild before the first build completes
 // await the same build instead of racing to create duplicate vector stores.
+// The build itself is skipped entirely (no OpenAI calls at all) when the
+// guild's support data hasn't changed since the last persisted build.
 export function ensureKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
@@ -122,7 +159,7 @@ export function ensureKnowledgeBaseFile(
 	const existing = managedVectorStores.get(guildId);
 	if (existing) return existing;
 
-	const buildPromise = buildKnowledgeBaseFile(guildId, client).catch(
+	const buildPromise = resolveKnowledgeBaseFile(guildId, client).catch(
 		(error) => {
 			managedVectorStores.delete(guildId);
 			console.error(`${ErrorMessage.VECTOR_STORE_ERROR}:`, error);

@@ -13,6 +13,8 @@ export async function getOrCreateGuildSettings(guildId: string) {
 	const newSettings: GuildSettings = {
 		id: guildId,
 		channelIds: [],
+		knowledgeBaseVectorStoreId: null,
+		knowledgeBaseHash: null,
 	};
 
 	await db
@@ -61,4 +63,32 @@ export async function deleteGuildSettings(guildId: string) {
 	await db
 		.delete(schema.guildPreferences)
 		.where(eq(schema.guildPreferences.id, guildId));
+}
+
+export interface KnowledgeBaseState {
+	vectorStoreId: string;
+	contentHash: string;
+}
+
+export async function getKnowledgeBaseState(
+	guildId: string,
+): Promise<KnowledgeBaseState | undefined> {
+	const settings = await getOrCreateGuildSettings(guildId);
+	if (!settings.knowledgeBaseVectorStoreId || !settings.knowledgeBaseHash) {
+		return undefined;
+	}
+	return {
+		vectorStoreId: settings.knowledgeBaseVectorStoreId,
+		contentHash: settings.knowledgeBaseHash,
+	};
+}
+
+export async function setKnowledgeBaseState(
+	guildId: string,
+	state: KnowledgeBaseState,
+) {
+	await updateGuildSettings(guildId, {
+		knowledgeBaseVectorStoreId: state.vectorStoreId,
+		knowledgeBaseHash: state.contentHash,
+	});
 }
