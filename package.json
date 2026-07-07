@@ -15,13 +15,15 @@
 		"sql-gen": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
 		"sql-migrate": "drizzle-kit migrate --config ./src/database/drizzle-config.ts",
 		"prepare": "husky .github/husky",
-		"start": "bun run src/main.ts"
+		"start": "bun run src/main.ts",
+		"test": "bun test"
 	},
 	"dependencies": {
 		"@neato/config": "^4.1.0",
 		"@sapphire/decorators": "^6.2.0",
 		"@sapphire/framework": "^5.5.0",
 		"@sapphire/plugin-subcommands": "^7.0.1",
+		"@sapphire/ratelimits": "^2.4.11",
 		"@sapphire/utilities": "^3.18.2",
 		"discord.js": "^14.26.4",
 		"drizzle-orm": "^0.45.2",

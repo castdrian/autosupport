@@ -1,7 +1,10 @@
 import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
+import { sweepStaleThreads } from "@utils/threadSweeper";
 import { ActivityType, User } from "discord.js";
+
+const STALE_THREAD_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
 
 @ApplyOptions<ListenerOptions>({ once: true })
 export class ReadyListener extends Listener {
@@ -27,5 +30,12 @@ export class ReadyListener extends Listener {
 				name: "autosupport",
 			});
 		}, 30e3);
+
+		setInterval(async () => {
+			if (!this.container.client.isReady()) return;
+			await sweepStaleThreads(this.container.client).catch((error) =>
+				this.container.logger.error(`Failed to sweep stale threads: ${error}`),
+			);
+		}, STALE_THREAD_SWEEP_INTERVAL_MS);
 	}
 }

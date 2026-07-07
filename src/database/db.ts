@@ -46,6 +46,7 @@ export async function updateGuildSettings(
 
 export async function addSupportChannelId(guildId: string, channelId: string) {
 	const settings = await getOrCreateGuildSettings(guildId);
+	if (settings.channelIds.includes(channelId)) return settings;
 	const channelIds = [...settings.channelIds, channelId];
 	return updateGuildSettings(guildId, { channelIds });
 }
