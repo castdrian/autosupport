@@ -1,6 +1,7 @@
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import {
 	addSupportChannelId,
+	getOrCreateGuildSettings,
 	removeSupportChannelId,
 } from "@src/database/db";
 import {
@@ -29,6 +30,20 @@ export class SettingsCommand extends Subcommand {
 					],
 				},
 			],
+		});
+	}
+
+	public async chatInputInfo(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+		const settings = await getOrCreateGuildSettings(interaction.guildId);
+
+		const content = settings.channelIds.length
+			? `**Support channels:**\n${settings.channelIds.map((id) => channelMention(id)).join("\n")}`
+			: "No support channels configured.";
+
+		await interaction.reply({
+			content,
+			flags: MessageFlags.Ephemeral,
 		});
 	}
 
