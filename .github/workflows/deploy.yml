@@ -50,6 +50,7 @@ jobs:
           skip-tag:  'true'
           major-wording: 'BREAKING CHANGE'
           minor-wording: 'feat:'
+          commit-message: 'chore: bump version [skip ci]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

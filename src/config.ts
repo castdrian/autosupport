@@ -37,4 +37,13 @@ const tomlSchema = z.object({
 		),
 	),
 });
-tomlSchema.parse(data);
+
+const tomlValidation = tomlSchema.safeParse(data);
+if (!tomlValidation.success) {
+	console.error("Invalid src/data.toml:");
+	for (const issue of tomlValidation.error.issues) {
+		const path = issue.path.length ? issue.path.join(".") : "(root)";
+		console.error(`  - ${path}: ${issue.message}`);
+	}
+	process.exit(1);
+}

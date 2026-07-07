@@ -10,26 +10,23 @@ export const db = drizzle(sqlite, { schema });
 export type GuildSettings = typeof schema.guildPreferences.$inferSelect;
 
 export async function getOrCreateGuildSettings(guildId: string) {
-	const existingSettings = await db
-		.select()
-		.from(schema.guildPreferences)
-		.where(eq(schema.guildPreferences.id, guildId))
-		.limit(1);
-
-	if (existingSettings.length > 0) {
-		return existingSettings[0];
-	}
-
 	const newSettings: GuildSettings = {
 		id: guildId,
 		channelIds: [],
 	};
 
-	const createdSettings = await db
+	await db
 		.insert(schema.guildPreferences)
 		.values(newSettings)
-		.returning();
-	return createdSettings[0];
+		.onConflictDoNothing();
+
+	const [settings] = await db
+		.select()
+		.from(schema.guildPreferences)
+		.where(eq(schema.guildPreferences.id, guildId))
+		.limit(1);
+
+	return settings;
 }
 
 export async function updateGuildSettings(

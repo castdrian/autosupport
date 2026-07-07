@@ -172,9 +172,6 @@ export async function getResponse(message: Message) {
 
 		userResponses.set(threadKey, response.id);
 
-		const cleanedContent = cleanResponseText(response.output_text);
-		if (!cleanedContent) return;
-
 		const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
 			tag.name.toLowerCase().includes("human"),
 		)?.id;
@@ -193,6 +190,24 @@ export async function getResponse(message: Message) {
 					.setStyle(ButtonStyle.Danger)
 					.setCustomId("request_human"),
 			);
+		}
+
+		const cleanedContent = cleanResponseText(response.output_text);
+		if (!cleanedContent) {
+			const fallbackNote = hasHumanTag
+				? " Use the Request Human button below if you'd like to talk to a person instead."
+				: "";
+			await message.reply({
+				components: [
+					new TextDisplayBuilder().setContent(
+						`Sorry, I wasn't able to generate a response for that. Try rephrasing your question.${fallbackNote}`,
+					),
+					row,
+				],
+				allowedMentions: { repliedUser: true },
+				flags: MessageFlags.IsComponentsV2,
+			});
+			return;
 		}
 
 		const chunks = splitContent(cleanedContent, MAX_TEXT_DISPLAY_LENGTH);
