@@ -22,7 +22,7 @@
 		"@sapphire/decorators": "^6.2.0",
 		"@sapphire/framework": "^5.3.5",
 		"@sapphire/pieces": "^4.4.0",
-		"@sapphire/plugin-subcommands": "^6.0.3",
+		"@sapphire/plugin-subcommands": "^7.0.1",
 		"@sapphire/utilities": "^3.18.2",
 		"discord.js": "^14.19.3",
 		"drizzle-orm": "^0.31.4",
