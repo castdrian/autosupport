@@ -6,7 +6,7 @@
       "name": "autosupport",
       "dependencies": {
         "@neato/config": "^4.1.0",
-        "@sapphire/decorators": "^6.1.1",
+        "@sapphire/decorators": "^6.2.0",
         "@sapphire/framework": "^5.3.5",
         "@sapphire/pieces": "^4.4.0",
         "@sapphire/plugin-subcommands": "^6.0.3",
@@ -121,7 +121,7 @@
 
     "@sapphire/async-queue": ["@sapphire/async-queue@1.5.5", "", {}, "sha512-cvGzxbba6sav2zZkH8GPf2oGk9yYoD5qrNWdu9fRehifgnFZJMV+nuy2nON2roRO4yQQ+v7MK/Pktl/HgfsUXg=="],
 
-    "@sapphire/decorators": ["@sapphire/decorators@6.1.1", "", { "dependencies": { "tslib": "^2.8.1" } }, "sha512-slUP6KauUC1wRcBcT0Ke7Fva2AGVAmX9/ZgE0K15Jzd0S3v2ggleECayFTWOjql5sZDS5x6mYtpIAxmuRkqE8Q=="],
+    "@sapphire/decorators": ["@sapphire/decorators@6.2.0", "", { "dependencies": { "tslib": "^2.8.1" } }, "sha512-st1DNDCNoZaZYz3fgCA99W87Bhe6XqM8y0G+Z9NBOBEqvOYkVNGcPMDrMiaZrPD9Z471k8fpLqJVUNSuWUx8Hg=="],
 
     "@sapphire/discord-utilities": ["@sapphire/discord-utilities@3.5.0", "", { "dependencies": { "discord-api-types": "^0.38.1" } }, "sha512-H4SY5KTVDZrqA5QG7ob6etwqhdOb3TRSY2wv56f0tiobUdIr0irlrYvdmr8Kg/FRxWU+aiHDIISWGG5vBuxOGw=="],
 

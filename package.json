@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@neato/config": "^4.1.0",
-		"@sapphire/decorators": "^6.1.1",
+		"@sapphire/decorators": "^6.2.0",
 		"@sapphire/framework": "^5.3.5",
 		"@sapphire/pieces": "^4.4.0",
 		"@sapphire/plugin-subcommands": "^6.0.3",
