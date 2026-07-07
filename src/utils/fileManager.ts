@@ -3,7 +3,11 @@ import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import data from "@src/data.toml";
-import { getKnowledgeBaseState, setKnowledgeBaseState } from "@src/database/db";
+import {
+	clearKnowledgeBaseState,
+	getKnowledgeBaseState,
+	setKnowledgeBaseState,
+} from "@src/database/db";
 import type OpenAI from "openai";
 
 enum FilePurpose {
@@ -169,6 +173,16 @@ export function ensureKnowledgeBaseFile(
 
 	managedVectorStores.set(guildId, buildPromise);
 	return buildPromise;
+}
+
+// Forgets everything about a guild's knowledge base build so the next call
+// to ensureKnowledgeBaseFile does a full rebuild. Use when the cached vector
+// store ID turns out to be stale (e.g. it was deleted out-of-band).
+export async function invalidateKnowledgeBaseCache(
+	guildId: string,
+): Promise<void> {
+	managedVectorStores.delete(guildId);
+	await clearKnowledgeBaseState(guildId);
 }
 
 export async function deleteKnowledgeBaseFile(

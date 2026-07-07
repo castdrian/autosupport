@@ -1,7 +1,10 @@
 import { type RateLimit, RateLimitManager } from "@sapphire/ratelimits";
 import { config } from "@src/config";
 import data from "@src/data.toml";
-import { ensureKnowledgeBaseFile } from "@utils/fileManager";
+import {
+	ensureKnowledgeBaseFile,
+	invalidateKnowledgeBaseCache,
+} from "@utils/fileManager";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -63,6 +66,16 @@ let openAIClient: OpenAI | undefined;
 
 function refundRateLimit(rateLimit: RateLimit<string>, limit: number): void {
 	if (rateLimit.remaining < limit) rateLimit.remaining++;
+}
+
+// Detects an OpenAI error caused by a vector store that no longer exists
+// (e.g. deleted out-of-band), so the stale cached reference can be cleared
+// and the next message triggers a fresh rebuild instead of failing forever.
+export function isMissingVectorStoreError(error: unknown): boolean {
+	if (!(error instanceof OpenAI.APIError)) return false;
+	if (error.status === 404) return true;
+	const message = error.message?.toLowerCase() ?? "";
+	return message.includes("vector_store") || message.includes("vector store");
 }
 
 export function addHumanAssistanceThread(threadId: string): void {
@@ -315,7 +328,16 @@ export async function getResponse(message: Message) {
 
 		let replyContent =
 			"Sorry, I encountered an error while processing your request.";
-		if (error instanceof OpenAI.APIError && error.status === 429) {
+		if (isMissingVectorStoreError(error) && message.guildId) {
+			await invalidateKnowledgeBaseCache(message.guildId).catch(
+				(invalidateError) =>
+					message.client.logger.error(
+						`Failed to invalidate knowledge base cache for guild ${message.guildId}: ${invalidateError}`,
+					),
+			);
+			replyContent =
+				"Sorry, I had trouble accessing the knowledge base for this server. It's been reset and should rebuild automatically — please try again in a moment.";
+		} else if (error instanceof OpenAI.APIError && error.status === 429) {
 			replyContent =
 				error.code === "insufficient_quota"
 					? "Sorry, the OpenAI account has run out of credits. An admin needs to top up billing before I can respond."

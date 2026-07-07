@@ -2,6 +2,7 @@ import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
 import data from "@src/data.toml";
+import { getOrCreateGuildSettings } from "@src/database/db";
 import { getOpenAIClient } from "@utils/autosupport";
 import { ensureKnowledgeBaseFile } from "@utils/fileManager";
 import { sweepStaleThreads } from "@utils/threadSweeper";
@@ -28,7 +29,9 @@ export class ReadyListener extends Listener {
 				.catch(() => null);
 		}
 
-		this.warmKnowledgeBases();
+		this.warmKnowledgeBases().catch((error) =>
+			this.container.logger.error(`Knowledge base warmup failed: ${error}`),
+		);
 
 		setInterval(async () => {
 			this.container.client.user?.setActivity({
@@ -57,10 +60,24 @@ export class ReadyListener extends Listener {
 	// Builds each guild's knowledge base vector store ahead of time so the
 	// first real user message doesn't pay the full upload/indexing latency.
 	// Runs in the background and never blocks readiness or command registration.
-	private warmKnowledgeBases(): void {
-		const guildIds = Object.keys(data.support).filter((guildId) =>
+	// Only warms guilds that both have knowledge base content *and* an actual
+	// configured support channel, since a guild without one can never receive
+	// a response anyway.
+	private async warmKnowledgeBases(): Promise<void> {
+		const candidateGuildIds = Object.keys(data.support).filter((guildId) =>
 			this.container.client.guilds.cache.has(guildId),
 		);
+		if (!candidateGuildIds.length) return;
+
+		const settingsEntries = await Promise.all(
+			candidateGuildIds.map(async (guildId) => ({
+				guildId,
+				settings: await getOrCreateGuildSettings(guildId),
+			})),
+		);
+		const guildIds = settingsEntries
+			.filter(({ settings }) => settings.channelIds.length > 0)
+			.map(({ guildId }) => guildId);
 		if (!guildIds.length) return;
 
 		const openai = getOpenAIClient();
@@ -68,18 +85,17 @@ export class ReadyListener extends Listener {
 			`Warming knowledge base for ${guildIds.length} guild(s)...`,
 		);
 
-		Promise.allSettled(
+		const results = await Promise.allSettled(
 			guildIds.map((guildId) => ensureKnowledgeBaseFile(guildId, openai)),
-		).then((results) => {
-			const failed = results.filter((r) => r.status === "rejected").length;
-			this.container.logger.info(
-				`Knowledge base warmup complete: ${results.length - failed}/${results.length} succeeded.`,
+		);
+		const failed = results.filter((r) => r.status === "rejected").length;
+		this.container.logger.info(
+			`Knowledge base warmup complete: ${results.length - failed}/${results.length} succeeded.`,
+		);
+		if (failed > 0) {
+			this.container.logger.error(
+				`Knowledge base warmup failed for ${failed} guild(s).`,
 			);
-			if (failed > 0) {
-				this.container.logger.error(
-					`Knowledge base warmup failed for ${failed} guild(s).`,
-				);
-			}
-		});
+		}
 	}
 }

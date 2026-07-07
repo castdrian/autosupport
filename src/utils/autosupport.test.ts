@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { Message } from "discord.js";
+import OpenAI from "openai";
 import {
 	buildInputContent,
 	cleanResponseText,
+	isMissingVectorStoreError,
 	MAX_ATTACHMENT_SIZE_BYTES,
 	MAX_ATTACHMENTS,
 	splitContent,
@@ -178,5 +180,40 @@ describe("buildInputContent", () => {
 
 		expect(result.content).toHaveLength(MAX_ATTACHMENTS);
 		expect(result.droppedAttachments).toBe(2);
+	});
+});
+
+describe("isMissingVectorStoreError", () => {
+	test("returns true for a 404 API error", () => {
+		const error = new OpenAI.APIError(404, undefined, "Not Found", undefined);
+		expect(isMissingVectorStoreError(error)).toBe(true);
+	});
+
+	test("returns true when the message mentions a missing vector store", () => {
+		const error = new OpenAI.APIError(
+			400,
+			undefined,
+			"Vector store vs_abc123 not found",
+			undefined,
+		);
+		expect(isMissingVectorStoreError(error)).toBe(true);
+	});
+
+	test("returns false for unrelated API errors", () => {
+		const error = new OpenAI.APIError(
+			500,
+			undefined,
+			"Internal server error",
+			undefined,
+		);
+		expect(isMissingVectorStoreError(error)).toBe(false);
+	});
+
+	test("returns false for non-API errors", () => {
+		expect(isMissingVectorStoreError(new Error("some other failure"))).toBe(
+			false,
+		);
+		expect(isMissingVectorStoreError("not an error")).toBe(false);
+		expect(isMissingVectorStoreError(undefined)).toBe(false);
 	});
 });

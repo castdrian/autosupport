@@ -15,7 +15,6 @@ import {
 	time,
 } from "discord.js";
 import { cpu, mem, osInfo } from "systeminformation";
-import { version as tsver } from "typescript";
 
 export class InfoCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
@@ -28,6 +27,7 @@ export class InfoCommand extends Command {
 			const { total } = await mem();
 			const { distro, release, arch } = await osInfo();
 
+			const tsver = pkg.devDependencies.typescript.replace(/^[\^~]/, "");
 			const osString = `${distro} ${release} ${arch}`;
 			const cpuString = `${cores}x ${manufacturer} ${brand}`;
 			const memoryString = `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB / ${Math.round(

@@ -17,7 +17,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production --ignore-scripts
 # Copy node_modules from temp directory
 # Then copy all (non-ignored) project files into the image
 FROM base AS release
-COPY --from=install /temp/dev/node_modules node_modules
+COPY --from=install /temp/prod/node_modules node_modules
 COPY . .
 
 ENTRYPOINT [ "bun", "start" ]

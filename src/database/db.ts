@@ -92,3 +92,10 @@ export async function setKnowledgeBaseState(
 		knowledgeBaseHash: state.contentHash,
 	});
 }
+
+export async function clearKnowledgeBaseState(guildId: string) {
+	await updateGuildSettings(guildId, {
+		knowledgeBaseVectorStoreId: null,
+		knowledgeBaseHash: null,
+	});
+}
