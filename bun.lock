@@ -9,7 +9,7 @@
         "@sapphire/decorators": "^6.2.0",
         "@sapphire/framework": "^5.3.5",
         "@sapphire/pieces": "^4.4.0",
-        "@sapphire/plugin-subcommands": "^6.0.3",
+        "@sapphire/plugin-subcommands": "^7.0.1",
         "@sapphire/utilities": "^3.18.2",
         "discord.js": "^14.19.3",
         "drizzle-orm": "^0.31.4",
@@ -143,7 +143,7 @@
 
     "@sapphire/pieces": ["@sapphire/pieces@4.4.0", "", { "dependencies": { "@discordjs/collection": "^2.1.1", "@sapphire/utilities": "^3.18.2", "tslib": "^2.8.1" } }, "sha512-0VXa3j4okHTrg8zsaR/QPr5nYYMdNAdmBAcihLVLsKp8YU6vnljhw48o3iQ9i+Y/KsV5iXcOIxLVkXwtUaGdvg=="],
 
-    "@sapphire/plugin-subcommands": ["@sapphire/plugin-subcommands@6.0.3", "", { "dependencies": { "@sapphire/utilities": "^3.15.3", "tslib": "^2.6.2" } }, "sha512-SLDlTjMrMpb3s89ZjrBvVbMWsXfNNciO6SnNQdKLKTUQwktaYxIdj+k3MmEWpN19i8W9ogRvIrLl0Hw20pPUng=="],
+    "@sapphire/plugin-subcommands": ["@sapphire/plugin-subcommands@7.0.1", "", { "dependencies": { "@sapphire/utilities": "^3.18.0" } }, "sha512-3ngUpfKfcMX4zIlJ4SHLe10N79XU72H+Wdfcnd9ueMf6FOSMJFvVUfqDIp1rb7/iXi7C5dfx0pQqSwqu3UG0KQ=="],
 
     "@sapphire/ratelimits": ["@sapphire/ratelimits@2.4.11", "", {}, "sha512-O6FNA/P0wxU4Ve9gxL948CoZw7+sSpujyUR2CLyLLCNuNvuFGFxPCJVl5crFVLXMIyBIrc2qk+/H9bsqsyQK1Q=="],
 
@@ -414,10 +414,6 @@
     "@esbuild-kit/core-utils/esbuild": ["esbuild@0.18.20", "", { "optionalDependencies": { "@esbuild/android-arm": "0.18.20", "@esbuild/android-arm64": "0.18.20", "@esbuild/android-x64": "0.18.20", "@esbuild/darwin-arm64": "0.18.20", "@esbuild/darwin-x64": "0.18.20", "@esbuild/freebsd-arm64": "0.18.20", "@esbuild/freebsd-x64": "0.18.20", "@esbuild/linux-arm": "0.18.20", "@esbuild/linux-arm64": "0.18.20", "@esbuild/linux-ia32": "0.18.20", "@esbuild/linux-loong64": "0.18.20", "@esbuild/linux-mips64el": "0.18.20", "@esbuild/linux-ppc64": "0.18.20", "@esbuild/linux-riscv64": "0.18.20", "@esbuild/linux-s390x": "0.18.20", "@esbuild/linux-x64": "0.18.20", "@esbuild/netbsd-x64": "0.18.20", "@esbuild/openbsd-x64": "0.18.20", "@esbuild/sunos-x64": "0.18.20", "@esbuild/win32-arm64": "0.18.20", "@esbuild/win32-ia32": "0.18.20", "@esbuild/win32-x64": "0.18.20" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA=="],
 
     "@neato/config/chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
-
-    "@sapphire/plugin-subcommands/@sapphire/utilities": ["@sapphire/utilities@3.16.2", "", {}, "sha512-0gRyXPH0hbmfZXwgvCH1z9H/kQwOlLeui86zKafZENpdjmuZznSkDFHRSUksr8Y5W/BxkqnR2WbNEfululh20Q=="],
-
-    "@sapphire/plugin-subcommands/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
 
     "@types/ws/@types/node": ["@types/node@20.12.12", "", { "dependencies": { "undici-types": "~5.26.4" } }, "sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw=="],
 
