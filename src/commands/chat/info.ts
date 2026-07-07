@@ -20,6 +20,7 @@ import pkg from "@root/package.json";
 
 export class InfoCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
 		try {
 			const { readyAt } = this.container.client;
 			const uptimeString = time(readyAt ?? new Date(), "R");
@@ -61,12 +62,15 @@ export class InfoCommand extends Command {
 				.addSectionComponents(section)
 				.addActionRowComponents(row);
 
-			await interaction.reply({
+			await interaction.editReply({
 				components: [container],
 				flags: MessageFlags.IsComponentsV2,
 			});
 		} catch (ex) {
 			this.container.logger.error(ex);
+			await interaction.editReply({
+				content: "Sorry, I couldn't gather the info right now.",
+			});
 		}
 	}
 

@@ -33,7 +33,9 @@ async function deleteVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 
 		for (const file of files.data || []) {
 			try {
-				await client.vectorStores.files.del(vectorStoreId, file.id);
+				await client.vectorStores.files.delete(file.id, {
+					vector_store_id: vectorStoreId,
+				});
 			} catch (error) {
 				console.warn(`Failed to delete file ${file.id}: ${error}`);
 			}

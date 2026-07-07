@@ -39,7 +39,10 @@ export function removeHumanAssistanceThread(threadId: string): void {
 
 export function getOpenAIClient(): OpenAI {
 	if (!openAIClient) {
-		openAIClient = new OpenAI({ apiKey: config.openAiApiKey });
+		openAIClient = new OpenAI({
+			apiKey: config.openAiApiKey,
+			adminAPIKey: config.openAiAdminApiKey,
+		});
 	}
 	return openAIClient;
 }
