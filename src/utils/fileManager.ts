@@ -18,8 +18,7 @@ const managedVectorStores = new Map<string, string>();
 
 async function getVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	try {
-
-		const response = (await client.vectorStores.files.list(vectorStoreId));
+		const response = await client.vectorStores.files.list(vectorStoreId);
 		return response;
 	} catch (error) {
 		console.warn(`Error listing vector store files: ${error}`);

@@ -23,6 +23,10 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_MESSAGES = 4;
 const MAX_ATTACHMENTS = 4;
 
+// Discord caps the total text across all Components V2 text displays in a
+// single message at 4000 characters; stay under that with some margin.
+const MAX_TEXT_DISPLAY_LENGTH = 3900;
+
 enum ToolType {
 	FILE_SEARCH = "file_search",
 }
@@ -67,6 +71,26 @@ export function cleanResponseText(text: string): string {
 		.replace(/\[\^\d+\^\]/g, "")
 		.replace(/\[\d+\]/g, "")
 		.trim();
+}
+
+export function splitContent(content: string, maxLength: number): string[] {
+	if (content.length <= maxLength) return [content];
+
+	const chunks: string[] = [];
+	let remaining = content;
+
+	while (remaining.length > maxLength) {
+		let splitAt = remaining.lastIndexOf("\n\n", maxLength);
+		if (splitAt <= 0) splitAt = remaining.lastIndexOf("\n", maxLength);
+		if (splitAt <= 0) splitAt = remaining.lastIndexOf(" ", maxLength);
+		if (splitAt <= 0) splitAt = maxLength;
+
+		chunks.push(remaining.slice(0, splitAt).trim());
+		remaining = remaining.slice(splitAt).trim();
+	}
+
+	if (remaining.length) chunks.push(remaining);
+	return chunks;
 }
 
 type InputContent = ResponseInputText | ResponseInputImage | ResponseInputFile;
@@ -151,8 +175,6 @@ export async function getResponse(message: Message) {
 		const cleanedContent = cleanResponseText(response.output_text);
 		if (!cleanedContent) return;
 
-		const text = new TextDisplayBuilder().setContent(cleanedContent);
-
 		const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
 			tag.name.toLowerCase().includes("human"),
 		)?.id;
@@ -173,11 +195,26 @@ export async function getResponse(message: Message) {
 			);
 		}
 
-		await message.reply({
-			components: [text, row],
-			allowedMentions: { repliedUser: true },
-			flags: MessageFlags.IsComponentsV2,
-		});
+		const chunks = splitContent(cleanedContent, MAX_TEXT_DISPLAY_LENGTH);
+
+		for (const [index, chunk] of chunks.entries()) {
+			const isLast = index === chunks.length - 1;
+			const text = new TextDisplayBuilder().setContent(chunk);
+			const components = isLast ? [text, row] : [text];
+
+			if (index === 0) {
+				await message.reply({
+					components,
+					allowedMentions: { repliedUser: true },
+					flags: MessageFlags.IsComponentsV2,
+				});
+			} else {
+				await message.channel.send({
+					components,
+					flags: MessageFlags.IsComponentsV2,
+				});
+			}
+		}
 	} catch (error) {
 		message.client.logger.error(`${ErrorMessage.API_ERROR}: ${error}`);
 

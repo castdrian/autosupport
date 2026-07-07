@@ -3,8 +3,7 @@
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "biomejs.biome",
 	"editor.codeActionsOnSave": {
-		"quickfix.biome": "explicit",
-		"source.organizeImports.biome": "explicit"
+		"source.fixAll.biome": "explicit"
 	},
 	"markdownlint.config": {
 		"MD033": {
@@ -15,5 +14,5 @@
 		{
 			"file": ".github/instructions/commit-messages.instructions.md"
 		}
-	],
+	]
 }

@@ -1,3 +1,4 @@
+import pkg from "@root/package.json";
 import { Command, version as sapphver } from "@sapphire/framework";
 import { version as bunver } from "bun";
 import {
@@ -6,17 +7,15 @@ import {
 	ButtonStyle,
 	type ChatInputCommandInteraction,
 	ContainerBuilder,
+	version as djsver,
 	MessageFlags,
 	SectionBuilder,
 	TextDisplayBuilder,
 	ThumbnailBuilder,
-	version as djsver,
 	time,
 } from "discord.js";
 import { cpu, mem, osInfo } from "systeminformation";
 import { version as tsver } from "typescript";
-
-import pkg from "@root/package.json";
 
 export class InfoCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {

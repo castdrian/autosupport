@@ -36,7 +36,8 @@ async function fetchCostBuckets(
 			...(page ? { page } : {}),
 		});
 		buckets.push(...response.data);
-		page = response.has_more && response.next_page ? response.next_page : undefined;
+		page =
+			response.has_more && response.next_page ? response.next_page : undefined;
 	} while (page);
 
 	return buckets;

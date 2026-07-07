@@ -32,7 +32,8 @@ export class UsageCommand extends Command {
 			this.container.logger.error(`Failed to fetch OpenAI usage: ${error}`);
 
 			const isAuthError =
-				error instanceof OpenAI.APIError && (error.status === 401 || error.status === 403);
+				error instanceof OpenAI.APIError &&
+				(error.status === 401 || error.status === 403);
 
 			await interaction.editReply({
 				content: isAuthError

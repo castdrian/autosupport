@@ -22,6 +22,7 @@ const client = new SapphireClient({
 DefaultWebSocketManagerOptions.identifyProperties.browser = "Discord iOS";
 
 const sqlite = new Database("autosupport.db");
+sqlite.run("PRAGMA journal_mode = WAL;");
 const db = drizzle(sqlite, { schema });
 migrate(db, { migrationsFolder: "./src/database/drizzle" });
 

@@ -1,10 +1,10 @@
 import { Database } from "bun:sqlite";
+import * as schema from "@src/database/schema";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 
-import * as schema from "@src/database/schema";
-
 const sqlite = new Database("autosupport.db");
+sqlite.run("PRAGMA journal_mode = WAL;");
 export const db = drizzle(sqlite, { schema });
 
 export type GuildSettings = typeof schema.guildPreferences.$inferSelect;

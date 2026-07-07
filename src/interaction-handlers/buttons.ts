@@ -3,7 +3,11 @@ import {
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
 import { addHumanAssistanceThread } from "@utils/autosupport";
-import { type ButtonInteraction, MessageFlags, PermissionFlagsBits } from "discord.js";
+import {
+	type ButtonInteraction,
+	MessageFlags,
+	PermissionFlagsBits,
+} from "discord.js";
 
 export class ThreadButtonHandler extends InteractionHandler {
 	public constructor(

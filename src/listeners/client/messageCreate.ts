@@ -9,7 +9,12 @@ export class MessageListener extends Listener {
 		if (!message.inGuild() || message.author.bot) return;
 		if (!message.channel.isThread()) return;
 		const settings = await getOrCreateGuildSettings(message.guildId);
-		if (!config.devGuildId && message.channel.parentId && !settings.channelIds.includes(message.channel.parentId)) return;
+		if (
+			!config.devGuildId &&
+			message.channel.parentId &&
+			!settings.channelIds.includes(message.channel.parentId)
+		)
+			return;
 		await getResponse(message);
 	}
 }
