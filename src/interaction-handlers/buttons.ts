@@ -2,11 +2,18 @@ import {
 	InteractionHandler,
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
-import { addHumanAssistanceThread } from "@utils/autosupport";
 import {
+	addHumanAssistanceThread,
+	removeHumanAssistanceThread,
+} from "@utils/autosupport";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
 	type ButtonInteraction,
+	ButtonStyle,
 	MessageFlags,
 	PermissionFlagsBits,
+	TextDisplayBuilder,
 	type ThreadChannel,
 } from "discord.js";
 
@@ -111,6 +118,73 @@ export class ThreadButtonHandler extends InteractionHandler {
 						"Human assistance has been requested. AI responses have been disabled for this thread.",
 					flags: MessageFlags.Ephemeral,
 				});
+
+				const resumeRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+					new ButtonBuilder()
+						.setLabel("Resume AI")
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId("resume_ai"),
+				);
+				await thread
+					.send({
+						components: [
+							new TextDisplayBuilder().setContent(
+								"AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.",
+							),
+							resumeRow,
+						],
+						flags: MessageFlags.IsComponentsV2,
+					})
+					.catch(() => null);
+				break;
+			}
+			case "resume_ai": {
+				if (!interaction.guildId) return;
+				const thread = interaction.channel;
+				if (!thread || !thread.isThread()) return;
+				if (!thread.parent?.isThreadOnly()) return;
+
+				if (!canManageThread(interaction, thread)) {
+					await interaction.reply({
+						content:
+							"Only the person who started this thread or a moderator can resume AI responses for it.",
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+
+				if (
+					!interaction.guild?.members?.me ||
+					!thread
+						.permissionsFor(interaction.guild.members.me)
+						?.has(PermissionFlagsBits.ManageThreads)
+				) {
+					await interaction.reply({
+						content: "I don't have permission to resume AI for this thread.",
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+
+				removeHumanAssistanceThread(thread.id);
+
+				const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
+					tag.name.toLowerCase().includes("human"),
+				)?.id;
+				if (
+					humanAssistanceTag &&
+					thread.appliedTags.includes(humanAssistanceTag)
+				) {
+					const remainingTags = thread.appliedTags.filter(
+						(id) => id !== humanAssistanceTag,
+					);
+					await thread.setAppliedTags(remainingTags).catch(() => null);
+				}
+
+				await interaction.reply({
+					content: "AI responses have been resumed for this thread.",
+					flags: MessageFlags.Ephemeral,
+				});
 				break;
 			}
 		}
@@ -120,7 +194,8 @@ export class ThreadButtonHandler extends InteractionHandler {
 		if (!interaction.guildId) return this.none();
 		if (
 			interaction.customId !== "close_thread" &&
-			interaction.customId !== "request_human"
+			interaction.customId !== "request_human" &&
+			interaction.customId !== "resume_ai"
 		)
 			return this.none();
 		return this.some({ interaction });

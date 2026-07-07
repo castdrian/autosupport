@@ -134,3 +134,6 @@ dist
 
 # sqlite
 *.db
+
+# healthcheck heartbeat
+healthcheck.tmp

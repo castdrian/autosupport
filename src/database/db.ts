@@ -56,3 +56,9 @@ export async function removeSupportChannelId(
 	const channelIds = settings.channelIds.filter((id) => id !== channelId);
 	return updateGuildSettings(guildId, { channelIds });
 }
+
+export async function deleteGuildSettings(guildId: string) {
+	await db
+		.delete(schema.guildPreferences)
+		.where(eq(schema.guildPreferences.id, guildId));
+}

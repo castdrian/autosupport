@@ -5,6 +5,8 @@ import { sweepStaleThreads } from "@utils/threadSweeper";
 import { ActivityType, Events, User } from "discord.js";
 
 const STALE_THREAD_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
+const HEARTBEAT_INTERVAL_MS = 30_000;
+const HEARTBEAT_FILE = "healthcheck.tmp";
 
 @ApplyOptions<ListenerOptions>({ once: true, event: Events.ClientReady })
 export class ReadyListener extends Listener {
@@ -37,5 +39,13 @@ export class ReadyListener extends Listener {
 				this.container.logger.error(`Failed to sweep stale threads: ${error}`),
 			);
 		}, STALE_THREAD_SWEEP_INTERVAL_MS);
+
+		const writeHeartbeat = () =>
+			Bun.write(HEARTBEAT_FILE, Date.now().toString()).catch((error) =>
+				this.container.logger.error(`Failed to write heartbeat file: ${error}`),
+			);
+
+		await writeHeartbeat();
+		setInterval(writeHeartbeat, HEARTBEAT_INTERVAL_MS);
 	}
 }

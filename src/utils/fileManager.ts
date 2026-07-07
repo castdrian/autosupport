@@ -14,7 +14,7 @@ enum ErrorMessage {
 	VECTOR_STORE_ERROR = "Error managing vector store",
 }
 
-const managedVectorStores = new Map<string, string>();
+const managedVectorStores = new Map<string, Promise<string>>();
 
 async function getVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	try {
@@ -44,83 +44,108 @@ async function deleteVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	}
 }
 
-export async function ensureKnowledgeBaseFile(
+async function buildKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
 ): Promise<string> {
-	if (managedVectorStores.has(guildId)) {
-		return managedVectorStores.get(guildId)!;
+	const supportData = data.support[guildId];
+	if (!supportData || !supportData.length) {
+		throw new Error(`${ErrorMessage.NO_SUPPORT_DATA}: ${guildId}`);
 	}
 
-	try {
-		const supportData = data.support[guildId];
-		if (!supportData || !supportData.length) {
-			throw new Error(`${ErrorMessage.NO_SUPPORT_DATA}: ${guildId}`);
-		}
+	const fileName = `${guildId}.json`;
+	const tempFilePath = path.join(process.cwd(), fileName);
 
-		const fileName = `${guildId}.json`;
-		const tempFilePath = path.join(process.cwd(), fileName);
-
-		const jsonContent = JSON.stringify(
-			{
-				support: {
-					[guildId]: supportData.map((item) => ({
-						problem: item.problem,
-						solution: item.solution,
-						notes: item.notes || null,
-					})),
-				},
+	const jsonContent = JSON.stringify(
+		{
+			support: {
+				[guildId]: supportData.map((item) => ({
+					problem: item.problem,
+					solution: item.solution,
+					notes: item.notes || null,
+				})),
 			},
-			null,
-			2,
-		);
+		},
+		null,
+		2,
+	);
 
-		await fs.writeFile(tempFilePath, jsonContent);
+	await fs.writeFile(tempFilePath, jsonContent);
 
-		let vectorStoreId: string;
-		let hasExistingVectorStore = false;
+	let vectorStoreId: string;
 
-		const vectorStores = await client.vectorStores.list();
-		const existingVectorStore = vectorStores.data.find(
-			(store) => store.name === guildId,
-		);
+	const vectorStores = await client.vectorStores.list();
+	const existingVectorStore = vectorStores.data.find(
+		(store) => store.name === guildId,
+	);
 
-		if (existingVectorStore) {
-			vectorStoreId = existingVectorStore.id;
-			hasExistingVectorStore = true;
-
-			await deleteVectorStoreFiles(client, vectorStoreId);
-		} else {
-			const vectorStore = await client.vectorStores.create({
-				name: guildId,
-			});
-			vectorStoreId = vectorStore.id;
-		}
-
-		const file = await client.files.create({
-			file: createReadStream(tempFilePath),
-			purpose: FilePurpose.ASSISTANTS,
+	if (existingVectorStore) {
+		vectorStoreId = existingVectorStore.id;
+		await deleteVectorStoreFiles(client, vectorStoreId);
+	} else {
+		const vectorStore = await client.vectorStores.create({
+			name: guildId,
 		});
-
-		const batch = await client.vectorStores.fileBatches.createAndPoll(
-			vectorStoreId,
-			{
-				file_ids: [file.id],
-			},
-		);
-
-		if (batch.status !== "completed" || batch.file_counts.failed > 0) {
-			throw new Error(
-				`Vector store file batch did not complete successfully for guild ${guildId}: status=${batch.status}, failed=${batch.file_counts.failed}`,
-			);
-		}
-
-		await fs.unlink(tempFilePath);
-
-		managedVectorStores.set(guildId, vectorStoreId);
-		return vectorStoreId;
-	} catch (error) {
-		console.error(`${ErrorMessage.VECTOR_STORE_ERROR}:`, error);
-		throw error;
+		vectorStoreId = vectorStore.id;
 	}
+
+	const file = await client.files.create({
+		file: createReadStream(tempFilePath),
+		purpose: FilePurpose.ASSISTANTS,
+	});
+
+	const batch = await client.vectorStores.fileBatches.createAndPoll(
+		vectorStoreId,
+		{
+			file_ids: [file.id],
+		},
+	);
+
+	if (batch.status !== "completed" || batch.file_counts.failed > 0) {
+		throw new Error(
+			`Vector store file batch did not complete successfully for guild ${guildId}: status=${batch.status}, failed=${batch.file_counts.failed}`,
+		);
+	}
+
+	await fs.unlink(tempFilePath);
+
+	return vectorStoreId;
+}
+
+// Caches the in-flight build promise (not just the finished result) so
+// concurrent calls for the same guild before the first build completes
+// await the same build instead of racing to create duplicate vector stores.
+export function ensureKnowledgeBaseFile(
+	guildId: string,
+	client: OpenAI,
+): Promise<string> {
+	const existing = managedVectorStores.get(guildId);
+	if (existing) return existing;
+
+	const buildPromise = buildKnowledgeBaseFile(guildId, client).catch(
+		(error) => {
+			managedVectorStores.delete(guildId);
+			console.error(`${ErrorMessage.VECTOR_STORE_ERROR}:`, error);
+			throw error;
+		},
+	);
+
+	managedVectorStores.set(guildId, buildPromise);
+	return buildPromise;
+}
+
+export async function deleteKnowledgeBaseFile(
+	guildId: string,
+	client: OpenAI,
+): Promise<void> {
+	managedVectorStores.delete(guildId);
+
+	const vectorStores = await client.vectorStores.list();
+	const existingVectorStore = vectorStores.data.find(
+		(store) => store.name === guildId,
+	);
+	if (!existingVectorStore) return;
+
+	await deleteVectorStoreFiles(client, existingVectorStore.id);
+	await client.vectorStores.delete(existingVectorStore.id);
 }

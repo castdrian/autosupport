@@ -62,10 +62,18 @@ export class SettingsCommand extends Subcommand {
 		const before = await getOrCreateGuildSettings(interaction.guildId);
 		const alreadyConfigured = before.channelIds.includes(channel.id);
 		await addSupportChannelId(interaction.guildId, channel.id);
+
+		const hasKnowledgeBase = Boolean(data.support[interaction.guildId]?.length);
+		const warning = hasKnowledgeBase
+			? ""
+			: "\n\n:warning: No knowledge base content is configured for this server yet — the bot won't be able to answer questions here until entries are added to `data.toml`.";
+
 		await interaction.reply({
-			content: alreadyConfigured
-				? `channel ${channelMention(channel.id)} is already a support channel`
-				: `channel ${channelMention(channel.id)} added as support channel`,
+			content: `${
+				alreadyConfigured
+					? `channel ${channelMention(channel.id)} is already a support channel`
+					: `channel ${channelMention(channel.id)} added as support channel`
+			}${warning}`,
 			flags: MessageFlags.Ephemeral,
 		});
 	}
