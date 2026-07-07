@@ -4,6 +4,7 @@ import {
 } from "@sapphire/framework";
 import {
 	addHumanAssistanceThread,
+	hasRequestedHumanAssistance,
 	removeHumanAssistanceThread,
 } from "@utils/autosupport";
 import {
@@ -86,6 +87,15 @@ export class ThreadButtonHandler extends InteractionHandler {
 					await interaction.reply({
 						content:
 							"Only the person who started this thread or a moderator can request human assistance for it.",
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+
+				if (hasRequestedHumanAssistance(thread.id)) {
+					await interaction.reply({
+						content:
+							"Human assistance has already been requested for this thread.",
 						flags: MessageFlags.Ephemeral,
 					});
 					return;

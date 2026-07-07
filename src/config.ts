@@ -30,8 +30,8 @@ const tomlSchema = z.object({
 		z.string().regex(/^(?<id>\d{17,20})$/),
 		z.array(
 			z.object({
-				problem: z.string(),
-				solution: z.string(),
+				problem: z.string().min(1, "problem must not be empty"),
+				solution: z.string().min(1, "solution must not be empty"),
 				notes: z.string().optional(),
 			}),
 		),

@@ -2,7 +2,7 @@ import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
 import data from "@src/data.toml";
-import { getOrCreateGuildSettings } from "@src/database/db";
+import { getGuildSettingsIfExists } from "@src/database/db";
 import { getOpenAIClient } from "@utils/autosupport";
 import { ensureKnowledgeBaseFile } from "@utils/fileManager";
 import { sweepStaleThreads } from "@utils/threadSweeper";
@@ -72,11 +72,11 @@ export class ReadyListener extends Listener {
 		const settingsEntries = await Promise.all(
 			candidateGuildIds.map(async (guildId) => ({
 				guildId,
-				settings: await getOrCreateGuildSettings(guildId),
+				settings: await getGuildSettingsIfExists(guildId),
 			})),
 		);
 		const guildIds = settingsEntries
-			.filter(({ settings }) => settings.channelIds.length > 0)
+			.filter(({ settings }) => (settings?.channelIds.length ?? 0) > 0)
 			.map(({ guildId }) => guildId);
 		if (!guildIds.length) return;
 
