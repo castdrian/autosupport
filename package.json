@@ -16,7 +16,7 @@
 		"sql-migrate": "drizzle-kit migrate --config ./src/database/drizzle-config.ts",
 		"prepare": "husky .github/husky",
 		"start": "bun run src/main.ts",
-		"test": "bun test"
+		"test": "DATABASE_PATH=:memory: bun test"
 	},
 	"dependencies": {
 		"@neato/config": "^4.1.0",

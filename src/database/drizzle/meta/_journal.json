@@ -15,6 +15,13 @@
 			"when": 1783464815155,
 			"tag": "0001_ambiguous_sir_ram",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1783467496081,
+			"tag": "0002_glorious_penance",
+			"breakpoints": true
 		}
 	]
 }

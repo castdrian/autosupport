@@ -21,14 +21,15 @@ const client = new SapphireClient({
 // @ts-expect-error just for fun
 DefaultWebSocketManagerOptions.identifyProperties.browser = "Discord iOS";
 
-const sqlite = new Database("autosupport.db");
+const databasePath = process.env.DATABASE_PATH ?? "autosupport.db";
+const sqlite = new Database(databasePath);
 sqlite.run("PRAGMA journal_mode = WAL;");
 const db = drizzle(sqlite, { schema });
 
 try {
 	migrate(db, { migrationsFolder: "./src/database/drizzle" });
 } catch (error) {
-	console.error("Failed to run database migrations against autosupport.db:");
+	console.error(`Failed to run database migrations against ${databasePath}:`);
 	console.error(error);
 	process.exit(1);
 }

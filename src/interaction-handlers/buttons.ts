@@ -3,6 +3,10 @@ import {
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
 import {
+	clearThreadEscalated,
+	deleteThreadResponsesForThread,
+} from "@src/database/db";
+import {
 	addHumanAssistanceThread,
 	hasRequestedHumanAssistance,
 	removeHumanAssistanceThread,
@@ -74,6 +78,11 @@ export class ThreadButtonHandler extends InteractionHandler {
 					flags: MessageFlags.Ephemeral,
 				});
 
+				await Promise.all([
+					clearThreadEscalated(thread.id),
+					deleteThreadResponsesForThread(thread.id),
+				]).catch(() => null);
+
 				await thread.setArchived(true);
 				break;
 			}
@@ -92,7 +101,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 					return;
 				}
 
-				if (hasRequestedHumanAssistance(thread.id)) {
+				if (await hasRequestedHumanAssistance(thread.id)) {
 					await interaction.reply({
 						content:
 							"Human assistance has already been requested for this thread.",
@@ -121,7 +130,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 					await thread.setAppliedTags([humanAssistanceTag]);
 				}
 
-				addHumanAssistanceThread(thread.id);
+				await addHumanAssistanceThread(interaction.guildId, thread.id);
 
 				await interaction.reply({
 					content:
@@ -176,7 +185,7 @@ export class ThreadButtonHandler extends InteractionHandler {
 					return;
 				}
 
-				removeHumanAssistanceThread(thread.id);
+				await removeHumanAssistanceThread(thread.id);
 
 				const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
 					tag.name.toLowerCase().includes("human"),

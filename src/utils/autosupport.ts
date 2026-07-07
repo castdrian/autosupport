@@ -2,6 +2,13 @@ import { type RateLimit, RateLimitManager } from "@sapphire/ratelimits";
 import { config } from "@src/config";
 import data from "@src/data.toml";
 import {
+	clearThreadEscalated,
+	getThreadResponseId,
+	isThreadEscalated,
+	setThreadEscalated,
+	setThreadResponseId,
+} from "@src/database/db";
+import {
 	ensureKnowledgeBaseFile,
 	invalidateKnowledgeBaseCache,
 } from "@utils/fileManager";
@@ -52,8 +59,6 @@ enum ErrorMessage {
 	API_ERROR = "Error in OpenAI API call",
 }
 
-const userResponses = new Map<string, string>();
-const humanAssistanceThreads = new Set<string>();
 const threadRateLimitManager = new RateLimitManager<string>(
 	THREAD_RATE_LIMIT_WINDOW_MS,
 	THREAD_RATE_LIMIT_MAX_MESSAGES,
@@ -78,16 +83,23 @@ export function isMissingVectorStoreError(error: unknown): boolean {
 	return message.includes("vector_store") || message.includes("vector store");
 }
 
-export function addHumanAssistanceThread(threadId: string): void {
-	humanAssistanceThreads.add(threadId);
+export async function addHumanAssistanceThread(
+	guildId: string,
+	threadId: string,
+): Promise<void> {
+	await setThreadEscalated(guildId, threadId);
 }
 
-export function hasRequestedHumanAssistance(threadId: string): boolean {
-	return humanAssistanceThreads.has(threadId);
+export async function hasRequestedHumanAssistance(
+	threadId: string,
+): Promise<boolean> {
+	return isThreadEscalated(threadId);
 }
 
-export function removeHumanAssistanceThread(threadId: string): void {
-	humanAssistanceThreads.delete(threadId);
+export async function removeHumanAssistanceThread(
+	threadId: string,
+): Promise<void> {
+	await clearThreadEscalated(threadId);
 }
 
 export function getOpenAIClient(): OpenAI {
@@ -187,7 +199,7 @@ export async function getResponse(message: Message) {
 		if (!message.channel.isThread()) return;
 		if (!message.channel.parent?.isThreadOnly()) return;
 
-		if (hasRequestedHumanAssistance(message.channelId)) return;
+		if (await hasRequestedHumanAssistance(message.channelId)) return;
 
 		const guildId = message.guildId;
 		const userId = message.author.id;
@@ -224,7 +236,11 @@ export async function getResponse(message: Message) {
 		const guildInstructions = data.instructions[guildId] ?? "";
 		const instructions = `${guildInstructions}\n\nThe user you are talking to is '${message.author.displayName} (@${message.author.username})'. The thread you are in is called '${message.channel.name}'.`;
 
-		const previousResponseId = userResponses.get(threadKey);
+		const previousResponseId = await getThreadResponseId(
+			guildId,
+			userId,
+			message.channelId,
+		);
 		const { content: inputContent, droppedAttachments } =
 			buildInputContent(message);
 		if (!inputContent.length) {
@@ -246,7 +262,7 @@ export async function getResponse(message: Message) {
 			],
 		});
 
-		userResponses.set(threadKey, response.id);
+		await setThreadResponseId(guildId, userId, message.channelId, response.id);
 
 		const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
 			tag.name.toLowerCase().includes("human"),

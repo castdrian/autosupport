@@ -83,6 +83,16 @@ export class SettingsCommand extends Subcommand {
 	) {
 		if (!interaction.guildId) return;
 		const channel = interaction.options.getChannel("channel", true);
+		const before = await getOrCreateGuildSettings(interaction.guildId);
+
+		if (!before.channelIds.includes(channel.id)) {
+			await interaction.reply({
+				content: `channel ${channelMention(channel.id)} is not a configured support channel`,
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		await removeSupportChannelId(interaction.guildId, channel.id);
 		await interaction.reply({
 			content: `channel ${channelMention(channel.id)} removed as support channel`,

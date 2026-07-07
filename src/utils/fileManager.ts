@@ -32,6 +32,18 @@ async function getVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	}
 }
 
+// client.vectorStores.list() only returns one page (20 items) by default.
+// The SDK's list result is an async iterable that transparently fetches
+// further pages on demand, so iterate rather than reading .data directly —
+// otherwise a store past the first page would never be found, causing
+// duplicate creation on rebuild and silently-failed cleanup on delete.
+async function findVectorStoreByName(client: OpenAI, name: string) {
+	for await (const store of client.vectorStores.list()) {
+		if (store.name === name) return store;
+	}
+	return undefined;
+}
+
 async function deleteVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	try {
 		const files = await getVectorStoreFiles(client, vectorStoreId);
@@ -84,10 +96,7 @@ async function buildKnowledgeBaseFile(
 
 	let vectorStoreId: string;
 
-	const vectorStores = await client.vectorStores.list();
-	const existingVectorStore = vectorStores.data.find(
-		(store) => store.name === guildId,
-	);
+	const existingVectorStore = await findVectorStoreByName(client, guildId);
 
 	if (existingVectorStore) {
 		vectorStoreId = existingVectorStore.id;
@@ -197,10 +206,7 @@ export async function deleteKnowledgeBaseFile(
 	managedVectorStores.delete(guildId);
 	if (inFlight) await inFlight.catch(() => null);
 
-	const vectorStores = await client.vectorStores.list();
-	const existingVectorStore = vectorStores.data.find(
-		(store) => store.name === guildId,
-	);
+	const existingVectorStore = await findVectorStoreByName(client, guildId);
 	if (!existingVectorStore) return;
 
 	await deleteVectorStoreFiles(client, existingVectorStore.id);

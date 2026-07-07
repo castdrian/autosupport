@@ -3,7 +3,7 @@ import * as schema from "@src/database/schema";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 
-const sqlite = new Database("autosupport.db");
+const sqlite = new Database(process.env.DATABASE_PATH ?? "autosupport.db");
 sqlite.run("PRAGMA journal_mode = WAL;");
 export const db = drizzle(sqlite, { schema });
 
@@ -51,6 +51,10 @@ export async function updateGuildSettings(
 	guildId: string,
 	newSettings: Partial<GuildSettings>,
 ) {
+	// Ensure a row exists first — updating a guild with no row yet would
+	// otherwise silently affect zero rows, and the fallback read below would
+	// then return freshly-created defaults instead of the intended update.
+	await getOrCreateGuildSettings(guildId);
 	await db
 		.update(schema.guildPreferences)
 		.set(newSettings)
@@ -114,4 +118,95 @@ export async function clearKnowledgeBaseState(guildId: string) {
 		knowledgeBaseVectorStoreId: null,
 		knowledgeBaseHash: null,
 	});
+}
+
+function threadResponseKey(
+	guildId: string,
+	userId: string,
+	threadId: string,
+): string {
+	return `${guildId}-${userId}-${threadId}`;
+}
+
+export async function getThreadResponseId(
+	guildId: string,
+	userId: string,
+	threadId: string,
+): Promise<string | undefined> {
+	const [row] = await db
+		.select()
+		.from(schema.threadResponses)
+		.where(
+			eq(
+				schema.threadResponses.key,
+				threadResponseKey(guildId, userId, threadId),
+			),
+		)
+		.limit(1);
+	return row?.responseId;
+}
+
+export async function setThreadResponseId(
+	guildId: string,
+	userId: string,
+	threadId: string,
+	responseId: string,
+): Promise<void> {
+	const key = threadResponseKey(guildId, userId, threadId);
+	await db
+		.insert(schema.threadResponses)
+		.values({ key, guildId, threadId, responseId })
+		.onConflictDoUpdate({
+			target: schema.threadResponses.key,
+			set: { responseId },
+		});
+}
+
+export async function deleteThreadResponsesForThread(
+	threadId: string,
+): Promise<void> {
+	await db
+		.delete(schema.threadResponses)
+		.where(eq(schema.threadResponses.threadId, threadId));
+}
+
+export async function deleteThreadResponsesForGuild(
+	guildId: string,
+): Promise<void> {
+	await db
+		.delete(schema.threadResponses)
+		.where(eq(schema.threadResponses.guildId, guildId));
+}
+
+export async function isThreadEscalated(threadId: string): Promise<boolean> {
+	const [row] = await db
+		.select()
+		.from(schema.escalatedThreads)
+		.where(eq(schema.escalatedThreads.threadId, threadId))
+		.limit(1);
+	return Boolean(row);
+}
+
+export async function setThreadEscalated(
+	guildId: string,
+	threadId: string,
+): Promise<void> {
+	await db
+		.insert(schema.escalatedThreads)
+		.values({ threadId, guildId })
+		.onConflictDoNothing();
+}
+
+export async function clearThreadEscalated(threadId: string): Promise<void> {
+	await db
+		.delete(schema.escalatedThreads)
+		.where(eq(schema.escalatedThreads.threadId, threadId));
+}
+
+export async function deleteEscalatedThreadsForGuild(
+	guildId: string,
+): Promise<void> {
+	await db
+		.delete(schema.escalatedThreads)
+		.where(eq(schema.escalatedThreads.guildId, guildId));
 }

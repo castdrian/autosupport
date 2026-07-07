@@ -1,4 +1,8 @@
-import { getGuildSettingsIfExists } from "@src/database/db";
+import {
+	clearThreadEscalated,
+	deleteThreadResponsesForThread,
+	getGuildSettingsIfExists,
+} from "@src/database/db";
 import type { Client } from "discord.js";
 import { SnowflakeUtil } from "discord.js";
 
@@ -31,6 +35,11 @@ export async function sweepStaleThreads(client: Client<true>): Promise<void> {
 
 				const inactiveFor = Date.now() - lastActivityTimestamp(thread);
 				if (inactiveFor < STALE_THREAD_INACTIVITY_MS) continue;
+
+				await Promise.all([
+					clearThreadEscalated(thread.id),
+					deleteThreadResponsesForThread(thread.id),
+				]).catch(() => null);
 
 				await thread
 					.setArchived(true, "Inactive support thread")

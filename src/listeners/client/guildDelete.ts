@@ -1,6 +1,10 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
-import { deleteGuildSettings } from "@src/database/db";
+import {
+	deleteEscalatedThreadsForGuild,
+	deleteGuildSettings,
+	deleteThreadResponsesForGuild,
+} from "@src/database/db";
 import { getOpenAIClient } from "@utils/autosupport";
 import { deleteKnowledgeBaseFile } from "@utils/fileManager";
 import { Events, type Guild } from "discord.js";
@@ -23,6 +27,8 @@ export class GuildDeleteListener extends Listener {
 
 		try {
 			await deleteGuildSettings(guild.id);
+			await deleteThreadResponsesForGuild(guild.id);
+			await deleteEscalatedThreadsForGuild(guild.id);
 		} catch (error) {
 			this.container.logger.error(
 				`Failed to delete guild settings for ${guild.id}: ${error}`,
