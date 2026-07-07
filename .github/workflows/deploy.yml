@@ -30,7 +30,7 @@ jobs:
 
       - name: Automated Version Bump
         if: steps.check-bump.outputs.should_bump == 'true'
-        uses: phips28/gh-action-bump-version@v11.0.7
+        uses: phips28/gh-action-bump-version@v11.1.5
         with:
           skip-tag:  'true'
         env:
