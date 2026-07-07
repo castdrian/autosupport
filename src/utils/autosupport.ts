@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import OpenAI from "openai";
 
-const MODEL = "gpt-4o-mini";
+const MODEL = "gpt-4.1-nano";
 
 enum ToolType {
 	FILE_SEARCH = "file_search",
