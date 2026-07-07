@@ -24,9 +24,25 @@ DefaultWebSocketManagerOptions.identifyProperties.browser = "Discord iOS";
 const sqlite = new Database("autosupport.db");
 sqlite.run("PRAGMA journal_mode = WAL;");
 const db = drizzle(sqlite, { schema });
-migrate(db, { migrationsFolder: "./src/database/drizzle" });
+
+try {
+	migrate(db, { migrationsFolder: "./src/database/drizzle" });
+} catch (error) {
+	console.error("Failed to run database migrations against autosupport.db:");
+	console.error(error);
+	process.exit(1);
+}
 
 ApplicationCommandRegistries.setDefaultGuildIds(
 	config.devGuildId ? [config.devGuildId] : null,
 );
-await client.login();
+
+try {
+	await client.login();
+} catch (error) {
+	console.error(
+		"Failed to log in to Discord. Check that DISCORD_TOKEN is set and valid:",
+	);
+	console.error(error);
+	process.exit(1);
+}

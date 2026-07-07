@@ -33,12 +33,22 @@ solution = "Answer text"
 notes = "Optional additional information"
 ```
 
+To enable the **Request Human** button on assistant replies, create a forum tag on the support channel whose name contains "human" (case-insensitive), e.g. `Needs Human`. Without a matching tag, only the **Close Thread** button is shown.
+
 ## Commands
 
 - `/info` — bot status, uptime, and version info
-- `/settings info` — list configured support channels for the guild
+- `/settings info` — list configured support channels and knowledge base stats for the guild
 - `/settings channels add|remove` — configure which forum channels the bot responds in
 - `/usage` — current OpenAI cost usage (requires `OPEN_AI_ADMIN_API_KEY`)
+
+## Behavior
+
+- The bot only responds to messages in threads under a configured support (forum) channel.
+- Messages are rate-limited per thread (4 messages/minute) and per user across all of a guild's threads (8 messages/minute) to prevent abuse.
+- Image and file attachments are forwarded to the model as context, up to 4 attachments per message, 20 MB each; video/audio attachments are ignored.
+- On the assistant's reply, anyone can read it, but only the person who started the thread (or a member with `Manage Threads`) can use the **Close Thread** / **Request Human** buttons.
+- Threads with no activity for 24 hours are automatically archived.
 
 ## Usage
 
@@ -52,4 +62,10 @@ sudo docker compose up --build
 
 ```bash
 bun start
+```
+
+### Testing
+
+```bash
+bun test
 ```

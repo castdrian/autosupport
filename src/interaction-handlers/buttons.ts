@@ -7,7 +7,19 @@ import {
 	type ButtonInteraction,
 	MessageFlags,
 	PermissionFlagsBits,
+	type ThreadChannel,
 } from "discord.js";
+
+function canManageThread(
+	interaction: ButtonInteraction,
+	thread: ThreadChannel,
+): boolean {
+	if (interaction.user.id === thread.ownerId) return true;
+	return (
+		interaction.memberPermissions?.has(PermissionFlagsBits.ManageThreads) ??
+		false
+	);
+}
 
 export class ThreadButtonHandler extends InteractionHandler {
 	public constructor(
@@ -27,6 +39,16 @@ export class ThreadButtonHandler extends InteractionHandler {
 				const thread = interaction.channel;
 				if (!thread || !thread.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
+
+				if (!canManageThread(interaction, thread)) {
+					await interaction.reply({
+						content:
+							"Only the person who started this thread or a moderator can close it.",
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+
 				if (
 					!interaction.guild?.members?.me ||
 					!thread
@@ -52,6 +74,16 @@ export class ThreadButtonHandler extends InteractionHandler {
 				const thread = interaction.channel;
 				if (!thread || !thread.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
+
+				if (!canManageThread(interaction, thread)) {
+					await interaction.reply({
+						content:
+							"Only the person who started this thread or a moderator can request human assistance for it.",
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+
 				if (
 					!interaction.guild?.members?.me ||
 					!thread
