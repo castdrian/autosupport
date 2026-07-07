@@ -34,7 +34,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"bun-types": "^1.2.14",
-		"drizzle-kit": "^0.22.8",
+		"drizzle-kit": "^0.31.10",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.5.2",
 		"typescript": "^6.0.3"
