@@ -101,9 +101,18 @@ export async function ensureKnowledgeBaseFile(
 			purpose: FilePurpose.ASSISTANTS,
 		});
 
-		await client.vectorStores.fileBatches.create(vectorStoreId, {
-			file_ids: [file.id],
-		});
+		const batch = await client.vectorStores.fileBatches.createAndPoll(
+			vectorStoreId,
+			{
+				file_ids: [file.id],
+			},
+		);
+
+		if (batch.status !== "completed" || batch.file_counts.failed > 0) {
+			throw new Error(
+				`Vector store file batch did not complete successfully for guild ${guildId}: status=${batch.status}, failed=${batch.file_counts.failed}`,
+			);
+		}
 
 		await fs.unlink(tempFilePath);
 

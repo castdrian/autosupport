@@ -18,7 +18,7 @@
 		"start": "bun run src/main.ts"
 	},
 	"dependencies": {
-		"@neato/config": "^4.0.3",
+		"@neato/config": "^4.1.0",
 		"@sapphire/decorators": "^6.1.1",
 		"@sapphire/framework": "^5.3.5",
 		"@sapphire/pieces": "^4.4.0",
@@ -29,7 +29,7 @@
 		"openai": "^4.103.0",
 		"systeminformation": "^5.26.2",
 		"tslib": "^2.8.1",
-		"zod": "^3.25.23"
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
@@ -37,7 +37,7 @@
 		"drizzle-kit": "^0.22.8",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.5.2",
-		"typescript": "^5.8.3"
+		"typescript": "^6.0.3"
 	},
 	"lint-staged": {
 		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
@@ -49,5 +49,5 @@
 			"biome lint --apply --no-errors-on-unmatched"
 		]
 	},
-	"trustedDependencies": ["@biomejs/biome", "tesseract.js"]
+	"trustedDependencies": ["@biomejs/biome", "esbuild", "tesseract.js"]
 }

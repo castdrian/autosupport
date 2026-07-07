@@ -5,6 +5,7 @@ import {
 } from "@src/database/db";
 import {
 	type ChatInputCommandInteraction,
+	MessageFlags,
 	PermissionFlagsBits,
 } from "discord.js";
 import { ChannelType, channelMention } from "discord.js";
@@ -39,7 +40,7 @@ export class SettingsCommand extends Subcommand {
 		await addSupportChannelId(interaction.guildId, channel.id);
 		await interaction.reply({
 			content: `channel ${channelMention(channel.id)} added as support channel`,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	}
 
@@ -51,7 +52,7 @@ export class SettingsCommand extends Subcommand {
 		await removeSupportChannelId(interaction.guildId, channel.id);
 		await interaction.reply({
 			content: `channel ${channelMention(channel.id)} removed as support channel`,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	}
 

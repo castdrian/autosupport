@@ -31,13 +31,13 @@ export class ThreadButtonHandler extends InteractionHandler {
 				) {
 					await interaction.reply({
 						content: "I don't have permission to close this thread.",
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
 				await interaction.reply({
 					content: "Thread has been closed.",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				await thread.setArchived(true);
