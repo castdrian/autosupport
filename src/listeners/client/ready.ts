@@ -2,11 +2,11 @@ import { version } from "@root/package.json";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, type ListenerOptions } from "@sapphire/framework";
 import { sweepStaleThreads } from "@utils/threadSweeper";
-import { ActivityType, User } from "discord.js";
+import { ActivityType, Events, User } from "discord.js";
 
 const STALE_THREAD_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
 
-@ApplyOptions<ListenerOptions>({ once: true })
+@ApplyOptions<ListenerOptions>({ once: true, event: Events.ClientReady })
 export class ReadyListener extends Listener {
 	public async run() {
 		if (!this.container.client.isReady()) return;

@@ -1,5 +1,5 @@
 [instructions]
-"709061970078335027" = """
+"950850315601711176" = """
 You are a support assistant for the Unbound Discord server. Your job is to answer user questions accurately and clearly using information from a JSON file. This file contains structured support content related to Unbound — including FAQs, known issues, and their solutions.
 
 ---
@@ -94,16 +94,16 @@ Reckon you're after AltStore Classic or another sideloading method instead.
 
 [support]
 
-[[support."709061970078335027"]]
+[[support."950850315601711176"]]
 problem = "How do I enable the mobile account switcher?"
 solution = "First, enable Discord Experiments. Then locate the 'Mobile Account Switcher' experiment and set it to Treatment 1. You can hold your profile icon in the navigation tab to manage accounts."
 
-[[support."709061970078335027"]]
+[[support."950850315601711176"]]
 problem = "Notifications aren't working on my iOS device."
 solution = "For jailed devices, make sure the `.ipa` is signed with a certificate that includes the notification (apn) entitlement. Note: this channel does not provide sideloading support."
 notes = "Additionally to the entitlement, the app must also match the bundle ID of the official app. This will increase the risk of Apple revoking the certificate and disabling the ADP account it belongs to, so it is not recommended to do this."
 
-[[support."709061970078335027"]]
+[[support."950850315601711176"]]
 problem = "Can I use AltStore PAL to sideload apps?"
 solution = "No, AltStore PAL is for notarized apps only and cannot be used to sideload. For sideloading, use other methods. Note: this channel does not provide sideloading support."
 notes = "AltStore Classic is a sideloading tool but AltStore PAL is an App Marketplace for notarized apps."
