@@ -7,6 +7,7 @@ import {
 	PermissionFlagsBits,
 	TextDisplayBuilder,
 } from "discord.js";
+import OpenAI from "openai";
 
 export class UsageCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
@@ -29,9 +30,14 @@ export class UsageCommand extends Command {
 			});
 		} catch (error) {
 			this.container.logger.error(`Failed to fetch OpenAI usage: ${error}`);
+
+			const isAuthError =
+				error instanceof OpenAI.APIError && (error.status === 401 || error.status === 403);
+
 			await interaction.editReply({
-				content:
-					"Couldn't fetch usage data. Make sure OPEN_AI_ADMIN_API_KEY is set to an org admin key with the api.usage.read scope.",
+				content: isAuthError
+					? "Couldn't fetch usage data. Make sure OPEN_AI_ADMIN_API_KEY is set to an org admin key with the api.usage.read scope."
+					: "Couldn't fetch usage data due to an unexpected error. Check the logs for details.",
 			});
 		}
 	}

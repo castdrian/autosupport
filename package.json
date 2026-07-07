@@ -21,7 +21,6 @@
 		"@neato/config": "^4.1.0",
 		"@sapphire/decorators": "^6.2.0",
 		"@sapphire/framework": "^5.5.0",
-		"@sapphire/pieces": "^4.4.0",
 		"@sapphire/plugin-subcommands": "^7.0.1",
 		"@sapphire/utilities": "^3.18.2",
 		"discord.js": "^14.19.3",

@@ -56,7 +56,7 @@ export async function getUsageSummary(client: OpenAI): Promise<UsageSummary> {
 	for (const bucket of buckets) {
 		for (const result of bucket.results) {
 			if (result.object !== "organization.costs.result") continue;
-			const value = result.amount?.value ?? 0;
+			const value = Number(result.amount?.value ?? 0);
 			currency = result.amount?.currency ?? currency;
 			monthToDateUsd += value;
 			if (bucket.start_time >= dayStart) {
