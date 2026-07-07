@@ -1,4 +1,4 @@
-import { getOrCreateGuildSettings } from "@src/database/db";
+import { getGuildSettingsIfExists } from "@src/database/db";
 import type { Client } from "discord.js";
 import { SnowflakeUtil } from "discord.js";
 
@@ -16,7 +16,8 @@ function lastActivityTimestamp(thread: {
 
 export async function sweepStaleThreads(client: Client<true>): Promise<void> {
 	for (const guild of client.guilds.cache.values()) {
-		const settings = await getOrCreateGuildSettings(guild.id);
+		const settings = await getGuildSettingsIfExists(guild.id);
+		if (!settings?.channelIds.length) continue;
 
 		for (const channelId of settings.channelIds) {
 			const channel = await guild.channels.fetch(channelId).catch(() => null);

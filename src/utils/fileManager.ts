@@ -189,7 +189,13 @@ export async function deleteKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
 ): Promise<void> {
+	// If a build is already in flight for this guild, let it finish first so
+	// we clean up whatever it actually produces instead of racing it — the
+	// in-flight build's own state writes would otherwise land after cleanup
+	// runs and leave a fresh, never-cleaned-up vector store behind.
+	const inFlight = managedVectorStores.get(guildId);
 	managedVectorStores.delete(guildId);
+	if (inFlight) await inFlight.catch(() => null);
 
 	const vectorStores = await client.vectorStores.list();
 	const existingVectorStore = vectorStores.data.find(

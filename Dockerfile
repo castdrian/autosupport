@@ -20,4 +20,8 @@ FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
 COPY . .
 
+# Run as the non-root user bundled with the official Bun image instead of root
+RUN chown -R bun:bun /usr/src/app
+USER bun
+
 ENTRYPOINT [ "bun", "start" ]

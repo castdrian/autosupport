@@ -9,6 +9,22 @@ export const db = drizzle(sqlite, { schema });
 
 export type GuildSettings = typeof schema.guildPreferences.$inferSelect;
 
+// Read-only lookup that never creates a row. Use this over
+// getOrCreateGuildSettings when the caller only needs to check existing
+// settings (e.g. a periodic sweep across every guild) and shouldn't pay for
+// an insert attempt — or leave behind a row — for guilds that never
+// configured anything.
+export async function getGuildSettingsIfExists(
+	guildId: string,
+): Promise<GuildSettings | undefined> {
+	const [settings] = await db
+		.select()
+		.from(schema.guildPreferences)
+		.where(eq(schema.guildPreferences.id, guildId))
+		.limit(1);
+	return settings;
+}
+
 export async function getOrCreateGuildSettings(guildId: string) {
 	const newSettings: GuildSettings = {
 		id: guildId,
