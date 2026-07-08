@@ -2,6 +2,8 @@ import { Subcommand } from "@sapphire/plugin-subcommands";
 import data from "@src/data.toml";
 import {
 	addSupportChannelId,
+	clearThreadEscalated,
+	deleteThreadResponsesForThread,
 	getOrCreateGuildSettings,
 	removeSupportChannelId,
 } from "@src/database/db";
@@ -94,10 +96,42 @@ export class SettingsCommand extends Subcommand {
 		}
 
 		await removeSupportChannelId(interaction.guildId, channel.id);
+		await this.cleanupThreadStateForChannel(channel.id).catch((error) =>
+			this.container.logger.error(
+				`Failed to clean up thread state for removed channel ${channel.id}: ${error}`,
+			),
+		);
+
 		await interaction.reply({
 			content: `channel ${channelMention(channel.id)} removed as support channel`,
 			flags: MessageFlags.Ephemeral,
 		});
+	}
+
+	private async cleanupThreadStateForChannel(channelId: string): Promise<void> {
+		const channel = await this.container.client.channels
+			.fetch(channelId)
+			.catch(() => null);
+		if (!channel?.isThreadOnly()) return;
+
+		const [active, archived] = await Promise.all([
+			channel.threads.fetchActive().catch(() => null),
+			channel.threads.fetchArchived().catch(() => null),
+		]);
+
+		const threadIds = new Set([
+			...(active?.threads.keys() ?? []),
+			...(archived?.threads.keys() ?? []),
+		]);
+
+		await Promise.all(
+			[...threadIds].map((threadId) =>
+				Promise.all([
+					clearThreadEscalated(threadId),
+					deleteThreadResponsesForThread(threadId),
+				]),
+			),
+		);
 	}
 
 	registerApplicationCommands(registry: Subcommand.Registry) {
