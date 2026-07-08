@@ -98,7 +98,13 @@ export class ThreadButtonHandler extends InteractionHandler {
 					deleteThreadResponsesForThread(thread.id),
 				]).catch(() => null);
 
-				await thread.setArchived(true);
+				await thread
+					.setArchived(true)
+					.catch((error) =>
+						this.container.logger.error(
+							`Failed to archive thread ${thread.id} after close_thread: ${error}`,
+						),
+					);
 				break;
 			}
 			case "request_human": {
@@ -172,7 +178,26 @@ export class ThreadButtonHandler extends InteractionHandler {
 							),
 					);
 
-				await interaction.showModal(modal);
+				try {
+					await interaction.showModal(modal);
+				} catch (error) {
+					this.container.logger.error(
+						`Failed to show request-human modal for thread ${thread.id}: ${error}`,
+					);
+					if (!interaction.replied && !interaction.deferred) {
+						await interaction
+							.reply({
+								components: [
+									statusContainer(
+										StatusColor.Danger,
+										"Sorry, something went wrong opening the request form. Please try again.",
+									),
+								],
+								flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+							})
+							.catch(() => null);
+					}
+				}
 				break;
 			}
 			case "resume_ai": {
@@ -212,30 +237,49 @@ export class ThreadButtonHandler extends InteractionHandler {
 					return;
 				}
 
-				await removeHumanAssistanceThread(thread.id);
+				try {
+					await removeHumanAssistanceThread(thread.id);
 
-				const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
-					tag.name.toLowerCase().includes("human"),
-				)?.id;
-				if (
-					humanAssistanceTag &&
-					thread.appliedTags.includes(humanAssistanceTag)
-				) {
-					const remainingTags = thread.appliedTags.filter(
-						(id) => id !== humanAssistanceTag,
+					const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
+						tag.name.toLowerCase().includes("human"),
+					)?.id;
+					if (
+						humanAssistanceTag &&
+						thread.appliedTags.includes(humanAssistanceTag)
+					) {
+						const remainingTags = thread.appliedTags.filter(
+							(id) => id !== humanAssistanceTag,
+						);
+						await thread.setAppliedTags(remainingTags).catch(() => null);
+					}
+
+					await interaction.reply({
+						components: [
+							statusContainer(
+								StatusColor.Success,
+								"AI responses have been resumed for this thread.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+					});
+				} catch (error) {
+					this.container.logger.error(
+						`Failed to resume AI for thread ${thread.id}: ${error}`,
 					);
-					await thread.setAppliedTags(remainingTags).catch(() => null);
+					if (!interaction.replied && !interaction.deferred) {
+						await interaction
+							.reply({
+								components: [
+									statusContainer(
+										StatusColor.Danger,
+										"Sorry, something went wrong resuming AI for this thread. Please try again.",
+									),
+								],
+								flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+							})
+							.catch(() => null);
+					}
 				}
-
-				await interaction.reply({
-					components: [
-						statusContainer(
-							StatusColor.Success,
-							"AI responses have been resumed for this thread.",
-						),
-					],
-					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-				});
 				break;
 			}
 		}

@@ -38,9 +38,9 @@ To enable the **Request Human** button on assistant replies, create a forum tag 
 ## Commands
 
 - `/info` — bot status, uptime, and version info
-- `/settings info` — list configured support channels and knowledge base stats for the guild
+- `/settings info` — configured support channels, knowledge base stats, and how many threads are currently waiting on a human, for the guild
 - `/settings channels add|remove` — configure which forum channels the bot responds in
-- `/usage` — current OpenAI cost usage (requires `OPEN_AI_ADMIN_API_KEY`)
+- `/usage` — current OpenAI cost usage (requires `OPEN_AI_ADMIN_API_KEY`); org-wide across all guilds sharing the same API key, not guild-specific
 
 ## Behavior
 
@@ -48,6 +48,8 @@ To enable the **Request Human** button on assistant replies, create a forum tag 
 - Messages are rate-limited per thread (4 messages/minute) and per user across all of a guild's threads (8 messages/minute) to prevent abuse.
 - Image and file attachments are forwarded to the model as context, up to 4 attachments per message, 20 MB each; video/audio attachments are ignored.
 - On the assistant's reply, anyone can read it, but only the person who started the thread (or a member with `Manage Threads`) can use the **Close Thread** / **Request Human** buttons.
+- Clicking **Request Human** opens a short modal asking what the user needs help with (optional); the answer is posted alongside the pause notice so whoever picks up the thread has context immediately. A **Resume AI** button on that notice re-enables the assistant for the thread.
+- Conversation history and human-escalation state are persisted to the database, so they survive a bot restart.
 - Threads with no activity for 24 hours are automatically archived.
 
 ## Usage
@@ -64,8 +66,12 @@ sudo docker compose up --build
 bun start
 ```
 
+The SQLite database path defaults to `autosupport.db`; override it with the `DATABASE_PATH` env var (e.g. for pointing at a different file, or `:memory:`).
+
 ### Testing
 
 ```bash
-bun test
+bun run test
 ```
+
+Runs against an in-memory database (`DATABASE_PATH=:memory:`, set by the `test` script). Running `bun test` directly instead skips that and will read/write your local `autosupport.db`.

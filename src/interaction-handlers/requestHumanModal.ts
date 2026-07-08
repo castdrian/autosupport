@@ -70,49 +70,70 @@ export class RequestHumanModalHandler extends InteractionHandler {
 			return;
 		}
 
-		const reason = interaction.fields
-			.getTextInputValue(REQUEST_HUMAN_REASON_FIELD_ID)
-			.trim();
+		try {
+			const reason = interaction.fields
+				.getTextInputValue(REQUEST_HUMAN_REASON_FIELD_ID)
+				.trim();
 
-		const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
-			tag.name.toLowerCase().includes("human"),
-		)?.id;
-		if (humanAssistanceTag) {
-			await thread.setAppliedTags([humanAssistanceTag]);
-		}
+			const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
+				tag.name.toLowerCase().includes("human"),
+			)?.id;
+			if (humanAssistanceTag) {
+				await thread.setAppliedTags([humanAssistanceTag]);
+			}
 
-		await addHumanAssistanceThread(interaction.guildId, thread.id);
+			await addHumanAssistanceThread(interaction.guildId, thread.id);
 
-		await interaction.reply({
-			components: [
-				statusContainer(
-					StatusColor.Success,
-					"Human assistance has been requested. AI responses have been disabled for this thread.",
-				),
-			],
-			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-		});
+			await interaction.reply({
+				components: [
+					statusContainer(
+						StatusColor.Success,
+						"Human assistance has been requested. AI responses have been disabled for this thread.",
+					),
+				],
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			});
 
-		const pausedText = reason
-			? `AI responses are paused for this thread.\n\n**Reason given:** ${reason}`
-			: "AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.";
+			const pausedText = reason
+				? `AI responses are paused for this thread.\n\n**Reason given:** ${reason}`
+				: "AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.";
 
-		const resumeSection = new SectionBuilder()
-			.addTextDisplayComponents(new TextDisplayBuilder().setContent(pausedText))
-			.setButtonAccessory(
-				new ButtonBuilder()
-					.setLabel("Resume AI")
-					.setEmoji("🔄")
-					.setStyle(ButtonStyle.Secondary)
-					.setCustomId("resume_ai"),
+			const resumeSection = new SectionBuilder()
+				.addTextDisplayComponents(
+					new TextDisplayBuilder().setContent(pausedText),
+				)
+				.setButtonAccessory(
+					new ButtonBuilder()
+						.setLabel("Resume AI")
+						.setEmoji("🔄")
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId("resume_ai"),
+				);
+
+			await thread
+				.send({
+					components: [resumeSection],
+					flags: MessageFlags.IsComponentsV2,
+				})
+				.catch(() => null);
+		} catch (error) {
+			this.container.logger.error(
+				`Failed to process human assistance request for thread ${thread.id}: ${error}`,
 			);
-
-		await thread
-			.send({
-				components: [resumeSection],
-				flags: MessageFlags.IsComponentsV2,
-			})
-			.catch(() => null);
+			if (!interaction.replied && !interaction.deferred) {
+				await interaction
+					.reply({
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"Sorry, something went wrong while requesting human assistance. Please try again.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+					})
+					.catch(() => null);
+			}
+		}
 	}
 
 	public override async parse(interaction: ModalSubmitInteraction) {
