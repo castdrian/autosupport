@@ -4,6 +4,7 @@ import { StatusColor, statusContainer } from "@utils/statusMessage";
 import { getUsageSummary } from "@utils/usage";
 import {
 	type ChatInputCommandInteraction,
+	InteractionContextType,
 	MessageFlags,
 	PermissionFlagsBits,
 } from "discord.js";
@@ -55,6 +56,7 @@ export class UsageCommand extends Command {
 			builder
 				.setName("usage")
 				.setDescription("check current OpenAI usage and cost")
+				.setContexts(InteractionContextType.Guild)
 				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 		);
 	}

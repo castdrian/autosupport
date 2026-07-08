@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { hashSupportData, normalizeSupportData } from "./fileManager";
+import { hashSupportData, normalizeSupportData } from "@utils/fileManager";
 
 describe("normalizeSupportData", () => {
 	test("normalizes missing notes to null", () => {

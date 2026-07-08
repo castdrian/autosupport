@@ -3,6 +3,7 @@ import data from "@src/data.toml";
 import {
 	addSupportChannelId,
 	clearThreadEscalated,
+	countEscalatedThreadsForGuild,
 	deleteThreadResponsesForThread,
 	getOrCreateGuildSettings,
 	removeSupportChannelId,
@@ -13,6 +14,7 @@ import {
 	type ChatInputCommandInteraction,
 	ContainerBuilder,
 	channelMention,
+	InteractionContextType,
 	MessageFlags,
 	PermissionFlagsBits,
 	SeparatorBuilder,
@@ -56,6 +58,11 @@ export class SettingsCommand extends Subcommand {
 
 		const knowledgeBaseText = `**Knowledge base**\n${articleCount} support article${articleCount === 1 ? "" : "s"} loaded\n${hasInstructions ? "Custom instructions configured" : "No custom instructions configured"}`;
 
+		const escalatedCount = await countEscalatedThreadsForGuild(
+			interaction.guildId,
+		);
+		const escalatedText = `**Active threads**\n${escalatedCount === 0 ? "No threads currently waiting on a human" : `${escalatedCount} thread${escalatedCount === 1 ? "" : "s"} currently waiting on a human`}`;
+
 		const accentColor =
 			hasChannels && hasKnowledgeBase
 				? StatusColor.Success
@@ -71,6 +78,10 @@ export class SettingsCommand extends Subcommand {
 			.addSeparatorComponents(new SeparatorBuilder())
 			.addTextDisplayComponents(
 				new TextDisplayBuilder().setContent(knowledgeBaseText),
+			)
+			.addSeparatorComponents(new SeparatorBuilder())
+			.addTextDisplayComponents(
+				new TextDisplayBuilder().setContent(escalatedText),
 			);
 
 		await interaction.reply({
@@ -214,6 +225,7 @@ export class SettingsCommand extends Subcommand {
 								),
 						),
 				)
+				.setContexts(InteractionContextType.Guild)
 				.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 		);
 	}

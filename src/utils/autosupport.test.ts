@@ -1,6 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import type { Message } from "discord.js";
-import OpenAI from "openai";
 import {
 	buildInputContent,
 	cleanResponseText,
@@ -8,7 +6,9 @@ import {
 	MAX_ATTACHMENT_SIZE_BYTES,
 	MAX_ATTACHMENTS,
 	splitContent,
-} from "./autosupport";
+} from "@utils/autosupport";
+import type { Message } from "discord.js";
+import OpenAI from "openai";
 
 interface FakeAttachment {
 	size: number;

@@ -8,7 +8,7 @@ import {
 	getOrCreateGuildSettings,
 	removeSupportChannelId,
 	setKnowledgeBaseState,
-} from "./db";
+} from "@src/database/db";
 
 // Each test uses its own guild ID since all tests share one in-memory db
 // connection for the whole test run (see bunfig.toml preload + DATABASE_PATH).

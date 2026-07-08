@@ -136,7 +136,7 @@ async function resolveKnowledgeBaseFile(
 	client: OpenAI,
 ): Promise<string> {
 	const supportData = data.support[guildId];
-	if (!supportData || !supportData.length) {
+	if (!supportData?.length) {
 		throw new Error(`${ErrorMessage.NO_SUPPORT_DATA}: ${guildId}`);
 	}
 

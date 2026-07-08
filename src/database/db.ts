@@ -210,3 +210,13 @@ export async function deleteEscalatedThreadsForGuild(
 		.delete(schema.escalatedThreads)
 		.where(eq(schema.escalatedThreads.guildId, guildId));
 }
+
+export async function countEscalatedThreadsForGuild(
+	guildId: string,
+): Promise<number> {
+	const rows = await db
+		.select()
+		.from(schema.escalatedThreads)
+		.where(eq(schema.escalatedThreads.guildId, guildId));
+	return rows.length;
+}

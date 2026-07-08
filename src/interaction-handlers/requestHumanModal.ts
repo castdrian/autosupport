@@ -2,6 +2,11 @@ import {
 	InteractionHandler,
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
+import {
+	canManageThread,
+	REQUEST_HUMAN_MODAL_ID,
+	REQUEST_HUMAN_REASON_FIELD_ID,
+} from "@src/interaction-handlers/buttons";
 import { addHumanAssistanceThread } from "@utils/autosupport";
 import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
@@ -13,11 +18,6 @@ import {
 	SectionBuilder,
 	TextDisplayBuilder,
 } from "discord.js";
-import {
-	canManageThread,
-	REQUEST_HUMAN_MODAL_ID,
-	REQUEST_HUMAN_REASON_FIELD_ID,
-} from "./buttons";
 
 export class RequestHumanModalHandler extends InteractionHandler {
 	public constructor(

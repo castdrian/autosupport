@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { getUsageSummary } from "@utils/usage";
 import type OpenAI from "openai";
-import { getUsageSummary } from "./usage";
 
 function startOfUtcDay(date: Date): number {
 	return (
