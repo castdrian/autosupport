@@ -100,6 +100,27 @@ function mockOpenAIResponse(
 	return fn;
 }
 
+const DISCORD_TEXT_DISPLAY_CHAR_LIMIT = 4000;
+
+function assertEveryTextDisplayWithinDiscordLimit(payload: unknown): void {
+	if (!payload || typeof payload !== "object") return;
+	if (Array.isArray(payload)) {
+		for (const item of payload) assertEveryTextDisplayWithinDiscordLimit(item);
+		return;
+	}
+	const record = payload as Record<string, unknown>;
+	if (record.type === 10 && typeof record.content === "string") {
+		expect(record.content.length).toBeLessThanOrEqual(
+			DISCORD_TEXT_DISPLAY_CHAR_LIMIT,
+		);
+	}
+	for (const value of Object.values(record)) {
+		if (value && typeof value === "object") {
+			assertEveryTextDisplayWithinDiscordLimit(value);
+		}
+	}
+}
+
 describe("getResponse", () => {
 	test("sends a single-chunk reply and persists response continuity", async () => {
 		const { message, reply, guildId, threadId, userId } = createFakeMessage({});
@@ -167,6 +188,9 @@ describe("getResponse", () => {
 
 		expect(reply).toHaveBeenCalledTimes(1);
 		expect(channelSend).toHaveBeenCalledTimes(2);
+		for (const call of [...reply.mock.calls, ...channelSend.mock.calls]) {
+			assertEveryTextDisplayWithinDiscordLimit(call[0]);
+		}
 	});
 
 	test("does not refund the rate limit and posts a partial-failure notice when a later chunk fails to send", async () => {

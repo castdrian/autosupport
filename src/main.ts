@@ -1,9 +1,11 @@
 import {
 	ApplicationCommandRegistries,
+	LogLevel,
 	SapphireClient,
 } from "@sapphire/framework";
 import { config } from "@src/config";
 import { db } from "@src/database/db";
+import { ErrorReportingLogger } from "@utils/errorReportingLogger";
 import { DefaultWebSocketManagerOptions, GatewayIntentBits } from "discord.js";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 
@@ -14,6 +16,9 @@ const client = new SapphireClient({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 	],
+	logger: {
+		instance: new ErrorReportingLogger(LogLevel.Info, config.errorWebhookUrl),
+	},
 });
 
 // @ts-expect-error just for fun

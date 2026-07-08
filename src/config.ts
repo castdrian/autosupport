@@ -16,6 +16,10 @@ const schema = z.object({
 		.string()
 		.regex(/^sk-[a-zA-Z0-9_-]{20,}$/)
 		.optional(),
+	errorWebhookUrl: z
+		.string()
+		.regex(/^https:\/\/discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/)
+		.optional(),
 });
 
 export const config = createConfig({
