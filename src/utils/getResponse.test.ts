@@ -6,7 +6,12 @@ mock.module("@utils/fileManager", () => ({
 }));
 
 const fileManager = await import("@utils/fileManager");
-const { getResponse, getOpenAIClient } = await import("@utils/autosupport");
+const {
+	getResponse,
+	getOpenAIClient,
+	THREAD_RATE_LIMIT_MAX_MESSAGES,
+	USER_RATE_LIMIT_MAX_MESSAGES,
+} = await import("@utils/autosupport");
 const { getThreadResponseId, setThreadEscalated } = await import(
 	"@src/database/db"
 );
@@ -297,5 +302,60 @@ describe("getResponse", () => {
 
 		const call = reply.mock.calls[0]?.[0] as { components: unknown[] };
 		expect(JSON.stringify(call)).toContain("request_human");
+	});
+
+	test("concurrency: exactly THREAD_RATE_LIMIT_MAX_MESSAGES succeed when many arrive at once in the same thread", async () => {
+		const guildId = freshId();
+		const threadId = freshId();
+		const userId = freshId();
+
+		mockOpenAIResponse(async () => ({
+			id: "resp_concurrent_thread",
+			output_text: "ok",
+		}));
+
+		const fakes = Array.from({ length: 20 }, () =>
+			createFakeMessage({ guildId, threadId, userId }),
+		);
+
+		await Promise.all(fakes.map((fake) => getResponse(fake.message)));
+
+		for (const fake of fakes) {
+			expect(fake.reply).toHaveBeenCalledTimes(1);
+		}
+
+		const succeeded = fakes.filter((fake) => {
+			const call = fake.reply.mock.calls[0]?.[0] as { components: unknown[] };
+			return !JSON.stringify(call).includes("sending messages too quickly");
+		});
+
+		expect(succeeded).toHaveLength(THREAD_RATE_LIMIT_MAX_MESSAGES);
+	});
+
+	test("concurrency: exactly USER_RATE_LIMIT_MAX_MESSAGES succeed when many arrive at once across different threads for the same user", async () => {
+		const guildId = freshId();
+		const userId = freshId();
+
+		mockOpenAIResponse(async () => ({
+			id: "resp_concurrent_user",
+			output_text: "ok",
+		}));
+
+		const fakes = Array.from({ length: 20 }, () =>
+			createFakeMessage({ guildId, userId }),
+		);
+
+		await Promise.all(fakes.map((fake) => getResponse(fake.message)));
+
+		for (const fake of fakes) {
+			expect(fake.reply).toHaveBeenCalledTimes(1);
+		}
+
+		const succeeded = fakes.filter((fake) => {
+			const call = fake.reply.mock.calls[0]?.[0] as { components: unknown[] };
+			return !JSON.stringify(call).includes("sending messages too quickly");
+		});
+
+		expect(succeeded).toHaveLength(USER_RATE_LIMIT_MAX_MESSAGES);
 	});
 });
