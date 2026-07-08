@@ -12,6 +12,7 @@ import {
 	ensureKnowledgeBaseFile,
 	invalidateKnowledgeBaseCache,
 } from "@utils/fileManager";
+import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -216,8 +217,14 @@ export async function getResponse(message: Message) {
 				? "in this thread"
 				: "across your open threads";
 			await message.reply({
-				content: `You're sending messages too quickly ${scope}. Please wait ${Math.ceil(limited.remainingTime / 1000)}s before trying again.`,
+				components: [
+					statusContainer(
+						StatusColor.Warning,
+						`You're sending messages too quickly ${scope}. Please wait ${Math.ceil(limited.remainingTime / 1000)}s before trying again.`,
+					),
+				],
 				allowedMentions: { repliedUser: true },
+				flags: MessageFlags.IsComponentsV2,
 			});
 			return;
 		}
@@ -246,9 +253,14 @@ export async function getResponse(message: Message) {
 			buildInputContent(message);
 		if (!inputContent.length) {
 			await message.reply({
-				content:
-					"Sorry, I couldn't process that message — the attachment(s) were too large or an unsupported type. Try a smaller file or a common image format.",
+				components: [
+					statusContainer(
+						StatusColor.Warning,
+						"Sorry, I couldn't process that message — the attachment(s) were too large or an unsupported type. Try a smaller file or a common image format.",
+					),
+				],
 				allowedMentions: { repliedUser: true },
+				flags: MessageFlags.IsComponentsV2,
 			});
 			return;
 		}
@@ -380,8 +392,9 @@ export async function getResponse(message: Message) {
 		}
 
 		await message.reply({
-			content: replyContent,
+			components: [statusContainer(StatusColor.Danger, replyContent)],
 			allowedMentions: { repliedUser: true },
+			flags: MessageFlags.IsComponentsV2,
 		});
 		return undefined;
 	} finally {

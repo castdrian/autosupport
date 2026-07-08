@@ -7,6 +7,7 @@ import {
 	getOrCreateGuildSettings,
 	removeSupportChannelId,
 } from "@src/database/db";
+import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
 	ChannelType,
 	type ChatInputCommandInteraction,
@@ -17,12 +18,6 @@ import {
 	SeparatorBuilder,
 	TextDisplayBuilder,
 } from "discord.js";
-
-enum AccentColor {
-	Success = 0x57f287,
-	Warning = 0xfee75c,
-	Neutral = 0x99aab5,
-}
 
 export class SettingsCommand extends Subcommand {
 	public constructor(
@@ -63,10 +58,10 @@ export class SettingsCommand extends Subcommand {
 
 		const accentColor =
 			hasChannels && hasKnowledgeBase
-				? AccentColor.Success
+				? StatusColor.Success
 				: hasChannels || hasKnowledgeBase
-					? AccentColor.Warning
-					: AccentColor.Neutral;
+					? StatusColor.Warning
+					: StatusColor.Neutral;
 
 		const container = new ContainerBuilder()
 			.setAccentColor(accentColor)
@@ -107,19 +102,13 @@ export class SettingsCommand extends Subcommand {
 		}
 
 		const accentColor = !hasKnowledgeBase
-			? AccentColor.Warning
+			? StatusColor.Warning
 			: alreadyConfigured
-				? AccentColor.Neutral
-				: AccentColor.Success;
-
-		const container = new ContainerBuilder()
-			.setAccentColor(accentColor)
-			.addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(lines.join("\n\n")),
-			);
+				? StatusColor.Neutral
+				: StatusColor.Success;
 
 		await interaction.reply({
-			components: [container],
+			components: [statusContainer(accentColor, lines.join("\n\n"))],
 			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 		});
 	}
@@ -132,15 +121,13 @@ export class SettingsCommand extends Subcommand {
 		const before = await getOrCreateGuildSettings(interaction.guildId);
 
 		if (!before.channelIds.includes(channel.id)) {
-			const container = new ContainerBuilder()
-				.setAccentColor(AccentColor.Neutral)
-				.addTextDisplayComponents(
-					new TextDisplayBuilder().setContent(
+			await interaction.reply({
+				components: [
+					statusContainer(
+						StatusColor.Neutral,
 						`channel ${channelMention(channel.id)} is not a configured support channel`,
 					),
-				);
-			await interaction.reply({
-				components: [container],
+				],
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 			});
 			return;
@@ -153,16 +140,13 @@ export class SettingsCommand extends Subcommand {
 			),
 		);
 
-		const container = new ContainerBuilder()
-			.setAccentColor(AccentColor.Success)
-			.addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(
+		await interaction.reply({
+			components: [
+				statusContainer(
+					StatusColor.Success,
 					`channel ${channelMention(channel.id)} removed as support channel`,
 				),
-			);
-
-		await interaction.reply({
-			components: [container],
+			],
 			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 		});
 	}

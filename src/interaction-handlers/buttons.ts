@@ -7,23 +7,24 @@ import {
 	deleteThreadResponsesForThread,
 } from "@src/database/db";
 import {
-	addHumanAssistanceThread,
 	hasRequestedHumanAssistance,
 	removeHumanAssistanceThread,
 } from "@utils/autosupport";
+import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
-	ButtonBuilder,
 	type ButtonInteraction,
-	ButtonStyle,
+	LabelBuilder,
 	MessageFlags,
+	ModalBuilder,
+	type ModalSubmitInteraction,
 	PermissionFlagsBits,
-	SectionBuilder,
-	TextDisplayBuilder,
+	TextInputBuilder,
+	TextInputStyle,
 	type ThreadChannel,
 } from "discord.js";
 
-function canManageThread(
-	interaction: ButtonInteraction,
+export function canManageThread(
+	interaction: ButtonInteraction | ModalSubmitInteraction,
 	thread: ThreadChannel,
 ): boolean {
 	if (interaction.user.id === thread.ownerId) return true;
@@ -32,6 +33,9 @@ function canManageThread(
 		false
 	);
 }
+
+export const REQUEST_HUMAN_MODAL_ID = "request_human_modal";
+export const REQUEST_HUMAN_REASON_FIELD_ID = "reason";
 
 export class ThreadButtonHandler extends InteractionHandler {
 	public constructor(
@@ -49,14 +53,18 @@ export class ThreadButtonHandler extends InteractionHandler {
 			case "close_thread": {
 				if (!interaction.guildId) return;
 				const thread = interaction.channel;
-				if (!thread || !thread.isThread()) return;
+				if (!thread?.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
 
 				if (!canManageThread(interaction, thread)) {
 					await interaction.reply({
-						content:
-							"Only the person who started this thread or a moderator can close it.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"Only the person who started this thread or a moderator can close it.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
@@ -68,14 +76,21 @@ export class ThreadButtonHandler extends InteractionHandler {
 						?.has(PermissionFlagsBits.ManageThreads)
 				) {
 					await interaction.reply({
-						content: "I don't have permission to close this thread.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"I don't have permission to close this thread.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
 				await interaction.reply({
-					content: "Thread has been closed.",
-					flags: MessageFlags.Ephemeral,
+					components: [
+						statusContainer(StatusColor.Success, "Thread has been closed."),
+					],
+					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 				});
 
 				await Promise.all([
@@ -89,23 +104,31 @@ export class ThreadButtonHandler extends InteractionHandler {
 			case "request_human": {
 				if (!interaction.guildId) return;
 				const thread = interaction.channel;
-				if (!thread || !thread.isThread()) return;
+				if (!thread?.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
 
 				if (!canManageThread(interaction, thread)) {
 					await interaction.reply({
-						content:
-							"Only the person who started this thread or a moderator can request human assistance for it.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"Only the person who started this thread or a moderator can request human assistance for it.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
 
 				if (await hasRequestedHumanAssistance(thread.id)) {
 					await interaction.reply({
-						content:
-							"Human assistance has already been requested for this thread.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Neutral,
+								"Human assistance has already been requested for this thread.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
@@ -117,59 +140,56 @@ export class ThreadButtonHandler extends InteractionHandler {
 						?.has(PermissionFlagsBits.ManageThreads)
 				) {
 					await interaction.reply({
-						content: "I don't have permission to request a human.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"I don't have permission to request a human.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
 
-				const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
-					tag.name.toLowerCase().includes("human"),
-				)?.id;
-				if (humanAssistanceTag) {
-					await thread.setAppliedTags([humanAssistanceTag]);
-				}
-
-				await addHumanAssistanceThread(interaction.guildId, thread.id);
-
-				await interaction.reply({
-					content:
-						"Human assistance has been requested. AI responses have been disabled for this thread.",
-					flags: MessageFlags.Ephemeral,
-				});
-
-				const resumeSection = new SectionBuilder()
-					.addTextDisplayComponents(
-						new TextDisplayBuilder().setContent(
-							"AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.",
-						),
-					)
-					.setButtonAccessory(
-						new ButtonBuilder()
-							.setLabel("Resume AI")
-							.setEmoji("🔄")
-							.setStyle(ButtonStyle.Secondary)
-							.setCustomId("resume_ai"),
+				const modal = new ModalBuilder()
+					.setCustomId(REQUEST_HUMAN_MODAL_ID)
+					.setTitle("Request Human Assistance")
+					.addLabelComponents(
+						new LabelBuilder()
+							.setLabel("What do you need help with?")
+							.setDescription(
+								"Optional — a quick summary helps whoever picks this up.",
+							)
+							.setTextInputComponent(
+								new TextInputBuilder()
+									.setCustomId(REQUEST_HUMAN_REASON_FIELD_ID)
+									.setStyle(TextInputStyle.Paragraph)
+									.setRequired(false)
+									.setMaxLength(500)
+									.setPlaceholder(
+										"e.g. the bot's answer didn't fix my issue and I'm not sure what to try next",
+									),
+							),
 					);
-				await thread
-					.send({
-						components: [resumeSection],
-						flags: MessageFlags.IsComponentsV2,
-					})
-					.catch(() => null);
+
+				await interaction.showModal(modal);
 				break;
 			}
 			case "resume_ai": {
 				if (!interaction.guildId) return;
 				const thread = interaction.channel;
-				if (!thread || !thread.isThread()) return;
+				if (!thread?.isThread()) return;
 				if (!thread.parent?.isThreadOnly()) return;
 
 				if (!canManageThread(interaction, thread)) {
 					await interaction.reply({
-						content:
-							"Only the person who started this thread or a moderator can resume AI responses for it.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"Only the person who started this thread or a moderator can resume AI responses for it.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
@@ -181,8 +201,13 @@ export class ThreadButtonHandler extends InteractionHandler {
 						?.has(PermissionFlagsBits.ManageThreads)
 				) {
 					await interaction.reply({
-						content: "I don't have permission to resume AI for this thread.",
-						flags: MessageFlags.Ephemeral,
+						components: [
+							statusContainer(
+								StatusColor.Danger,
+								"I don't have permission to resume AI for this thread.",
+							),
+						],
+						flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					});
 					return;
 				}
@@ -203,8 +228,13 @@ export class ThreadButtonHandler extends InteractionHandler {
 				}
 
 				await interaction.reply({
-					content: "AI responses have been resumed for this thread.",
-					flags: MessageFlags.Ephemeral,
+					components: [
+						statusContainer(
+							StatusColor.Success,
+							"AI responses have been resumed for this thread.",
+						),
+					],
+					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 				});
 				break;
 			}
