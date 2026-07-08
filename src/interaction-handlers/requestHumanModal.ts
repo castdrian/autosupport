@@ -7,7 +7,10 @@ import {
 	REQUEST_HUMAN_MODAL_ID,
 	REQUEST_HUMAN_REASON_FIELD_ID,
 } from "@src/interaction-handlers/buttons";
-import { addHumanAssistanceThread } from "@utils/autosupport";
+import {
+	addHumanAssistanceThread,
+	hasRequestedHumanAssistance,
+} from "@utils/autosupport";
 import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
 	ButtonBuilder,
@@ -67,6 +70,19 @@ export class RequestHumanModalHandler extends InteractionHandler {
 			return;
 		}
 
+		if (await hasRequestedHumanAssistance(thread.id)) {
+			await interaction.reply({
+				components: [
+					statusContainer(
+						StatusColor.Neutral,
+						"Human assistance has already been requested for this thread.",
+					),
+				],
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			});
+			return;
+		}
+
 		try {
 			const reason = interaction.fields
 				.getTextInputValue(REQUEST_HUMAN_REASON_FIELD_ID)
@@ -75,8 +91,14 @@ export class RequestHumanModalHandler extends InteractionHandler {
 			const humanAssistanceTag = thread.parent.availableTags.find((tag) =>
 				tag.name.toLowerCase().includes("human"),
 			)?.id;
-			if (humanAssistanceTag) {
-				await thread.setAppliedTags([humanAssistanceTag]);
+			if (
+				humanAssistanceTag &&
+				!thread.appliedTags.includes(humanAssistanceTag)
+			) {
+				await thread.setAppliedTags([
+					...thread.appliedTags,
+					humanAssistanceTag,
+				]);
 			}
 
 			await addHumanAssistanceThread(interaction.guildId, thread.id);
