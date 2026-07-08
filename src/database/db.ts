@@ -55,20 +55,62 @@ export async function updateGuildSettings(
 	return getOrCreateGuildSettings(guildId);
 }
 
-export async function addSupportChannelId(guildId: string, channelId: string) {
-	const settings = await getOrCreateGuildSettings(guildId);
-	if (settings.channelIds.includes(channelId)) return settings;
-	const channelIds = [...settings.channelIds, channelId];
-	return updateGuildSettings(guildId, { channelIds });
+function readOrCreateGuildSettingsSync(
+	tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+	guildId: string,
+): GuildSettings {
+	const newSettings: GuildSettings = {
+		id: guildId,
+		channelIds: [],
+		knowledgeBaseVectorStoreId: null,
+		knowledgeBaseHash: null,
+	};
+	tx.insert(schema.guildPreferences)
+		.values(newSettings)
+		.onConflictDoNothing()
+		.run();
+
+	const [settings] = tx
+		.select()
+		.from(schema.guildPreferences)
+		.where(eq(schema.guildPreferences.id, guildId))
+		.all();
+
+	return settings;
+}
+
+export async function addSupportChannelId(
+	guildId: string,
+	channelId: string,
+): Promise<GuildSettings> {
+	return db.transaction((tx) => {
+		const settings = readOrCreateGuildSettingsSync(tx, guildId);
+		if (settings.channelIds.includes(channelId)) return settings;
+
+		const channelIds = [...settings.channelIds, channelId];
+		tx.update(schema.guildPreferences)
+			.set({ channelIds })
+			.where(eq(schema.guildPreferences.id, guildId))
+			.run();
+
+		return { ...settings, channelIds };
+	});
 }
 
 export async function removeSupportChannelId(
 	guildId: string,
 	channelId: string,
-) {
-	const settings = await getOrCreateGuildSettings(guildId);
-	const channelIds = settings.channelIds.filter((id) => id !== channelId);
-	return updateGuildSettings(guildId, { channelIds });
+): Promise<GuildSettings> {
+	return db.transaction((tx) => {
+		const settings = readOrCreateGuildSettingsSync(tx, guildId);
+		const channelIds = settings.channelIds.filter((id) => id !== channelId);
+		tx.update(schema.guildPreferences)
+			.set({ channelIds })
+			.where(eq(schema.guildPreferences.id, guildId))
+			.run();
+
+		return { ...settings, channelIds };
+	});
 }
 
 export async function deleteGuildSettings(guildId: string) {

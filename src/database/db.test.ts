@@ -92,6 +92,19 @@ describe("addSupportChannelId / removeSupportChannelId", () => {
 		);
 		expect(settings.channelIds).toEqual(["222222222222222222"]);
 	});
+
+	test("concurrent adds for different channels both survive", async () => {
+		const guildId = freshGuildId();
+		await Promise.all([
+			addSupportChannelId(guildId, "333333333333333333"),
+			addSupportChannelId(guildId, "444444444444444444"),
+		]);
+
+		const settings = await getOrCreateGuildSettings(guildId);
+		expect(settings.channelIds).toContain("333333333333333333");
+		expect(settings.channelIds).toContain("444444444444444444");
+		expect(settings.channelIds).toHaveLength(2);
+	});
 });
 
 describe("deleteGuildSettings", () => {

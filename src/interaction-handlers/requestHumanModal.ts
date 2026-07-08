@@ -22,6 +22,8 @@ import {
 	TextDisplayBuilder,
 } from "discord.js";
 
+const MAX_APPLIED_TAGS = 5;
+
 export class RequestHumanModalHandler extends InteractionHandler {
 	public constructor(
 		ctx: InteractionHandler.LoaderContext,
@@ -95,10 +97,10 @@ export class RequestHumanModalHandler extends InteractionHandler {
 				humanAssistanceTag &&
 				!thread.appliedTags.includes(humanAssistanceTag)
 			) {
-				await thread.setAppliedTags([
-					...thread.appliedTags,
-					humanAssistanceTag,
-				]);
+				const nextTags = [...thread.appliedTags, humanAssistanceTag].slice(
+					-MAX_APPLIED_TAGS,
+				);
+				await thread.setAppliedTags(nextTags);
 			}
 
 			await addHumanAssistanceThread(interaction.guildId, thread.id);
