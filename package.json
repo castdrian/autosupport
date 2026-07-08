@@ -9,9 +9,8 @@
 	"type": "module",
 	"scripts": {
 		"format": "bunx @biomejs/biome check --write .",
-		"sversion": "standard-version",
-		"commit": "git-cz",
-		"cz": "git-cz",
+		"commit": "git-cz --disable-emoji",
+		"cz": "git-cz --disable-emoji",
 		"sql-gen": "drizzle-kit generate --config ./src/database/drizzle-config.ts",
 		"sql-migrate": "drizzle-kit migrate --config ./src/database/drizzle-config.ts",
 		"prepare": "husky .github/husky",
@@ -38,6 +37,7 @@
 		"bun-types": "^1.3.14",
 		"drizzle-kit": "^0.31.10",
 		"fast-check": "^4.8.0",
+		"git-cz": "^4.9.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.0.8",
 		"typescript": "^6.0.3"
