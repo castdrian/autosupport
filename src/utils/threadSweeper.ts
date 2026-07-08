@@ -8,7 +8,7 @@ import { SnowflakeUtil } from "discord.js";
 
 const STALE_THREAD_INACTIVITY_MS = 24 * 60 * 60 * 1000;
 
-function lastActivityTimestamp(thread: {
+export function lastActivityTimestamp(thread: {
 	lastMessageId: string | null;
 	createdTimestamp: number | null;
 }): number {
