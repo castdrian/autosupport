@@ -1,11 +1,11 @@
 import { Command } from "@sapphire/framework";
 import { getOpenAIClient } from "@utils/autosupport";
+import { StatusColor, statusContainer } from "@utils/statusMessage";
 import { getUsageSummary } from "@utils/usage";
 import {
 	type ChatInputCommandInteraction,
 	MessageFlags,
 	PermissionFlagsBits,
-	TextDisplayBuilder,
 } from "discord.js";
 import OpenAI from "openai";
 
@@ -20,12 +20,13 @@ export class UsageCommand extends Command {
 			const usage = await getUsageSummary(openai);
 			const currency = usage.currency.toUpperCase();
 
-			const text = new TextDisplayBuilder().setContent(
-				`**OpenAI Usage**\nToday: ${usage.todayUsd.toFixed(2)} ${currency}\nMonth to date: ${usage.monthToDateUsd.toFixed(2)} ${currency}`,
-			);
-
 			await interaction.editReply({
-				components: [text],
+				components: [
+					statusContainer(
+						StatusColor.Neutral,
+						`**OpenAI Usage**\nToday: ${usage.todayUsd.toFixed(2)} ${currency}\nMonth to date: ${usage.monthToDateUsd.toFixed(2)} ${currency}`,
+					),
+				],
 				flags: MessageFlags.IsComponentsV2,
 			});
 		} catch (error) {
@@ -36,9 +37,15 @@ export class UsageCommand extends Command {
 				(error.status === 401 || error.status === 403);
 
 			await interaction.editReply({
-				content: isAuthError
-					? "Couldn't fetch usage data. Make sure OPEN_AI_ADMIN_API_KEY is set to an org admin key with the api.usage.read scope."
-					: "Couldn't fetch usage data due to an unexpected error. Check the logs for details.",
+				components: [
+					statusContainer(
+						StatusColor.Danger,
+						isAuthError
+							? "Couldn't fetch usage data. Make sure OPEN_AI_ADMIN_API_KEY is set to an org admin key with the api.usage.read scope."
+							: "Couldn't fetch usage data due to an unexpected error. Check the logs for details.",
+					),
+				],
+				flags: MessageFlags.IsComponentsV2,
 			});
 		}
 	}

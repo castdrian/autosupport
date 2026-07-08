@@ -1,5 +1,6 @@
 import pkg from "@root/package.json";
 import { Command, version as sapphver } from "@sapphire/framework";
+import { StatusColor, statusContainer } from "@utils/statusMessage";
 import { version as bunver } from "bun";
 import {
 	ActionRowBuilder,
@@ -58,6 +59,7 @@ export class InfoCommand extends Command {
 			);
 
 			const container = new ContainerBuilder()
+				.setAccentColor(StatusColor.Neutral)
 				.addSectionComponents(section)
 				.addActionRowComponents(row);
 
@@ -68,7 +70,13 @@ export class InfoCommand extends Command {
 		} catch (ex) {
 			this.container.logger.error(ex);
 			await interaction.editReply({
-				content: "Sorry, I couldn't gather the info right now.",
+				components: [
+					statusContainer(
+						StatusColor.Danger,
+						"Sorry, I couldn't gather the info right now.",
+					),
+				],
+				flags: MessageFlags.IsComponentsV2,
 			});
 		}
 	}
