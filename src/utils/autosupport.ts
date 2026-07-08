@@ -194,6 +194,7 @@ export async function getResponse(message: Message) {
 	let userRateLimit: RateLimit<string> | undefined;
 	let consumedRateLimits = false;
 	let typingInterval: ReturnType<typeof setInterval> | undefined;
+	let deliveredChunks = 0;
 
 	try {
 		if (!message.content.length && !message.attachments.size) return;
@@ -275,7 +276,19 @@ export async function getResponse(message: Message) {
 			],
 		});
 
-		await setThreadResponseId(guildId, userId, message.channelId, response.id);
+		// Non-fatal: the OpenAI call already succeeded and cost real money, so
+		// losing conversation continuity for this one exchange is a much
+		// smaller price than discarding the whole generated answer below.
+		await setThreadResponseId(
+			guildId,
+			userId,
+			message.channelId,
+			response.id,
+		).catch((persistError) =>
+			message.client.logger.error(
+				`Failed to persist thread response id for thread ${message.channelId}: ${persistError}`,
+			),
+		);
 
 		const hasHumanTag = message.channel.parent.availableTags.find((tag) =>
 			tag.name.toLowerCase().includes("human"),
@@ -360,6 +373,7 @@ export async function getResponse(message: Message) {
 					flags: MessageFlags.IsComponentsV2,
 				});
 			}
+			deliveredChunks++;
 		}
 	} catch (error) {
 		if (consumedRateLimits) {
@@ -372,6 +386,28 @@ export async function getResponse(message: Message) {
 		}
 
 		message.client.logger.error(`${ErrorMessage.API_ERROR}: ${error}`);
+
+		if (deliveredChunks > 0 && message.channel.isThread()) {
+			// A real (if truncated) answer already reached the user — piling a
+			// generic "Sorry, I encountered an error" reply on top of it would
+			// just be confusing. Let them know the rest didn't make it instead.
+			await message.channel
+				.send({
+					components: [
+						statusContainer(
+							StatusColor.Warning,
+							"The rest of my reply couldn't be sent. If it looks cut off, try asking again.",
+						),
+					],
+					flags: MessageFlags.IsComponentsV2,
+				})
+				.catch((sendError: unknown) =>
+					message.client.logger.error(
+						`Failed to send partial-failure notice for thread ${message.channelId}: ${sendError}`,
+					),
+				);
+			return undefined;
+		}
 
 		let replyContent =
 			"Sorry, I encountered an error while processing your request.";
