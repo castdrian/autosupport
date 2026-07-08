@@ -8,6 +8,13 @@
 			"when": 1783468385944,
 			"tag": "0000_loud_frank_castle",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1783527354542,
+			"tag": "0001_stormy_jack_power",
+			"breakpoints": true
 		}
 	]
 }

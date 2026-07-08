@@ -26,6 +26,7 @@ export async function getOrCreateGuildSettings(guildId: string) {
 		channelIds: [],
 		knowledgeBaseVectorStoreId: null,
 		knowledgeBaseHash: null,
+		supportRoleId: null,
 	};
 
 	await db
@@ -64,6 +65,7 @@ function readOrCreateGuildSettingsSync(
 		channelIds: [],
 		knowledgeBaseVectorStoreId: null,
 		knowledgeBaseHash: null,
+		supportRoleId: null,
 	};
 	tx.insert(schema.guildPreferences)
 		.values(newSettings)
@@ -117,6 +119,14 @@ export async function deleteGuildSettings(guildId: string) {
 	await db
 		.delete(schema.guildPreferences)
 		.where(eq(schema.guildPreferences.id, guildId));
+}
+
+export async function setSupportRoleId(guildId: string, roleId: string) {
+	return updateGuildSettings(guildId, { supportRoleId: roleId });
+}
+
+export async function clearSupportRoleId(guildId: string) {
+	return updateGuildSettings(guildId, { supportRoleId: null });
 }
 
 export interface KnowledgeBaseState {

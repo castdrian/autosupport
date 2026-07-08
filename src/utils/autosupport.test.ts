@@ -9,6 +9,7 @@ import {
 	splitContent,
 } from "@utils/autosupport";
 import type { Message } from "discord.js";
+import fc from "fast-check";
 import OpenAI from "openai";
 
 interface FakeAttachment {
@@ -81,6 +82,36 @@ describe("splitContent", () => {
 
 		expect(chunks.join(" ").replace(/\s+/g, " ")).toBe(
 			content.replace(/\s+/g, " "),
+		);
+	});
+
+	test("property: every chunk respects maxLength, for arbitrary content", () => {
+		fc.assert(
+			fc.property(
+				fc.string({ maxLength: 2000 }),
+				fc.integer({ min: 1, max: 500 }),
+				(content, maxLength) => {
+					const chunks = splitContent(content, maxLength);
+					for (const chunk of chunks) {
+						expect(chunk.length).toBeLessThanOrEqual(maxLength);
+					}
+				},
+			),
+		);
+	});
+
+	test("property: no non-whitespace character is dropped or duplicated, for arbitrary content", () => {
+		fc.assert(
+			fc.property(
+				fc.string({ maxLength: 2000 }),
+				fc.integer({ min: 1, max: 500 }),
+				(content, maxLength) => {
+					const chunks = splitContent(content, maxLength);
+					const rejoined = chunks.join("").replace(/\s+/g, "");
+					const normalizedOriginal = content.replace(/\s+/g, "");
+					expect(rejoined).toBe(normalizedOriginal);
+				},
+			),
 		);
 	});
 });

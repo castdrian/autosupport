@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	addSupportChannelId,
 	clearKnowledgeBaseState,
+	clearSupportRoleId,
 	clearThreadEscalated,
 	clearThreadResponseId,
 	countEscalatedThreadsForGuild,
@@ -16,13 +17,11 @@ import {
 	isThreadEscalated,
 	removeSupportChannelId,
 	setKnowledgeBaseState,
+	setSupportRoleId,
 	setThreadEscalated,
 	setThreadResponseId,
 } from "@src/database/db";
 
-// Each test uses its own guild/thread/user ID since all tests share one
-// in-memory db connection for the whole test run (see bunfig.toml preload +
-// DATABASE_PATH).
 let nextGuildId = 100000000000000001n;
 function freshGuildId(): string {
 	return String(nextGuildId++);
@@ -47,6 +46,7 @@ describe("getOrCreateGuildSettings", () => {
 		expect(settings.channelIds).toEqual([]);
 		expect(settings.knowledgeBaseVectorStoreId).toBeNull();
 		expect(settings.knowledgeBaseHash).toBeNull();
+		expect(settings.supportRoleId).toBeNull();
 	});
 
 	test("returns the existing row on subsequent calls without resetting it", async () => {
@@ -55,6 +55,35 @@ describe("getOrCreateGuildSettings", () => {
 
 		const settings = await getOrCreateGuildSettings(guildId);
 		expect(settings.channelIds).toEqual(["111111111111111111"]);
+	});
+});
+
+describe("setSupportRoleId / clearSupportRoleId", () => {
+	test("sets the support role", async () => {
+		const guildId = freshGuildId();
+		const settings = await setSupportRoleId(guildId, "555555555555555555");
+		expect(settings.supportRoleId).toBe("555555555555555555");
+	});
+
+	test("overwrites a previously set support role", async () => {
+		const guildId = freshGuildId();
+		await setSupportRoleId(guildId, "555555555555555555");
+		const settings = await setSupportRoleId(guildId, "666666666666666666");
+		expect(settings.supportRoleId).toBe("666666666666666666");
+	});
+
+	test("clears the support role", async () => {
+		const guildId = freshGuildId();
+		await setSupportRoleId(guildId, "555555555555555555");
+		const settings = await clearSupportRoleId(guildId);
+		expect(settings.supportRoleId).toBeNull();
+	});
+
+	test("does not affect other guild settings", async () => {
+		const guildId = freshGuildId();
+		await addSupportChannelId(guildId, "222222222222222222");
+		const settings = await setSupportRoleId(guildId, "555555555555555555");
+		expect(settings.channelIds).toEqual(["222222222222222222"]);
 	});
 });
 

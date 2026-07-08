@@ -16,7 +16,8 @@
 		"sql-migrate": "drizzle-kit migrate --config ./src/database/drizzle-config.ts",
 		"prepare": "husky .github/husky",
 		"start": "bun run src/main.ts",
-		"test": "DATABASE_PATH=:memory: bun test"
+		"test": "DATABASE_PATH=:memory: bun test",
+		"test:coverage": "DATABASE_PATH=:memory: bun test --coverage"
 	},
 	"dependencies": {
 		"@neato/config": "^4.1.0",
@@ -36,6 +37,7 @@
 		"@biomejs/biome": "^2.5.2",
 		"bun-types": "^1.3.14",
 		"drizzle-kit": "^0.31.10",
+		"fast-check": "^4.8.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.0.8",
 		"typescript": "^6.0.3"

@@ -2,6 +2,7 @@ import {
 	InteractionHandler,
 	InteractionHandlerTypes,
 } from "@sapphire/framework";
+import { getGuildSettingsIfExists } from "@src/database/db";
 import {
 	canManageThread,
 	REQUEST_HUMAN_MODAL_ID,
@@ -18,6 +19,7 @@ import {
 	MessageFlags,
 	type ModalSubmitInteraction,
 	PermissionFlagsBits,
+	roleMention,
 	SectionBuilder,
 	TextDisplayBuilder,
 } from "discord.js";
@@ -119,9 +121,15 @@ export class RequestHumanModalHandler extends InteractionHandler {
 				? `AI responses are paused for this thread.\n\n**Reason given:** ${reason}`
 				: "AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.";
 
+			const settings = await getGuildSettingsIfExists(interaction.guildId);
+			const supportRoleId = settings?.supportRoleId ?? undefined;
+			const pausedTextWithPing = supportRoleId
+				? `${roleMention(supportRoleId)} ${pausedText}`
+				: pausedText;
+
 			const resumeSection = new SectionBuilder()
 				.addTextDisplayComponents(
-					new TextDisplayBuilder().setContent(pausedText),
+					new TextDisplayBuilder().setContent(pausedTextWithPing),
 				)
 				.setButtonAccessory(
 					new ButtonBuilder()
@@ -134,6 +142,9 @@ export class RequestHumanModalHandler extends InteractionHandler {
 			await thread
 				.send({
 					components: [resumeSection],
+					allowedMentions: {
+						roles: supportRoleId ? [supportRoleId] : [],
+					},
 					flags: MessageFlags.IsComponentsV2,
 				})
 				.catch(() => null);

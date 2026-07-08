@@ -7,6 +7,11 @@ on:
     paths-ignore:
       - '**/*.md'
       - '.github/workflows/**'
+  pull_request:
+    branches:
+        - main
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   test:
@@ -32,10 +37,11 @@ jobs:
         run: bunx biome check .
 
       - name: Test
-        run: bun test
+        run: bun test --coverage
 
   deploy:
     needs: test
+    if: github.event_name == 'push'
     permissions:
         contents: write
     runs-on: ubuntu-latest

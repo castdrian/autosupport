@@ -1,2 +1,10 @@
 [test]
 preload = ["./src/database/test-setup.ts"]
+coveragePathIgnorePatterns = [
+	"src/commands/**",
+	"src/listeners/**",
+	"src/interaction-handlers/**",
+	"src/main.ts",
+	"**/*.test.ts",
+]
+coverageThreshold = 0.15

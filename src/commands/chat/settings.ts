@@ -2,11 +2,13 @@ import { Subcommand } from "@sapphire/plugin-subcommands";
 import data from "@src/data.toml";
 import {
 	addSupportChannelId,
+	clearSupportRoleId,
 	clearThreadEscalated,
 	countEscalatedThreadsForGuild,
 	deleteThreadResponsesForThread,
 	getOrCreateGuildSettings,
 	removeSupportChannelId,
+	setSupportRoleId,
 } from "@src/database/db";
 import { StatusColor, statusContainer } from "@utils/statusMessage";
 import {
@@ -17,6 +19,7 @@ import {
 	InteractionContextType,
 	MessageFlags,
 	PermissionFlagsBits,
+	roleMention,
 	SeparatorBuilder,
 	TextDisplayBuilder,
 	type ThreadChannel,
@@ -40,6 +43,7 @@ export class SettingsCommand extends Subcommand {
 						{ name: "remove", chatInputRun: "chatInputRemoveSupportChannel" },
 					],
 				},
+				{ name: "support-role", chatInputRun: "chatInputSupportRole" },
 			],
 		});
 	}
@@ -64,6 +68,8 @@ export class SettingsCommand extends Subcommand {
 		);
 		const escalatedText = `**Active threads**\n${escalatedCount === 0 ? "No threads currently waiting on a human" : `${escalatedCount} thread${escalatedCount === 1 ? "" : "s"} currently waiting on a human`}`;
 
+		const supportRoleText = `**Support role**\n${settings.supportRoleId ? `${roleMention(settings.supportRoleId)} is pinged when a thread requests human assistance` : "No support role configured — escalations won't ping anyone"}`;
+
 		const accentColor =
 			hasChannels && hasKnowledgeBase
 				? StatusColor.Success
@@ -83,6 +89,10 @@ export class SettingsCommand extends Subcommand {
 			.addSeparatorComponents(new SeparatorBuilder())
 			.addTextDisplayComponents(
 				new TextDisplayBuilder().setContent(escalatedText),
+			)
+			.addSeparatorComponents(new SeparatorBuilder())
+			.addTextDisplayComponents(
+				new TextDisplayBuilder().setContent(supportRoleText),
 			);
 
 		await interaction.reply({
@@ -163,6 +173,36 @@ export class SettingsCommand extends Subcommand {
 		});
 	}
 
+	public async chatInputSupportRole(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId) return;
+		const role = interaction.options.getRole("role");
+
+		if (!role) {
+			await clearSupportRoleId(interaction.guildId);
+			await interaction.reply({
+				components: [
+					statusContainer(
+						StatusColor.Neutral,
+						"Support role cleared — escalations won't ping anyone.",
+					),
+				],
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			});
+			return;
+		}
+
+		await setSupportRoleId(interaction.guildId, role.id);
+		await interaction.reply({
+			components: [
+				statusContainer(
+					StatusColor.Success,
+					`${roleMention(role.id)} will be pinged when a thread requests human assistance.`,
+				),
+			],
+			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+		});
+	}
+
 	private async cleanupThreadStateForChannel(channelId: string): Promise<void> {
 		const channel = await this.container.client.channels
 			.fetch(channelId)
@@ -228,6 +268,21 @@ export class SettingsCommand extends Subcommand {
 										.addChannelTypes(ChannelType.GuildForum)
 										.setRequired(true),
 								),
+						),
+				)
+				.addSubcommand((command) =>
+					command
+						.setName("support-role")
+						.setDescription(
+							"set or clear the role pinged when a thread requests human assistance",
+						)
+						.addRoleOption((option) =>
+							option
+								.setName("role")
+								.setDescription(
+									"role to ping on escalation (omit to clear the current role)",
+								)
+								.setRequired(false),
 						),
 				)
 				.setContexts(InteractionContextType.Guild)

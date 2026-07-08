@@ -1,0 +1,1 @@
+ALTER TABLE `guild_preferences` ADD `support_role_id` text;

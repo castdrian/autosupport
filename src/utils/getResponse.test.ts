@@ -160,8 +160,6 @@ describe("getResponse", () => {
 
 		await getResponse(message);
 
-		// 9000 chars over the 3900-char display cap splits into 3 chunks: the
-		// first goes out via reply(), the remaining two via channel.send().
 		expect(reply).toHaveBeenCalledTimes(1);
 		expect(channelSend).toHaveBeenCalledTimes(2);
 	});
@@ -187,9 +185,6 @@ describe("getResponse", () => {
 		};
 		expect(JSON.stringify(noticeCall)).toContain("couldn't be sent");
 
-		// The consumed rate-limit slot should not have been refunded: the
-		// initial message already used 1 of the 4 per-thread slots, so only 3
-		// more should go through before the thread hits its cap.
 		for (let i = 0; i < 4; i++) {
 			const followUp = createFakeMessage({ guildId, threadId, userId });
 			mockOpenAIResponse(async () => ({
@@ -226,9 +221,6 @@ describe("getResponse", () => {
 			);
 		}
 
-		// All 4 attempts failed before delivering anything, so the rate limit
-		// should have been refunded every time and a 5th attempt should still
-		// go through rather than being rate limited.
 		const fifth = createFakeMessage({ guildId, threadId, userId });
 		mockOpenAIResponse(async () => ({
 			id: "resp_fifth",

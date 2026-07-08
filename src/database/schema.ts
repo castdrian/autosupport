@@ -8,6 +8,7 @@ export const guildPreferences = sqliteTable("guild_preferences", {
 		.$type<string[]>(),
 	knowledgeBaseVectorStoreId: text("knowledge_base_vector_store_id"),
 	knowledgeBaseHash: text("knowledge_base_hash"),
+	supportRoleId: text("support_role_id"),
 });
 
 export const threadResponses = sqliteTable("thread_responses", {
