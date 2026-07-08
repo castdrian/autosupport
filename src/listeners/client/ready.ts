@@ -57,12 +57,6 @@ export class ReadyListener extends Listener {
 		setInterval(writeHeartbeat, HEARTBEAT_INTERVAL_MS);
 	}
 
-	// Builds each guild's knowledge base vector store ahead of time so the
-	// first real user message doesn't pay the full upload/indexing latency.
-	// Runs in the background and never blocks readiness or command registration.
-	// Only warms guilds that both have knowledge base content *and* an actual
-	// configured support channel, since a guild without one can never receive
-	// a response anyway.
 	private async warmKnowledgeBases(): Promise<void> {
 		const candidateGuildIds = Object.keys(data.support).filter((guildId) =>
 			this.container.client.guilds.cache.has(guildId),

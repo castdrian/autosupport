@@ -19,6 +19,7 @@ import {
 	PermissionFlagsBits,
 	SeparatorBuilder,
 	TextDisplayBuilder,
+	type ThreadChannel,
 } from "discord.js";
 
 export class SettingsCommand extends Subcommand {
@@ -168,15 +169,19 @@ export class SettingsCommand extends Subcommand {
 			.catch(() => null);
 		if (!channel?.isThreadOnly()) return;
 
-		const [active, archived] = await Promise.all([
-			channel.threads.fetchActive().catch(() => null),
-			channel.threads.fetchArchived().catch(() => null),
-		]);
+		const active = await channel.threads.fetchActive().catch(() => null);
+		const threadIds = new Set(active?.threads.keys() ?? []);
 
-		const threadIds = new Set([
-			...(active?.threads.keys() ?? []),
-			...(archived?.threads.keys() ?? []),
-		]);
+		let before: ThreadChannel | undefined;
+		for (;;) {
+			const page = await channel.threads
+				.fetchArchived({ before })
+				.catch(() => null);
+			if (!page?.threads.size) break;
+			for (const id of page.threads.keys()) threadIds.add(id);
+			if (!page.hasMore) break;
+			before = page.threads.last();
+		}
 
 		await Promise.all(
 			[...threadIds].map((threadId) =>

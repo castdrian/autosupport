@@ -31,26 +31,18 @@ import type {
 
 const MODEL = "gpt-5-nano";
 
-// Caps messages within a single thread.
 const THREAD_RATE_LIMIT_WINDOW_MS = 60_000;
 const THREAD_RATE_LIMIT_MAX_MESSAGES = 4;
 
-// Caps a user's total messages across every thread in a guild, so spreading
-// messages across many threads can't be used to dodge the per-thread cap.
 const USER_RATE_LIMIT_WINDOW_MS = 60_000;
 const USER_RATE_LIMIT_MAX_MESSAGES = 8;
 
 export const MAX_ATTACHMENTS = 4;
-// Conservative cap kept well under typical API upload limits.
 export const MAX_ATTACHMENT_SIZE_BYTES = 20 * 1024 * 1024;
 const UNSUPPORTED_ATTACHMENT_TYPE_PREFIXES = ["video/", "audio/"];
 
-// Discord caps the total text across all Components V2 text displays in a
-// single message at 4000 characters; stay under that with some margin.
 const MAX_TEXT_DISPLAY_LENGTH = 3900;
 
-// Discord's typing indicator expires after ~10s; refresh it periodically
-// while a request is in flight so slow requests don't look stalled.
 const TYPING_REFRESH_INTERVAL_MS = 8_000;
 
 enum ToolType {
@@ -75,9 +67,6 @@ function refundRateLimit(rateLimit: RateLimit<string>, limit: number): void {
 	if (rateLimit.remaining < limit) rateLimit.remaining++;
 }
 
-// Detects an OpenAI error caused by a vector store that no longer exists
-// (e.g. deleted out-of-band), so the stale cached reference can be cleared
-// and the next message triggers a fresh rebuild instead of failing forever.
 export function isMissingVectorStoreError(error: unknown): boolean {
 	if (!(error instanceof OpenAI.APIError)) return false;
 	if (error.status === 404) return true;
@@ -276,9 +265,6 @@ export async function getResponse(message: Message) {
 			],
 		});
 
-		// Non-fatal: the OpenAI call already succeeded and cost real money, so
-		// losing conversation continuity for this one exchange is a much
-		// smaller price than discarding the whole generated answer below.
 		await setThreadResponseId(
 			guildId,
 			userId,
@@ -388,9 +374,6 @@ export async function getResponse(message: Message) {
 		message.client.logger.error(`${ErrorMessage.API_ERROR}: ${error}`);
 
 		if (deliveredChunks > 0 && message.channel.isThread()) {
-			// A real (if truncated) answer already reached the user — piling a
-			// generic "Sorry, I encountered an error" reply on top of it would
-			// just be confusing. Let them know the rest didn't make it instead.
 			await message.channel
 				.send({
 					components: [

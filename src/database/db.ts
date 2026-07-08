@@ -9,11 +9,6 @@ export const db = drizzle(sqlite, { schema });
 
 export type GuildSettings = typeof schema.guildPreferences.$inferSelect;
 
-// Read-only lookup that never creates a row. Use this over
-// getOrCreateGuildSettings when the caller only needs to check existing
-// settings (e.g. a periodic sweep across every guild) and shouldn't pay for
-// an insert attempt — or leave behind a row — for guilds that never
-// configured anything.
 export async function getGuildSettingsIfExists(
 	guildId: string,
 ): Promise<GuildSettings | undefined> {
@@ -51,9 +46,6 @@ export async function updateGuildSettings(
 	guildId: string,
 	newSettings: Partial<GuildSettings>,
 ) {
-	// Ensure a row exists first — updating a guild with no row yet would
-	// otherwise silently affect zero rows, and the fallback read below would
-	// then return freshly-created defaults instead of the intended update.
 	await getOrCreateGuildSettings(guildId);
 	await db
 		.update(schema.guildPreferences)

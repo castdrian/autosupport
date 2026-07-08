@@ -32,11 +32,6 @@ async function getVectorStoreFiles(client: OpenAI, vectorStoreId: string) {
 	}
 }
 
-// client.vectorStores.list() only returns one page (20 items) by default.
-// The SDK's list result is an async iterable that transparently fetches
-// further pages on demand, so iterate rather than reading .data directly —
-// otherwise a store past the first page would never be found, causing
-// duplicate creation on rebuild and silently-failed cleanup on delete.
 async function findVectorStoreByName(client: OpenAI, name: string) {
 	for await (const store of client.vectorStores.list()) {
 		if (store.name === name) return store;
@@ -160,11 +155,6 @@ async function resolveKnowledgeBaseFile(
 	return vectorStoreId;
 }
 
-// Caches the in-flight build promise (not just the finished result) so
-// concurrent calls for the same guild before the first build completes
-// await the same build instead of racing to create duplicate vector stores.
-// The build itself is skipped entirely (no OpenAI calls at all) when the
-// guild's support data hasn't changed since the last persisted build.
 export function ensureKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
@@ -184,9 +174,6 @@ export function ensureKnowledgeBaseFile(
 	return buildPromise;
 }
 
-// Forgets everything about a guild's knowledge base build so the next call
-// to ensureKnowledgeBaseFile does a full rebuild. Use when the cached vector
-// store ID turns out to be stale (e.g. it was deleted out-of-band).
 export async function invalidateKnowledgeBaseCache(
 	guildId: string,
 ): Promise<void> {
@@ -198,10 +185,6 @@ export async function deleteKnowledgeBaseFile(
 	guildId: string,
 	client: OpenAI,
 ): Promise<void> {
-	// If a build is already in flight for this guild, let it finish first so
-	// we clean up whatever it actually produces instead of racing it — the
-	// in-flight build's own state writes would otherwise land after cleanup
-	// runs and leave a fresh, never-cleaned-up vector store behind.
 	const inFlight = managedVectorStores.get(guildId);
 	managedVectorStores.delete(guildId);
 	if (inFlight) await inFlight.catch(() => null);

@@ -36,9 +36,6 @@ export class RequestHumanModalHandler extends InteractionHandler {
 		if (!thread?.isThread()) return;
 		if (!thread.parent?.isThreadOnly()) return;
 
-		// Re-check everything: time has passed since the button was clicked and
-		// showModal() was awaited, so the thread's state could have changed —
-		// e.g. someone else already requested human help in the meantime.
 		if (!canManageThread(interaction, thread)) {
 			await interaction.reply({
 				components: [
