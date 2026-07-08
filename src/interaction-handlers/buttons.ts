@@ -12,12 +12,12 @@ import {
 	removeHumanAssistanceThread,
 } from "@utils/autosupport";
 import {
-	ActionRowBuilder,
 	ButtonBuilder,
 	type ButtonInteraction,
 	ButtonStyle,
 	MessageFlags,
 	PermissionFlagsBits,
+	SectionBuilder,
 	TextDisplayBuilder,
 	type ThreadChannel,
 } from "discord.js";
@@ -138,20 +138,22 @@ export class ThreadButtonHandler extends InteractionHandler {
 					flags: MessageFlags.Ephemeral,
 				});
 
-				const resumeRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setLabel("Resume AI")
-						.setStyle(ButtonStyle.Secondary)
-						.setCustomId("resume_ai"),
-				);
+				const resumeSection = new SectionBuilder()
+					.addTextDisplayComponents(
+						new TextDisplayBuilder().setContent(
+							"AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.",
+						),
+					)
+					.setButtonAccessory(
+						new ButtonBuilder()
+							.setLabel("Resume AI")
+							.setEmoji("🔄")
+							.setStyle(ButtonStyle.Secondary)
+							.setCustomId("resume_ai"),
+					);
 				await thread
 					.send({
-						components: [
-							new TextDisplayBuilder().setContent(
-								"AI responses are paused for this thread. The person who started this thread or a moderator can click below to resume them.",
-							),
-							resumeRow,
-						],
+						components: [resumeSection],
 						flags: MessageFlags.IsComponentsV2,
 					})
 					.catch(() => null);

@@ -18,6 +18,7 @@ import {
 	ButtonStyle,
 	type Message,
 	MessageFlags,
+	SeparatorBuilder,
 	TextDisplayBuilder,
 } from "discord.js";
 import OpenAI from "openai";
@@ -271,6 +272,7 @@ export async function getResponse(message: Message) {
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setLabel("Close Thread")
+				.setEmoji("✅")
 				.setStyle(ButtonStyle.Success)
 				.setCustomId("close_thread"),
 		);
@@ -279,6 +281,7 @@ export async function getResponse(message: Message) {
 			row.addComponents(
 				new ButtonBuilder()
 					.setLabel("Request Human")
+					.setEmoji("🙋")
 					.setStyle(ButtonStyle.Danger)
 					.setCustomId("request_human"),
 			);
@@ -286,7 +289,7 @@ export async function getResponse(message: Message) {
 
 		const droppedAttachmentsNote =
 			droppedAttachments > 0
-				? `\n\n_Note: ${droppedAttachments} attachment${droppedAttachments === 1 ? " was" : "s were"} skipped (unsupported type, too large, or the ${MAX_ATTACHMENTS}-attachment limit was reached)._`
+				? `_Note: ${droppedAttachments} attachment${droppedAttachments === 1 ? " was" : "s were"} skipped (unsupported type, too large, or the ${MAX_ATTACHMENTS}-attachment limit was reached)._`
 				: "";
 
 		const cleanedContent = cleanResponseText(response.output_text);
@@ -294,28 +297,44 @@ export async function getResponse(message: Message) {
 			const fallbackNote = hasHumanTag
 				? " Use the Request Human button below if you'd like to talk to a person instead."
 				: "";
+			const components: (TextDisplayBuilder | SeparatorBuilder)[] = [
+				new TextDisplayBuilder().setContent(
+					`Sorry, I wasn't able to generate a response for that. Try rephrasing your question.${fallbackNote}`,
+				),
+			];
+			if (droppedAttachmentsNote) {
+				components.push(
+					new SeparatorBuilder(),
+					new TextDisplayBuilder().setContent(droppedAttachmentsNote),
+				);
+			}
 			await message.reply({
-				components: [
-					new TextDisplayBuilder().setContent(
-						`Sorry, I wasn't able to generate a response for that. Try rephrasing your question.${fallbackNote}${droppedAttachmentsNote}`,
-					),
-					row,
-				],
+				components: [...components, row],
 				allowedMentions: { repliedUser: true },
 				flags: MessageFlags.IsComponentsV2,
 			});
 			return;
 		}
 
-		const chunks = splitContent(
-			`${cleanedContent}${droppedAttachmentsNote}`,
-			MAX_TEXT_DISPLAY_LENGTH,
-		);
+		const chunks = splitContent(cleanedContent, MAX_TEXT_DISPLAY_LENGTH);
 
 		for (const [index, chunk] of chunks.entries()) {
 			const isLast = index === chunks.length - 1;
-			const text = new TextDisplayBuilder().setContent(chunk);
-			const components = isLast ? [text, row] : [text];
+			const components: (
+				| TextDisplayBuilder
+				| SeparatorBuilder
+				| ActionRowBuilder<ButtonBuilder>
+			)[] = [new TextDisplayBuilder().setContent(chunk)];
+
+			if (isLast) {
+				if (droppedAttachmentsNote) {
+					components.push(
+						new SeparatorBuilder(),
+						new TextDisplayBuilder().setContent(droppedAttachmentsNote),
+					);
+				}
+				components.push(row);
+			}
 
 			if (index === 0) {
 				await message.reply({
