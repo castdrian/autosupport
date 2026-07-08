@@ -3,6 +3,7 @@ import { config } from "@src/config";
 import data from "@src/data.toml";
 import {
 	clearThreadEscalated,
+	clearThreadResponseId,
 	getThreadResponseId,
 	isThreadEscalated,
 	setThreadEscalated,
@@ -69,9 +70,15 @@ function refundRateLimit(rateLimit: RateLimit<string>, limit: number): void {
 
 export function isMissingVectorStoreError(error: unknown): boolean {
 	if (!(error instanceof OpenAI.APIError)) return false;
-	if (error.status === 404) return true;
 	const message = error.message?.toLowerCase() ?? "";
 	return message.includes("vector_store") || message.includes("vector store");
+}
+
+export function isStaleResponseIdError(error: unknown): boolean {
+	if (!(error instanceof OpenAI.APIError) || error.status !== 404) return false;
+	if (error.param === "previous_response_id") return true;
+	const message = error.message?.toLowerCase() ?? "";
+	return message.includes("previous_response_id");
 }
 
 export async function addHumanAssistanceThread(
@@ -362,7 +369,7 @@ export async function getResponse(message: Message) {
 			deliveredChunks++;
 		}
 	} catch (error) {
-		if (consumedRateLimits) {
+		if (consumedRateLimits && deliveredChunks === 0) {
 			if (threadRateLimit) {
 				refundRateLimit(threadRateLimit, threadRateLimitManager.limit);
 			}
@@ -403,6 +410,18 @@ export async function getResponse(message: Message) {
 			);
 			replyContent =
 				"Sorry, I had trouble accessing the knowledge base for this server. It's been reset and should rebuild automatically — please try again in a moment.";
+		} else if (isStaleResponseIdError(error) && message.guildId) {
+			await clearThreadResponseId(
+				message.guildId,
+				message.author.id,
+				message.channelId,
+			).catch((clearError) =>
+				message.client.logger.error(
+					`Failed to clear stale response id for thread ${message.channelId}: ${clearError}`,
+				),
+			);
+			replyContent =
+				"Sorry, I lost track of this conversation (it may have expired). I've reset it — please try your message again.";
 		} else if (error instanceof OpenAI.APIError && error.status === 429) {
 			replyContent =
 				error.code === "insufficient_quota"

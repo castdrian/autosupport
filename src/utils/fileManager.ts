@@ -89,41 +89,43 @@ async function buildKnowledgeBaseFile(
 
 	await fs.writeFile(tempFilePath, jsonContent);
 
-	let vectorStoreId: string;
+	try {
+		let vectorStoreId: string;
 
-	const existingVectorStore = await findVectorStoreByName(client, guildId);
+		const existingVectorStore = await findVectorStoreByName(client, guildId);
 
-	if (existingVectorStore) {
-		vectorStoreId = existingVectorStore.id;
-		await deleteVectorStoreFiles(client, vectorStoreId);
-	} else {
-		const vectorStore = await client.vectorStores.create({
-			name: guildId,
+		if (existingVectorStore) {
+			vectorStoreId = existingVectorStore.id;
+			await deleteVectorStoreFiles(client, vectorStoreId);
+		} else {
+			const vectorStore = await client.vectorStores.create({
+				name: guildId,
+			});
+			vectorStoreId = vectorStore.id;
+		}
+
+		const file = await client.files.create({
+			file: createReadStream(tempFilePath),
+			purpose: FilePurpose.ASSISTANTS,
 		});
-		vectorStoreId = vectorStore.id;
-	}
 
-	const file = await client.files.create({
-		file: createReadStream(tempFilePath),
-		purpose: FilePurpose.ASSISTANTS,
-	});
-
-	const batch = await client.vectorStores.fileBatches.createAndPoll(
-		vectorStoreId,
-		{
-			file_ids: [file.id],
-		},
-	);
-
-	if (batch.status !== "completed" || batch.file_counts.failed > 0) {
-		throw new Error(
-			`Vector store file batch did not complete successfully for guild ${guildId}: status=${batch.status}, failed=${batch.file_counts.failed}`,
+		const batch = await client.vectorStores.fileBatches.createAndPoll(
+			vectorStoreId,
+			{
+				file_ids: [file.id],
+			},
 		);
+
+		if (batch.status !== "completed" || batch.file_counts.failed > 0) {
+			throw new Error(
+				`Vector store file batch did not complete successfully for guild ${guildId}: status=${batch.status}, failed=${batch.file_counts.failed}`,
+			);
+		}
+
+		return vectorStoreId;
+	} finally {
+		await fs.unlink(tempFilePath).catch(() => null);
 	}
-
-	await fs.unlink(tempFilePath);
-
-	return vectorStoreId;
 }
 
 async function resolveKnowledgeBaseFile(

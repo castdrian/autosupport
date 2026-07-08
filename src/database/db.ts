@@ -154,6 +154,21 @@ export async function setThreadResponseId(
 		});
 }
 
+export async function clearThreadResponseId(
+	guildId: string,
+	userId: string,
+	threadId: string,
+): Promise<void> {
+	await db
+		.delete(schema.threadResponses)
+		.where(
+			eq(
+				schema.threadResponses.key,
+				threadResponseKey(guildId, userId, threadId),
+			),
+		);
+}
+
 export async function deleteThreadResponsesForThread(
 	threadId: string,
 ): Promise<void> {

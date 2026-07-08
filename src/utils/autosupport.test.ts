@@ -3,6 +3,7 @@ import {
 	buildInputContent,
 	cleanResponseText,
 	isMissingVectorStoreError,
+	isStaleResponseIdError,
 	MAX_ATTACHMENT_SIZE_BYTES,
 	MAX_ATTACHMENTS,
 	splitContent,
@@ -184,9 +185,9 @@ describe("buildInputContent", () => {
 });
 
 describe("isMissingVectorStoreError", () => {
-	test("returns true for a 404 API error", () => {
+	test("returns false for a 404 API error unrelated to vector stores", () => {
 		const error = new OpenAI.APIError(404, undefined, "Not Found", undefined);
-		expect(isMissingVectorStoreError(error)).toBe(true);
+		expect(isMissingVectorStoreError(error)).toBe(false);
 	});
 
 	test("returns true when the message mentions a missing vector store", () => {
@@ -215,5 +216,48 @@ describe("isMissingVectorStoreError", () => {
 		);
 		expect(isMissingVectorStoreError("not an error")).toBe(false);
 		expect(isMissingVectorStoreError(undefined)).toBe(false);
+	});
+});
+
+describe("isStaleResponseIdError", () => {
+	test("returns true when the error param is previous_response_id", () => {
+		const error = new OpenAI.APIError(
+			404,
+			{ param: "previous_response_id" },
+			"Previous response not found",
+			undefined,
+		);
+		expect(isStaleResponseIdError(error)).toBe(true);
+	});
+
+	test("returns true when the message mentions previous_response_id", () => {
+		const error = new OpenAI.APIError(
+			404,
+			undefined,
+			"previous_response_id 'resp_abc123' not found",
+			undefined,
+		);
+		expect(isStaleResponseIdError(error)).toBe(true);
+	});
+
+	test("returns false for a 404 unrelated to previous_response_id", () => {
+		const error = new OpenAI.APIError(404, undefined, "Not Found", undefined);
+		expect(isStaleResponseIdError(error)).toBe(false);
+	});
+
+	test("returns false for a non-404 error mentioning previous_response_id", () => {
+		const error = new OpenAI.APIError(
+			400,
+			undefined,
+			"previous_response_id must be a string",
+			undefined,
+		);
+		expect(isStaleResponseIdError(error)).toBe(false);
+	});
+
+	test("returns false for non-API errors", () => {
+		expect(isStaleResponseIdError(new Error("some other failure"))).toBe(false);
+		expect(isStaleResponseIdError("not an error")).toBe(false);
+		expect(isStaleResponseIdError(undefined)).toBe(false);
 	});
 });
