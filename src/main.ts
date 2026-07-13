@@ -39,7 +39,7 @@ ApplicationCommandRegistries.setDefaultGuildIds(
 );
 
 try {
-	await client.login();
+	await client.login(config.discordToken);
 } catch (error) {
 	console.error(
 		"Failed to log in to Discord. Check that DISCORD_TOKEN is set and valid:",
