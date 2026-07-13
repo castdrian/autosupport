@@ -63,6 +63,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            set -e
             cd autosupport
-            git pull
+            git fetch origin main
+            git reset --hard origin/main
             docker compose up --build -d

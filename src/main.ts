@@ -45,5 +45,6 @@ try {
 		"Failed to log in to Discord. Check that DISCORD_TOKEN is set and valid:",
 	);
 	console.error(error);
+	await Bun.sleep(60_000);
 	process.exit(1);
 }
