@@ -1,6 +1,7 @@
 import { OnePasswordConnect } from "@1password/connect";
 
-const CONNECT_SERVER_URL = "https://1p.unbound.rip";
+const CONNECT_SERVER_URL =
+	process.env.OP_CONNECT_SERVER_URL ?? "https://1p.unbound.rip";
 const VAULT_TITLE = "Unbound";
 
 const AUTOSUPPORT_ITEM_ID = "3lbrpnmiautp3luz4yn56ncrdq";

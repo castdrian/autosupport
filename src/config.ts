@@ -1,8 +1,16 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { createConfig, loaders } from "@neato/config";
 import data from "@src/data.toml";
 import { fetchOnePasswordSecrets } from "@utils/onePasswordSecrets";
 import { z } from "zod";
+
+function hasRegularEnvFile(): boolean {
+	try {
+		return statSync(".env").isFile();
+	} catch {
+		return false;
+	}
+}
 
 const schema = z.object({
 	discordToken: z
@@ -25,7 +33,7 @@ const schema = z.object({
 
 const usesOnePassword =
 	existsSync("/.dockerenv") ||
-	(!existsSync(".env") && !process.env.DISCORD_TOKEN);
+	(!hasRegularEnvFile() && !process.env.DISCORD_TOKEN);
 
 async function loadConfig() {
 	if (!usesOnePassword) {
