@@ -28,6 +28,7 @@ const schema = z.object({
 		.string()
 		.regex(/^sk-[a-zA-Z0-9_-]{20,}$/)
 		.optional(),
+	githubToken: z.string().min(1).optional(),
 	errorWebhookUrl: z
 		.string()
 		.regex(/^https:\/\/discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/)
@@ -49,7 +50,11 @@ async function loadConfig() {
 	try {
 		const secrets = await fetchOnePasswordSecrets();
 		return Object.freeze(
-			schema.parse({ ...secrets, devGuildId: process.env.DEV_GUILD_ID }),
+			schema.parse({
+				...secrets,
+				devGuildId: process.env.DEV_GUILD_ID,
+				githubToken: secrets.githubToken ?? process.env.GITHUB_TOKEN,
+			}),
 		);
 	} catch (error) {
 		console.error("Failed to load secrets from 1Password:");

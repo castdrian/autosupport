@@ -10,6 +10,7 @@ export interface OnePasswordSecrets {
 	discordToken: string;
 	openAiApiKey: string;
 	openAiAdminApiKey: string | undefined;
+	githubToken: string | undefined;
 	errorWebhookUrl: string | undefined;
 }
 
@@ -64,6 +65,7 @@ export async function fetchOnePasswordSecrets(): Promise<OnePasswordSecrets> {
 		autosupportItem.fields,
 		"error webhook url",
 	);
+	const githubToken = fieldValue(autosupportItem.fields, "github token");
 	const openAiApiKey = fieldValue(openAiApiItem.fields, "credential");
 	const openAiAdminApiKey = fieldValue(openAiAdminItem.fields, "credential");
 
@@ -78,5 +80,11 @@ export async function fetchOnePasswordSecrets(): Promise<OnePasswordSecrets> {
 		);
 	}
 
-	return { discordToken, openAiApiKey, openAiAdminApiKey, errorWebhookUrl };
+	return {
+		discordToken,
+		openAiApiKey,
+		openAiAdminApiKey,
+		githubToken,
+		errorWebhookUrl,
+	};
 }

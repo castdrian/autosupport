@@ -33,6 +33,7 @@ function setValidItems(overrides?: {
 			fields: [
 				{ label: "credential", value: "discord-token-value" },
 				{ label: "error webhook url", value: "https://webhook.example/x" },
+				{ label: "github token", value: "github-token-value" },
 			],
 		},
 		[OPENAI_API_ITEM_ID]: overrides?.openAiApi ?? {
@@ -121,6 +122,7 @@ describe("fetchOnePasswordSecrets", () => {
 				discordToken: "discord-token-value",
 				openAiApiKey: "openai-api-key-value",
 				openAiAdminApiKey: "openai-admin-key-value",
+				githubToken: "github-token-value",
 				errorWebhookUrl: "https://webhook.example/x",
 			});
 		});
