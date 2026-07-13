@@ -49,10 +49,12 @@ async function withToken<T>(
 	fn: () => Promise<T>,
 ): Promise<T> {
 	const previous = process.env.OP_CONNECT_TOKEN;
+	const previousServerURL = process.env.OP_CONNECT_SERVER_URL;
 	if (token === undefined) {
 		delete process.env.OP_CONNECT_TOKEN;
 	} else {
 		process.env.OP_CONNECT_TOKEN = token;
+		process.env.OP_CONNECT_SERVER_URL = "https://1p.unbound.rip";
 	}
 	try {
 		return await fn();
@@ -61,6 +63,11 @@ async function withToken<T>(
 			delete process.env.OP_CONNECT_TOKEN;
 		} else {
 			process.env.OP_CONNECT_TOKEN = previous;
+		}
+		if (previousServerURL === undefined) {
+			delete process.env.OP_CONNECT_SERVER_URL;
+		} else {
+			process.env.OP_CONNECT_SERVER_URL = previousServerURL;
 		}
 	}
 }
