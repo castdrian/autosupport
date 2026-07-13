@@ -76,7 +76,10 @@ async function persistEntries(
 	return { knowledgeBaseRefreshed };
 }
 
-export function addSupportEntry(guildId: string, input: SupportEntryInput) {
+export async function addSupportEntry(
+	guildId: string,
+	input: SupportEntryInput,
+) {
 	const nextEntries = [...getSupportEntries(guildId), normalizeInput(input)];
 	return persistEntries(
 		guildId,
@@ -85,7 +88,7 @@ export function addSupportEntry(guildId: string, input: SupportEntryInput) {
 	);
 }
 
-export function updateSupportEntry(
+export async function updateSupportEntry(
 	guildId: string,
 	index: number,
 	input: SupportEntryInput,
@@ -104,7 +107,7 @@ export function updateSupportEntry(
 	);
 }
 
-export function deleteSupportEntry(guildId: string, index: number) {
+export async function deleteSupportEntry(guildId: string, index: number) {
 	const entries = getSupportEntries(guildId);
 	if (index < 0 || index >= entries.length) {
 		throw new RangeError(`No knowledge base entry at index ${index}`);
