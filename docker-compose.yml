@@ -19,8 +19,8 @@ services:
       dockerfile: Dockerfile
       target: release
     container_name: autosupport
-    env_file:
-      - .env
+    environment:
+      - OP_UNBOUND_TOKEN
     volumes:
       - autosupport-db:/var/lib/sqlite
     entrypoint: sh -c "ln -sf /var/lib/sqlite/autosupport.db /usr/src/app/autosupport.db && bun start"

@@ -19,6 +19,7 @@
 		"test:coverage": "DATABASE_PATH=:memory: bun test --coverage"
 	},
 	"dependencies": {
+		"@1password/connect": "^1.4.2",
 		"@neato/config": "^4.1.0",
 		"@sapphire/decorators": "^6.2.0",
 		"@sapphire/framework": "^5.5.0",

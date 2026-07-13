@@ -1,6 +1,7 @@
+import { existsSync } from "node:fs";
 import { createConfig, loaders } from "@neato/config";
 import data from "@src/data.toml";
-
+import { fetchOnePasswordSecrets } from "@utils/onePasswordSecrets";
 import { z } from "zod";
 
 const schema = z.object({
@@ -22,11 +23,32 @@ const schema = z.object({
 		.optional(),
 });
 
-export const config = createConfig({
-	schema,
-	loaders: [loaders.file(".env"), loaders.environment()],
-	freeze: true,
-});
+const usesOnePassword =
+	existsSync("/.dockerenv") ||
+	(!existsSync(".env") && !process.env.DISCORD_TOKEN);
+
+async function loadConfig() {
+	if (!usesOnePassword) {
+		return createConfig({
+			schema,
+			loaders: [loaders.file(".env"), loaders.environment()],
+			freeze: true,
+		});
+	}
+
+	try {
+		const secrets = await fetchOnePasswordSecrets();
+		return Object.freeze(
+			schema.parse({ ...secrets, devGuildId: process.env.DEV_GUILD_ID }),
+		);
+	} catch (error) {
+		console.error("Failed to load secrets from 1Password:");
+		console.error(error);
+		process.exit(1);
+	}
+}
+
+export const config = await loadConfig();
 
 const tomlSchema = z.object({
 	instructions: z.record(z.string().regex(/^(?<id>\d{17,20})$/), z.string()),
