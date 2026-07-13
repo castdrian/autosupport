@@ -20,8 +20,8 @@ services:
       target: release
     container_name: autosupport
     environment:
-      - OP_UNBOUND_TOKEN
-      - OP_CONNECT_SERVER_URL=http://localhost:8080
+      - OP_CONNECT_TOKEN=${OP_UNBOUND_TOKEN}
+      - OP_CONNECT_SERVER_URL=https://1p.unbound.rip
     volumes:
       - autosupport-db:/var/lib/sqlite
     entrypoint: sh -c "ln -sf /var/lib/sqlite/autosupport.db /usr/src/app/autosupport.db && bun start"

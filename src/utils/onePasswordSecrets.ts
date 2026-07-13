@@ -1,7 +1,5 @@
 import { OnePasswordConnect } from "@1password/connect";
 
-const CONNECT_SERVER_URL =
-	process.env.OP_CONNECT_SERVER_URL ?? "https://1p.unbound.rip";
 const VAULT_TITLE = "Unbound";
 
 const AUTOSUPPORT_ITEM_ID = "3lbrpnmiautp3luz4yn56ncrdq";
@@ -30,15 +28,22 @@ function fieldValue(
 }
 
 export async function fetchOnePasswordSecrets(): Promise<OnePasswordSecrets> {
-	const token = process.env.OP_UNBOUND_TOKEN;
+	const token = process.env.OP_CONNECT_TOKEN;
 	if (!token) {
 		throw new Error(
-			"OP_UNBOUND_TOKEN is not set; cannot fetch secrets from 1Password.",
+			"OP_CONNECT_TOKEN is not set; cannot fetch secrets from 1Password.",
+		);
+	}
+
+	const serverURL = process.env.OP_CONNECT_SERVER_URL;
+	if (!serverURL) {
+		throw new Error(
+			"OP_CONNECT_SERVER_URL is not set; cannot fetch secrets from 1Password.",
 		);
 	}
 
 	const op = OnePasswordConnect({
-		serverURL: CONNECT_SERVER_URL,
+		serverURL,
 		token,
 		keepAlive: true,
 	});

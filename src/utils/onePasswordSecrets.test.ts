@@ -48,28 +48,28 @@ async function withToken<T>(
 	token: string | undefined,
 	fn: () => Promise<T>,
 ): Promise<T> {
-	const previous = process.env.OP_UNBOUND_TOKEN;
+	const previous = process.env.OP_CONNECT_TOKEN;
 	if (token === undefined) {
-		delete process.env.OP_UNBOUND_TOKEN;
+		delete process.env.OP_CONNECT_TOKEN;
 	} else {
-		process.env.OP_UNBOUND_TOKEN = token;
+		process.env.OP_CONNECT_TOKEN = token;
 	}
 	try {
 		return await fn();
 	} finally {
 		if (previous === undefined) {
-			delete process.env.OP_UNBOUND_TOKEN;
+			delete process.env.OP_CONNECT_TOKEN;
 		} else {
-			process.env.OP_UNBOUND_TOKEN = previous;
+			process.env.OP_CONNECT_TOKEN = previous;
 		}
 	}
 }
 
 describe("fetchOnePasswordSecrets", () => {
-	test("throws when OP_UNBOUND_TOKEN is not set", async () => {
+	test("throws when OP_CONNECT_TOKEN is not set", async () => {
 		await withToken(undefined, async () => {
 			await expect(fetchOnePasswordSecrets()).rejects.toThrow(
-				"OP_UNBOUND_TOKEN is not set",
+				"OP_CONNECT_TOKEN is not set",
 			);
 		});
 	});
