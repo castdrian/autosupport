@@ -4,9 +4,12 @@ import data from "@src/data.toml";
 import { fetchOnePasswordSecrets } from "@utils/onePasswordSecrets";
 import { z } from "zod";
 
-function hasRegularEnvFile(): boolean {
+function hasEnvFile(): boolean {
 	try {
-		return statSync(".env").isFile();
+		const stats = statSync(".env");
+		// 1Password's local environments feature serves .env content through a
+		// named pipe rather than a regular file, so FIFOs count too.
+		return stats.isFile() || stats.isFIFO();
 	} catch {
 		return false;
 	}
@@ -32,8 +35,7 @@ const schema = z.object({
 });
 
 const usesOnePassword =
-	existsSync("/.dockerenv") ||
-	(!hasRegularEnvFile() && !process.env.DISCORD_TOKEN);
+	existsSync("/.dockerenv") || (!hasEnvFile() && !process.env.DISCORD_TOKEN);
 
 async function loadConfig() {
 	if (!usesOnePassword) {
