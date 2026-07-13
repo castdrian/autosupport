@@ -3,7 +3,7 @@
 	"version": "1.5.9",
 	"description": "discord autosupport",
 	"main": "src/main.ts",
-	"repository": "git@github.com:castdrian/autosupport.git",
+	"repository": "git@github.com:unbound-app/autosupport.git",
 	"author": "castdrian",
 	"license": "GPL-3.0",
 	"type": "module",

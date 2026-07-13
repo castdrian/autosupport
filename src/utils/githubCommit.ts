@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { config } from "@src/config";
 
-const REPO_OWNER = "castdrian";
+const REPO_OWNER = "unbound-app";
 const REPO_NAME = "autosupport";
 const DATA_FILE_PATH = "src/data.toml";
 const BRANCH = "main";

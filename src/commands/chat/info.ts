@@ -36,7 +36,7 @@ export class InfoCommand extends Command {
 			)} MB`;
 
 			const content = new TextDisplayBuilder().setContent(
-				`${pkg.name} [v${pkg.version}](<https://github.com/castdrian/autosupport>)\n${pkg.description}\n\n**Uptime:** Container started ${uptimeString}\n**System:** ${osString}\n**CPU:** ${cpuString}\n**Memory Usage:** ${memoryString}\n\n**Bun:** [v${bunver}](<https://bun.sh/>)\n**TypeScript:** [v${tsver}](<https://www.typescriptlang.org/>)\n**Discord.js:** [v${djsver}](<https://discord.js.org/>)\n**Sapphire:** [v${sapphver}](<https://www.sapphirejs.dev/>)`,
+				`${pkg.name} [v${pkg.version}](<https://github.com/unbound-app/autosupport>)\n${pkg.description}\n\n**Uptime:** Container started ${uptimeString}\n**System:** ${osString}\n**CPU:** ${cpuString}\n**Memory Usage:** ${memoryString}\n\n**Bun:** [v${bunver}](<https://bun.sh/>)\n**TypeScript:** [v${tsver}](<https://www.typescriptlang.org/>)\n**Discord.js:** [v${djsver}](<https://discord.js.org/>)\n**Sapphire:** [v${sapphver}](<https://www.sapphirejs.dev/>)`,
 			);
 
 			const section = new SectionBuilder()
@@ -55,7 +55,7 @@ export class InfoCommand extends Command {
 				new ButtonBuilder()
 					.setLabel("GitHub")
 					.setStyle(ButtonStyle.Link)
-					.setURL("https://github.com/castdrian/autosupport"),
+					.setURL("https://github.com/unbound-app/autosupport"),
 			);
 
 			const container = new ContainerBuilder()
