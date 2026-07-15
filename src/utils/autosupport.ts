@@ -239,7 +239,13 @@ export async function getResponse(message: Message) {
 		const vectorStoreId = await ensureKnowledgeBaseFile(guildId, openai);
 
 		const guildInstructions = data.instructions[guildId] ?? "";
-		const instructions = `${guildInstructions}\n\nThe user you are talking to is '${message.author.displayName} (@${message.author.username})'. The thread you are in is called '${message.channel.name}'.`;
+		const roleNames = message.member?.roles.cache
+			.filter((role) => role.id !== guildId)
+			.map((role) => role.name);
+		const roleInfo = roleNames?.length
+			? ` with roles [${roleNames.join(", ")}]`
+			: "";
+		const instructions = `${guildInstructions}\n\nThe user you are talking to is '${message.author.displayName} (@${message.author.username})'${roleInfo}. The thread you are in is called '${message.channel.name}'.`;
 
 		const previousResponseId = await getThreadResponseId(
 			guildId,

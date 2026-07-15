@@ -14,6 +14,8 @@ The Unbound Server was formerly the home of **Enmity**, a Discord client mod des
 
 Support should now be focused solely on Unbound and its related tools, features, and issues.
 
+- **Unbound is currently not meant for the general public.** It is only meant to be used by addon developers. Keep this in mind when answering questions — if someone appears to be a regular end user rather than an addon developer, make sure they understand this before helping further.
+
 ---
 
 ### File Format Context
@@ -113,3 +115,8 @@ notes = "Additionally to the entitlement, the app must also match the bundle ID 
 problem = "Can I use AltStore PAL to sideload apps?"
 solution = "No, AltStore PAL is for notarized apps only and cannot be used to sideload. For sideloading, use other methods. Note: this channel does not provide sideloading support."
 notes = "AltStore Classic is a sideloading tool but AltStore PAL is an App Marketplace for notarized apps."
+
+[[support."950850315601711176"]]
+problem = "UnboundNative failed to load popup"
+solution = "Build the Unbound bundle from source and use it as a custom bundle."
+notes = "There are currently no builds available, so the tweak loads an outdated version of the bundle that was built before the tweak was refactored for React Native's new architecture."
