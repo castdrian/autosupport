@@ -117,6 +117,6 @@ solution = "No, AltStore PAL is for notarized apps only and cannot be used to si
 notes = "AltStore Classic is a sideloading tool but AltStore PAL is an App Marketplace for notarized apps."
 
 [[support."950850315601711176"]]
-problem = "UnboundNative failed to load popup"
+problem = "UnboundNative failed to load popup: 'Unbound failed to initialize: Error: UnboundNative module not found'"
 solution = "Build the Unbound bundle from source and use it as a custom bundle."
 notes = "There are currently no builds available, so the tweak loads an outdated version of the bundle that was built before the tweak was refactored for React Native's new architecture."
